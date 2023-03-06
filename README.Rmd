@@ -29,7 +29,7 @@ Last update: `r format(Sys.Date(),"%d-%m-%Y")`
 ```{r, echo=TRUE, eval=FALSE}
 # Installation
 install.packages("devtools")
-devtools::install_github("Jodavid/FuzzyClass")
+devtools::install_github("leapigufpb/FuzzyClass")
 ```
 
 
@@ -83,112 +83,15 @@ print(fit_FGNB)
 saida <- predict(fit_FGNB, test)
 confusionMatrix(factor(Test[,4]), saida)
 
-saida <- predict(fit_FGNB, test, type = "matrix")
+saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
 ```
-
-<!--
-
-#### Fuzzy Gaussian Naive Bayes based in Zadeh
 
 ```{r}
-fit_FGNB <- FuzzyGaussianNaiveBayes(train =  Train[,-4],
-                                    cl = Train[,4], cores = 1,
-                                    fuzzy = T)
-print(fit_FGNB)
-saida <- predict(fit_FGNB, test)
-confusionMatrix(factor(Test[,4]), saida)
+# --------------------------------------------------
+# head view
 
-# -----
-fit_GNB <- FuzzyGaussianNaiveBayes(train =  Train[,-4],
-                               cl = Train[,4], cores = 2,
-                               fuzzy = F)
-print(fit_GNB)
+saida |> head()
 
-saida <- predict(fit_GNB, test)
-confusionMatrix(factor(Test[,4]), saida)
-
-saida <- predict(fit_GNB, test, type = "matrix")
+saidaMatrix |> head()
 
 ```
-
-#### Fuzzy Naive Bayes Triangular
-
-```{r}
-fit_FNBT <- FuzzyTriangularNaiveBayes(train =  Train[,-4],
-                                  cl = Train[,4], cores = 2,
-                                  fuzzy = T)
-
-print(fit_FNBT)
-
-saida <- predict(fit_FNBT, test)
-confusionMatrix(factor(Test[,4]), saida)
-
-saida <- predict(fit_FNBT, test, type = "matrix")
-
-# ----------------
-
-fit_NBT <- FuzzyTriangularNaiveBayes(train =  Train[,-4],
-                                 cl = Train[,4], cores = 2,
-                                 fuzzy = F)
-print(fit_NBT)
-
-saida <- predict(fit_NBT, test)
-confusionMatrix(factor(Test[,4]), saida)
-
-saida <- predict(fit_NBT, test, type = "matrix")
-
-```
-
-#### Fuzzy Exponential Naive Bayes Classifier
-
-```{r}
-
-fit_FENB <- ExpNBFuzzyParam(train =  Train[,-4],
-                                    cl = Train[,4], metd = 1, cores = 2)
-                              
-print(fit_FENB)
-
-saida <- predict(fit_FENB, test)
-confusionMatrix(factor(Test[,4]), saida)
-
-saida <- predict(fit_FENB, test, type = "matrix")
-head(saida)
-
-```
-
-#### Fuzzy Gamma Naive Bayes Classifier
-
-```{r}
-
-fit_NBT <- FuzzyGammaNaiveBayes(train =  Train[,-4],
-                                    cl = Train[,4], cores = 2)
-                              
-print(fit_NBT)
-
-saida <- predict(fit_NBT, test)
-saida <- factor(saida,levels = unique(Test[,4]))
-confusionMatrix(factor(Test[,4]), saida)
-
-saida <- predict(fit_NBT, test, type = "matrix")
-head(saida)
-
-```
-
-#### Fuzzy Exponential Naive Bayes Classifier
-
-```{r}
-
-fit_NBE <- FuzzyExponentialNaiveBayes(train =  Train[,-4],
-                                    cl = Train[,4], cores = 2)
-                              
-print(fit_NBE)
-
-saida <- predict(fit_NBE, test)
-saida <- factor(saida,levels = unique(Test[,4]))
-confusionMatrix(factor(Test[,4]), saida)
-
-saida <- predict(fit_NBT, test, type = "matrix")
-head(saida)
-
-```
--->
