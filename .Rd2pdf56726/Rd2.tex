@@ -1,0 +1,48 @@
+\nonstopmode{}
+\documentclass[letterpaper]{book}
+\usepackage[times,inconsolata,hyper]{Rd}
+\usepackage{makeidx}
+\usepackage[utf8]{inputenc} % @SET ENCODING@
+% \usepackage{graphicx} % @USE GRAPHICX@
+\makeindex{}
+\begin{document}
+\chapter*{}
+\begin{center}
+{\textbf{\huge Package `FuzzyClass'}}
+\par\bigskip{\large \today}
+\end{center}
+\inputencoding{utf8}
+\ifthenelse{\boolean{Rd@use@hyper}}{\hypersetup{pdftitle = {FuzzyClass: Fuzzy and Non-Fuzzy Classifiers}}}{}
+\ifthenelse{\boolean{Rd@use@hyper}}{\hypersetup{pdfauthor = {Jodavid Ferreira}}}{}
+\begin{description}
+\raggedright{}
+\item[Title]\AsIs{Fuzzy and Non-Fuzzy Classifiers}
+\item[Version]\AsIs{0.1.4}
+\item[Description]\AsIs{It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the 'Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE)' (<}\url{http://www.de.ufpb.br/~labteve/}\AsIs{>) and 'Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG)' (<}\url{http://www.de.ufpb.br/~leapig/}\AsIs{>) at 'Federal University of Paraiba, Brazil'. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by 'Moraes, Ferreira and Machado' (2021) <}\Rhref{https://doi.org/10.1007/s40815-020-00936-4}{doi:10.1007/s40815-020-00936-4}\AsIs{>.}
+\item[License]\AsIs{MIT + file LICENSE}
+\item[Encoding]\AsIs{UTF-8}
+\item[LazyData]\AsIs{true}
+\item[Roxygen]\AsIs{list(markdown = TRUE)}
+\item[RoxygenNote]\AsIs{7.2.3}
+\item[Imports]\AsIs{caTools,
+doParallel,
+dplyr,
+e1071,
+EnvStats,
+foreach,
+MASS,
+parallel,
+purrr,
+Rdpack,
+rootSolve,
+stats}
+\item[RdMacros]\AsIs{Rdpack}
+\item[Depends]\AsIs{R (>= 2.10)}
+\item[Suggests]\AsIs{spelling,
+testthat (>= 3.0.0)}
+\item[Config/testthat/edition]\AsIs{3}
+\item[URL]\AsIs{}\url{https://github.com/leapigufpb/FuzzyClass}\AsIs{}
+\item[BugReports]\AsIs{}\url{https://github.com/leapigufpb/FuzzyClass/issues}\AsIs{}
+\item[Language]\AsIs{en-US}
+\end{description}
+\Rdcontents{\R{} topics documented:}

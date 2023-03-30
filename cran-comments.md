@@ -1,3 +1,4 @@
 This is a resubmission. In this version I have:
 
-* Resubmission to fix error in `documentation pages in HTML5`
+- Updates in estimation methods;
+- Added a new ordering method for functions with fuzzy parameters: `GauNBFuzzyParam`, `ExpNBFuzzyParam` and `PoiNBFuzzyParam`. The form can be used considering `metd = 4`.

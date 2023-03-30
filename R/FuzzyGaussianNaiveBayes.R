@@ -151,6 +151,7 @@ FuzzyGaussianNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) 
     logaritmo = logaritmo,
     inversa_covar = inversa_covar,
     medias = medias,
+    varian = varian,
     cols = cols,
     M = M,
     cores = cores

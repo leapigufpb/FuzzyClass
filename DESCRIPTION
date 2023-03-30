@@ -1,6 +1,6 @@
 Package: FuzzyClass
 Title: Fuzzy and Non-Fuzzy Classifiers
-Version: 0.1.3.900
+Version: 0.1.4
 Authors@R:
     c(person("Jodavid", "Ferreira", email = "jodavid@protonmail.com",role = c("aut","cre"), comment = c(ORCID = "0000-0002-2131-6464")),
       person("Ronei", "Moraes", email = "ronei@de.ufpb.br",role = c("ctb"), comment = c(ORCID = "0000-0001-8436-8950")),
@@ -14,6 +14,7 @@ RoxygenNote: 7.2.3
 Imports: 
     caTools,
     doParallel,
+    dplyr,
     e1071,
     EnvStats,
     foreach,
