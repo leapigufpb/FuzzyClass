@@ -1,5 +1,5 @@
 ---
-title: 'FuzzyClass: A family of Fuzzy and Non-Fuzzy probabilistic-based classifiers'
+title: 'FuzzyClass: An R package for Fuzzy and Non-Fuzzy probabilistic-based classifiers'
 tags:
   - R
   - fuzzy
