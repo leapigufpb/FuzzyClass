@@ -17,7 +17,7 @@ authors:
 affiliations:
  - name: Department of Statistics, Federal University of Paraiba, João Pessoa, Brazil
    index: 1
-date: 28 March 2023
+date: 31 March 2023
 bibliography: refs.bib
 # Optional fields if submitting to a AAS journal too, see this blog post:
 # https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
@@ -103,7 +103,7 @@ $$
 
 ## The Fuzzy Naive Bayes Network
 
-The Fuzzy Naive Bayes Networks are based on the Zadeh's definition of probability of fuzzy events \citep{zadeh1968}. 
+The Fuzzy Naive Bayes Networks are based on the Zadeh's definition of probability of fuzzy events [@zadeh1968]. 
 Thus, let membership function $\mu_{j}(X_{it})$ for the variable $X_{it}$, and class 
 $w_{j}$, the Zadeh's probability for this class is:
 
