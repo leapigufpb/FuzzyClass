@@ -62,14 +62,14 @@ PoiNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp 
 
   # --------------------------------------------------------
   # Estimating class parameters
-  train <- as.data.frame(train)
-  cols <- ncol(train) # Number of variables
-  if (is.null(cols)) {
-    cols <- 1
-  }
-  dados <- train # training data matrix
-  M <- c(unlist(cl)) # true classes
-  M <- factor(M, labels = sort(unique(M)))
+  p_data <- predata(train,cl)
+  # --
+  train <-  p_data$train
+  cols <- p_data$cols
+  dados <- p_data$dados
+  M <- p_data$M
+  intervalos <- p_data$intervalos
+  #--------------------------------------------------------
   # --------------------------------------------------------
   # Verify data types
   verifyNumbers <- sapply(1:cols, function(i){
