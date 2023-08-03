@@ -1,6 +1,6 @@
-#' Fuzzy Gamma Naive Bayes
+#' Fuzzy Bayes Rule
 #'
-#' \code{FuzzyGammaNaiveBayes} Fuzzy Gamma Naive Bayes
+#' \code{FuzzyBayesRule} Fuzzy Bayes Rule
 #'
 #'
 #' @param train matrix or data frame of training set cases.
@@ -11,7 +11,7 @@
 #' @return A vector of classifications
 #'
 #' @references
-#' \insertRef{de2018fuzzy}{FuzzyClass}
+#' \insertRef{roneide2006fuzzy}{FuzzyClass}
 #'
 #' @examples
 #'
@@ -26,7 +26,7 @@
 #' # matrix or data frame of test set cases.
 #' # A vector will be interpreted as a row vector for a single case.
 #' test <- Test[, -5]
-#' fit_NBT <- FuzzyGammaNaiveBayes(
+#' fit_NBT <- FuzzyBayesRule(
 #'   train = Train[, -5],
 #'   cl = Train[, 5], cores = 2
 #' )
@@ -38,28 +38,26 @@
 #' @importFrom stats dgamma
 #'
 #' @export
-FuzzyGammaNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
-  UseMethod("FuzzyGammaNaiveBayes")
+FuzzyBayesRule <- function(train, cl, cores = 2, fuzzy = TRUE) {
+  UseMethod("FuzzyBayesRule")
 }
 
 #' @export
-FuzzyGammaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
+FuzzyBayesRule.default <- function(train, cl, cores = 2, fuzzy = T) {
 
   # --------------------------------------------------------
   # Estimating class parameters
-  train <- as.data.frame(train)
-  cols <- ncol(train) # Number of variables
-  if(is.null(cols)){
-    cols <- 1
-  }
-  dados <- train # training data matrix
-  M <- c(unlist(cl)) # true classes
-  M <- factor(M, labels = sort(unique(M)))
+  p_data <- predata(train,cl)
+  # --
+  train <-  p_data$train
+  cols <- p_data$cols
+  dados <- p_data$dados
+  M <- p_data$M
   # --------------------------------------------------------
 
   # --------------------------------------------------------
-  # Estimating Gamma Parameters
-  parametersC <- estimation_parameters_gamma(M, cols, dados)
+  # Estimating Parameters
+  parametersC <- estimation_parameters_fuzzy_bayes_rule(M, cols, dados)
 
   # --------------------------------------------------------
   Sturges <- Sturges(dados, M);
@@ -86,21 +84,21 @@ FuzzyGammaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
     pk = pk,
     fuzzy = fuzzy
   ),
-  class = "FuzzyGammaNaiveBayes"
+  class = "FuzzyBayesRule"
   )
 }
 # -------------------------
 
 
 #' @export
-print.FuzzyGammaNaiveBayes <- function(x, ...) {
+print.FuzzyBayesRule <- function(x, ...) {
   if (x$fuzzy == T) {
     # -----------------
-    cat("\nFuzzy Gamma Naive Bayes Classifier for Discrete Predictors\n\n")
+    cat("\nFuzzy Bayes Rule Classifier for Discrete Predictors\n\n")
     # -----------------
   } else {
     # -----------------
-    cat("\nNaive Gamma  Bayes Classifier for Discrete Predictors\n\n")
+    cat("\nNaive Bayes Rule Classifier for Discrete Predictors\n\n")
     # -----------------
   }
   cat("Class:\n")
@@ -109,10 +107,10 @@ print.FuzzyGammaNaiveBayes <- function(x, ...) {
 }
 
 #' @export
-predict.FuzzyGammaNaiveBayes <- function(object,
-                                         newdata,
-                                         type = "class",
-                                         ...) {
+predict.FuzzyBayesRule <- function(object,
+                                   newdata,
+                                   type = "class",
+                                   ...) {
   # --------------------------------------------------------
   test <- as.data.frame(newdata)
   # --------------------------------------------------------
@@ -131,7 +129,7 @@ predict.FuzzyGammaNaiveBayes <- function(object,
   # --------------------------------------------------------
   # Classification
   # --------------
-  P <- density_values_gamma(M, cols, test, parametersC, pk)
+  P <- density_values_multivariate_normal(M, cols, test, parametersC, pk)
 
   # ---------
   N_test <- nrow(test)
@@ -168,12 +166,9 @@ predict.FuzzyGammaNaiveBayes <- function(object,
 # Functions
 
 # ----------------
-density_values_gamma <- function(M, cols, test, parametersC, pk){
+density_values_multivariate_normal <- function(M, cols, test, parametersC, pk){
   lapply(1:length(unique(M)), function(i) {
-    densidades <- sapply(1:cols, function(j) {
-      stats::dgamma(test[, j], shape = parametersC[[i]][[j]][1], scale = parametersC[[i]][[j]][2])
-    })
-    densidades <- apply(densidades, 1, prod)
+    densidades <- mvtnorm::dmvnorm(test,mean = parametersC[[i]][[1]], sigma = parametersC[[i]][[2]])
     # Calcula a P(w_i) * P(X_k | w_i)
     p <- pk[[i]] * densidades
     # ---
@@ -184,15 +179,16 @@ density_values_gamma <- function(M, cols, test, parametersC, pk){
 # ----------------
 
 # ----------------
-estimation_parameters_gamma <- function(M, cols, dados){
+estimation_parameters_fuzzy_bayes_rule <- function(M, cols, dados){
   lapply(1:length(unique(M)), function(i) {
-    lapply(1:cols, function(j) {
-      SubSet <- dados[M == unique(M)[i], j]
+      SubSet <- dados[M == unique(M)[i],]
       # --
-      param <- stats::optim(c(.5,.5), log_ver_Gamma, method = "L-BFGS-B", y = SubSet, lower = 0.1, upper = max(SubSet))$par
+      Mean <- colMeans(SubSet)
+      VarMatrix <- var(SubSet)
+      # --
+      param <- list(Mean,VarMatrix)
       # --
       return(param)
-    })
   })
 
 }
