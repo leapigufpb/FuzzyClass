@@ -11,7 +11,7 @@ DWFuzzyGammaNaiveBayes(train, cl, cores = 2, fuzzy = TRUE, wdelta, weta)
 
 \item{cl}{factor of true classifications of training set}
 
-\item{cores}{how many cores of the computer do you want to use (default = 2)}
+\item{cores}{how many cores of the computer do you want to use to use for prediction (default = 2)}
 
 \item{fuzzy}{boolean variable to use the membership function}
 

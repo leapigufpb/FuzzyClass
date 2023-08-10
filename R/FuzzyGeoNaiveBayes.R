@@ -5,7 +5,7 @@
 #'
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
-#' @param cores  how many cores of the computer do you want to use (default = 2)
+#' @param cores  how many cores of the computer do you want to use to use for prediction (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
 #' @return A vector of classifications

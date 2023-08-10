@@ -5,7 +5,7 @@
 - Add the "double weighted fuzzy gamma naive bayes classifier" as `DWFuzzyGammaNaiveBayes`
 - Add the "geometric fuzzy gamma naive bayes classifier" as `GeometricFuzzyGammaNaiveBayes`
 - Add the "Fuzzy Bayes Rule classifier" as `FuzzyBayesRule`
-
+- Remove the ordering method for functions with fuzzy parameters `metd=4`.
 
 # FuzzyClass 0.1.4
 

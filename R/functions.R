@@ -323,9 +323,9 @@ log_ver_Gamma <- function(theta,y){
 }
 
 
-#' @noRd
 #' Barycenter
 #' Yager method
+#' @noRd
 Yagerdistance <- function(vec_trian, M){
 
   value <- sapply(1:length(unique(M)), function(i) (vec_trian[[i]][1] + 2*vec_trian[[i]][2] + vec_trian[[i]][3]) / 4)
@@ -333,8 +333,8 @@ Yagerdistance <- function(vec_trian, M){
 
 }
 
-#' @noRd
 #' Using distance Q
+#' @noRd
 Qdistance <- function(vec_trian, M){
 
   # ------------
@@ -361,13 +361,10 @@ Qdistance <- function(vec_trian, M){
 }
 
 
-#' @noRd
-#' Yagger
-
-#' @noRd
 #' Thorani
 #' Article: Ordering Generalized Trapezoidal Fuzzy Numbers Using Orthocentre of Centroids
 #' "changes were made"
+#' @noRd
 Thoranidistance <- function(vec_trian, M){
 
   # ------------
@@ -383,10 +380,10 @@ Thoranidistance <- function(vec_trian, M){
 }
 
 
-#' @noRd
 #' Alpha-Order for a class of fuzzy sets
 #' Article: Alpha-Order for a class of fuzzy sets
 #' "changes were made"
+#' @noRd
 AlphaOrderFuzzy <- function(vec_trian, w,  M){
 
   vec_mean <- lapply(1:length(vec_trian), function(i) rowMeans(vec_trian[[i]]))

@@ -24,6 +24,26 @@ Last update: `r format(Sys.Date(),"%d-%m-%Y")`
 ## A family of probabilities-based classifiers fuzzy and non-fuzzy
 
 
+The classification predicament involves assigning labels or categories to data instances based on observed features. Consider, for instance, the task of discriminating between "spam" and "non-spam" emails. This constitutes a classification task, where the algorithm must acquire the ability to discern patterns that distinguish the two email types based on their keywords, structure, or other attributes. Classification algorithms employ a training dataset containing pre-labeled examples to learn these patterns. When faced with unclassified data, the algorithm applies the acquired patterns to predict the class to which they belong, enabling efficient and precise automation in the categorization of new cases. Algorithms like those in `FuzzyClass` address this task by leveraging data probabilities and characteristics, thus becoming valuable tools for addressing intricate and ambiguous classification problems.
+
+### Dependencies
+
+Below is the list of packages on which `FuzzyClass` depends. However, during its installation, `FuzzyClass` automatically installs the dependencies:
+
+
+- [caTools](https://cran.r-project.org/package=caTools)
+- [doParallel](https://cran.r-project.org/package=doParallel)
+- [e1071](https://cran.r-project.org/package=e1071)
+- [EnvStats](https://cran.r-project.org/package=EnvStats)
+- [foreach](https://cran.r-project.org/package=foreach)
+- [MASS](https://cran.r-project.org/package=MASS)
+- [maxLik](https://cran.r-project.org/package=maxLik)
+- [mvtnorm](https://cran.r-project.org/package=mvtnorm)
+- [purrr](https://cran.r-project.org/package=purrr)
+- [dplyr](https://cran.r-project.org/package=dplyr)
+- [Rdpack](https://cran.r-project.org/package=Rdpack)
+- [rootSolve](https://cran.r-project.org/package=rootSolve)
+
 ### Installation
 
 ```{r, echo=TRUE, eval=FALSE}
@@ -35,18 +55,23 @@ devtools::install_github("leapigufpb/FuzzyClass")
 
 ### Usage
 
+Once installed, you can load the `FuzzyClass` package into your R session:
+
 ```{r}
-# package import
+# Package import
 library(FuzzyClass)
 ```
 
+<img src="man/figures/FuzzyClass_instalation.png"  height="700"/>
 
-### Data reading and preparation for use
+
+### Data Reading and Preparation]
+
+To demonstrate the usage of `FuzzyClass`, let's look at reading and preparing data:
 
 ```{r, message=FALSE, warning=FALSE}
 
 library(FuzzyClass)
-library(caret)
 
 #' ---------------------------------------------
 #' The following shows how the functions are used:
@@ -70,6 +95,11 @@ test = Test[,-4]
 
 #### Fuzzy Gaussian Naive Bayes with Fuzzy Parameters
 
+
+Let's delve into the example of using the `Fuzzy Gaussian Naive Bayes` algorithm with fuzzy parameters:
+
+
+
 ```{r}
 # --------------------------------------------------
 # Fuzzy Gaussian Naive Bayes with Fuzzy Parameters
@@ -81,10 +111,16 @@ fit_FGNB <- GauNBFuzzyParam(train =  Train[,-4],
 
 print(fit_FGNB)
 saida <- predict(fit_FGNB, test)
-confusionMatrix(factor(Test[,4]), saida)
+Table <- table(factor(Test[,4]), saida)
+Table
+
+#Accuracy:
+sum(diag(Table))/sum(Table)
 
 saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
 ```
+
+Additionally, you can visualize the results:
 
 ```{r}
 # --------------------------------------------------
@@ -95,3 +131,54 @@ saida |> head()
 saidaMatrix |> head()
 
 ```
+
+
+This enhanced documentation provides a comprehensive guide to using the FuzzyClass package for probabilistic classification tasks. It covers installation, package usage, data preparation, and examples of applying the Fuzzy Gaussian Naive Bayes algorithm with fuzzy parameters. Feel free to explore the package further to leverage its capabilities for your classification tasks.
+
+---
+
+## How to Contribute
+
+If you would like to contribute to FuzzyClass, please follow these steps:
+
+1. Fork the `FuzzyClass` repository on GitHub.
+2. Create a new branch for your contribution.
+3. Make your changes to the code or documentation.
+4. Test your changes thoroughly.
+5. Add or update documentation for your changes.
+6. Submit a pull request to the main `FuzzyClass` repository.
+7. The `FuzzyClass` maintainers will review your pull request and may ask you to make some changes before it is merged. Once your pull request is merged, your contribution will be available to all `FuzzyClass` users.
+
+#### Here are some additional tips for contributing to FuzzyClass:
+
+* Please use descriptive commit messages that explain what your changes do.
+* If you are making a large or complex change, please consider creating an issue in the `FuzzyClass` repository first to discuss your plans with the maintainers.
+* Please be patient while your pull request is reviewed. The maintainers may be busy with other things, but they will get to your pull request as soon as they can.
+
+#### Thank you for your interest in contributing to FuzzyClass!
+
+---
+
+## Reporting Issues
+
+If you find a bug in `FuzzyClass`, please report it by creating an issue on the `FuzzyClass` repository on GitHub at the link: https://github.com/leapigufpb/FuzzyClass/issues. When reporting an issue, please include the following information:
+
+1. A clear and concise description of the bug.
+2. The steps to reproduce the bug.
+3. The expected behavior.
+4. The actual behavior.
+5. Any relevant screenshots or code snippets.
+6. If possible, please also include the version of `FuzzyClass` that you are using.
+
+The `FuzzyClass` maintainers will review your issue and may ask you for more information before they can fix the bug. Once the bug is fixed, a new release of `FuzzyClass` will be made available.
+
+Here are some additional tips for reporting issues to FuzzyClass:
+
+* Please be as specific as possible when describing the bug.
+* If you can, try to reproduce the bug on a clean installation of R.
+* Include the output of sessionInfo() when reporting a bug. This will help the maintainers to diagnose the problem.
+* Please be patient while your issue is being reviewed. The maintainers may be busy with other things, but they will get to your issue as soon as they can.
+
+##### Thank you for your help in making FuzzyClass a better package
+
+I hope this helps! Let me know if you have any other questions.

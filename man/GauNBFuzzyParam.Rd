@@ -4,15 +4,7 @@
 \alias{GauNBFuzzyParam}
 \title{Fuzzy Gaussian Naive Bayes Classifier with Fuzzy parameters}
 \usage{
-GauNBFuzzyParam(
-  train,
-  cl,
-  alphacut = 1e-04,
-  metd = 2,
-  alp = c(0.35, 0.7, 0.86),
-  w = c(0.1, 0.3, 0.6),
-  cores = 2
-)
+GauNBFuzzyParam(train, cl, alphacut = 1e-04, metd = 2, cores = 2)
 }
 \arguments{
 \item{train}{matrix or data frame of training set cases.}
@@ -23,11 +15,7 @@ GauNBFuzzyParam(
 
 \item{metd}{Method of transforming the triangle into scalar, It is the type of data entry for the test sample, use metd 1 if you want to use the Yager technique, metd 2 if you want to use the Q technique of the uniformity test (article: Directional Statistics and Shape analysis), and metd 3 if you want to use the Thorani technique}
 
-\item{alp}{When metd for 4, it is necessary to have alp which are alpha-cut defined}
-
-\item{w}{When metd for 4, it is necessary to have w which are alpha-cut weights defined}
-
-\item{cores}{how many cores of the computer do you want to use (default = 2)}
+\item{cores}{how many cores of the computer do you want to use to use for prediction (default = 2)}
 }
 \value{
 A vector of classifications

@@ -9,9 +9,28 @@ version](https://www.r-pkg.org/badges/version/FuzzyClass)](https://cran.r-projec
 Download](https://cranlogs.r-pkg.org/badges/grand-total/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
 <!-- badges: end -->
 
-Last update: 05-03-2023
+Last update: 10-08-2023
 
 ## A family of probabilities-based classifiers fuzzy and non-fuzzy
+
+### Dependencies
+
+Below is the list of packages on which `FuzzyClass` depends. However,
+during its installation, `FuzzyClass` automatically installs the
+dependencies:
+
+- [caTools](https://cran.r-project.org/package=caTools)
+- [doParallel](https://cran.r-project.org/package=doParallel)
+- [e1071](https://cran.r-project.org/package=e1071)
+- [EnvStats](https://cran.r-project.org/package=EnvStats)
+- [foreach](https://cran.r-project.org/package=foreach)
+- [MASS](https://cran.r-project.org/package=MASS)
+- [maxLik](https://cran.r-project.org/package=maxLik)
+- [mvtnorm](https://cran.r-project.org/package=mvtnorm)
+- [purrr](https://cran.r-project.org/package=purrr)
+- [dplyr](https://cran.r-project.org/package=dplyr)
+- [Rdpack](https://cran.r-project.org/package=Rdpack)
+- [rootSolve](https://cran.r-project.org/package=rootSolve)
 
 ### Installation
 
@@ -28,12 +47,13 @@ devtools::install_github("leapigufpb/FuzzyClass")
 library(FuzzyClass)
 ```
 
+<img src="man/figures/FuzzyClass_instalation.png"  height="700"/>
+
 ### Data reading and preparation for use
 
 ``` r
 
 library(FuzzyClass)
-library(caret)
 
 #' ---------------------------------------------
 #' The following shows how the functions are used:
@@ -74,37 +94,17 @@ print(fit_FGNB)
 #> Class:
 #> [1] "1" "2" "3"
 saida <- predict(fit_FGNB, test)
-confusionMatrix(factor(Test[,4]), saida)
-#> Confusion Matrix and Statistics
-#> 
-#>           Reference
-#> Prediction  1  2  3
-#>          1 62  6  0
-#>          2  6 38 13
-#>          3  0  7 48
-#> 
-#> Overall Statistics
-#>                                           
-#>                Accuracy : 0.8222          
-#>                  95% CI : (0.7584, 0.8751)
-#>     No Information Rate : 0.3778          
-#>     P-Value [Acc > NIR] : < 2.2e-16       
-#>                                           
-#>                   Kappa : 0.7323          
-#>                                           
-#>  Mcnemar's Test P-Value : NA              
-#> 
-#> Statistics by Class:
-#> 
-#>                      Class: 1 Class: 2 Class: 3
-#> Sensitivity            0.9118   0.7451   0.7869
-#> Specificity            0.9464   0.8527   0.9412
-#> Pos Pred Value         0.9118   0.6667   0.8727
-#> Neg Pred Value         0.9464   0.8943   0.8960
-#> Prevalence             0.3778   0.2833   0.3389
-#> Detection Rate         0.3444   0.2111   0.2667
-#> Detection Prevalence   0.3778   0.3167   0.3056
-#> Balanced Accuracy      0.9291   0.7989   0.8640
+Table <- table(factor(Test[,4]), saida)
+Table
+#>    saida
+#>      1  2  3
+#>   1 54  5  1
+#>   2  1 37 18
+#>   3  0 12 52
+
+#Accuracy:
+sum(diag(Table))/sum(Table)
+#> [1] 0.7944444
 
 saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
 ```
@@ -119,10 +119,76 @@ saida |> head()
 
 saidaMatrix |> head()
 #>              1           2            3
-#> [1,] 0.5190477 0.381592934 9.935940e-02
-#> [2,] 0.9938309 0.006160007 9.063041e-06
-#> [3,] 0.9361335 0.063651768 2.147316e-04
-#> [4,] 0.9938859 0.006110688 3.403995e-06
-#> [5,] 0.8330550 0.156143228 1.080176e-02
-#> [6,] 0.4868158 0.481737673 3.144651e-02
+#> [1,] 0.9982027 0.001797179 7.842536e-08
+#> [2,] 0.5503209 0.366827524 8.285153e-02
+#> [3,] 0.9014399 0.097705726 8.543253e-04
+#> [4,] 0.9911943 0.008792640 1.304282e-05
+#> [5,] 0.9795244 0.010029007 1.044664e-02
+#> [6,] 0.9222658 0.077520975 2.132260e-04
 ```
+
+------------------------------------------------------------------------
+
+## How to Contribute
+
+If you would like to contribute to FuzzyClass, please follow these
+steps:
+
+1.  Fork the `FuzzyClass` repository on GitHub.
+2.  Create a new branch for your contribution.
+3.  Make your changes to the code or documentation.
+4.  Test your changes thoroughly.
+5.  Add or update documentation for your changes.
+6.  Submit a pull request to the main `FuzzyClass` repository.
+7.  The `FuzzyClass` maintainers will review your pull request and may
+    ask you to make some changes before it is merged. Once your pull
+    request is merged, your contribution will be available to all
+    `FuzzyClass` users.
+
+#### Here are some additional tips for contributing to FuzzyClass:
+
+- Please use descriptive commit messages that explain what your changes
+  do.
+- If you are making a large or complex change, please consider creating
+  an issue in the `FuzzyClass` repository first to discuss your plans
+  with the maintainers.
+- Please be patient while your pull request is reviewed. The maintainers
+  may be busy with other things, but they will get to your pull request
+  as soon as they can.
+
+#### Thank you for your interest in contributing to FuzzyClass!
+
+------------------------------------------------------------------------
+
+## Reporting Issues
+
+If you find a bug in `FuzzyClass`, please report it by creating an issue
+on the `FuzzyClass` repository on GitHub at the link:
+<https://github.com/leapigufpb/FuzzyClass/issues>. When reporting an
+issue, please include the following information:
+
+1.  A clear and concise description of the bug.
+2.  The steps to reproduce the bug.
+3.  The expected behavior.
+4.  The actual behavior.
+5.  Any relevant screenshots or code snippets.
+6.  If possible, please also include the version of `FuzzyClass` that
+    you are using.
+
+The `FuzzyClass` maintainers will review your issue and may ask you for
+more information before they can fix the bug. Once the bug is fixed, a
+new release of `FuzzyClass` will be made available.
+
+Here are some additional tips for reporting issues to FuzzyClass:
+
+- Please be as specific as possible when describing the bug.
+- If you can, try to reproduce the bug on a clean installation of R.
+- Include the output of sessionInfo() when reporting a bug. This will
+  help the maintainers to diagnose the problem.
+- Please be patient while your issue is being reviewed. The maintainers
+  may be busy with other things, but they will get to your issue as soon
+  as they can.
+
+##### Thank you for your help in making FuzzyClass a better package
+
+I hope this helps! Let me know if you have any other questions.
