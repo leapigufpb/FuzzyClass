@@ -9,9 +9,24 @@ version](https://www.r-pkg.org/badges/version/FuzzyClass)](https://cran.r-projec
 Download](https://cranlogs.r-pkg.org/badges/grand-total/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
 <!-- badges: end -->
 
-Last update: 10-08-2023
+Last update: 11-08-2023
 
 ## A family of probabilities-based classifiers fuzzy and non-fuzzy
+
+The classification predicament involves assigning labels or categories
+to data instances based on observed features. Consider, for instance,
+the task of discriminating between “spam” and “non-spam” emails. This
+constitutes a classification task, where the algorithm must acquire the
+ability to discern patterns that distinguish the two email types based
+on their keywords, structure, or other attributes. Classification
+algorithms employ a training dataset containing pre-labeled examples to
+learn these patterns. When faced with unclassified data, the algorithm
+applies the acquired patterns to predict the class to which they belong,
+enabling efficient and precise automation in the categorization of new
+cases. Algorithms like those in `FuzzyClass` address this task by
+leveraging data probabilities and characteristics, thus becoming
+valuable tools for addressing intricate and ambiguous classification
+problems.
 
 ### Dependencies
 
@@ -42,14 +57,20 @@ devtools::install_github("leapigufpb/FuzzyClass")
 
 ### Usage
 
+Once installed, you can load the `FuzzyClass` package into your R
+session:
+
 ``` r
-# package import
+# Package import
 library(FuzzyClass)
 ```
 
 <img src="man/figures/FuzzyClass_instalation.png"  height="700"/>
 
-### Data reading and preparation for use
+### Data Reading and Preparation\]
+
+To demonstrate the usage of `FuzzyClass`, let’s look at reading and
+preparing data:
 
 ``` r
 
@@ -76,6 +97,9 @@ test = Test[,-4]
 
 #### Fuzzy Gaussian Naive Bayes with Fuzzy Parameters
 
+Let’s delve into the example of using the `Fuzzy Gaussian Naive Bayes`
+algorithm with fuzzy parameters:
+
 ``` r
 # --------------------------------------------------
 # Fuzzy Gaussian Naive Bayes with Fuzzy Parameters
@@ -98,16 +122,18 @@ Table <- table(factor(Test[,4]), saida)
 Table
 #>    saida
 #>      1  2  3
-#>   1 54  5  1
-#>   2  1 37 18
-#>   3  0 12 52
+#>   1 57  5  0
+#>   2  9 36 11
+#>   3  1  8 53
 
 #Accuracy:
 sum(diag(Table))/sum(Table)
-#> [1] 0.7944444
+#> [1] 0.8111111
 
 saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
 ```
+
+Additionally, you can visualize the results:
 
 ``` r
 # --------------------------------------------------
@@ -119,13 +145,20 @@ saida |> head()
 
 saidaMatrix |> head()
 #>              1           2            3
-#> [1,] 0.9982027 0.001797179 7.842536e-08
-#> [2,] 0.5503209 0.366827524 8.285153e-02
-#> [3,] 0.9014399 0.097705726 8.543253e-04
-#> [4,] 0.9911943 0.008792640 1.304282e-05
-#> [5,] 0.9795244 0.010029007 1.044664e-02
-#> [6,] 0.9222658 0.077520975 2.132260e-04
+#> [1,] 0.9409533 0.058494042 5.526780e-04
+#> [2,] 0.8307950 0.112747515 5.645750e-02
+#> [3,] 0.9554715 0.044401137 1.273269e-04
+#> [4,] 0.9922347 0.007761474 3.827954e-06
+#> [5,] 0.7429942 0.241923033 1.508276e-02
+#> [6,] 0.8587876 0.125696231 1.551619e-02
 ```
+
+This enhanced documentation provides a comprehensive guide to using the
+FuzzyClass package for probabilistic classification tasks. It covers
+installation, package usage, data preparation, and examples of applying
+the Fuzzy Gaussian Naive Bayes algorithm with fuzzy parameters. Feel
+free to explore the package further to leverage its capabilities for
+your classification tasks.
 
 ------------------------------------------------------------------------
 
