@@ -5,7 +5,7 @@
 #'
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
-#' @param cores  how many cores of the computer do you want to use (default = 2)
+#' @param cores  how many cores of the computer do you want to use to use for prediction (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
 #' @return A vector of classifications
@@ -47,14 +47,13 @@ FuzzyExponentialNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) 
 
   # --------------------------------------------------------
   # Estimating class parameters
-  train <- as.data.frame(train)
-  cols <- ncol(train) # Number of variables
-  if(is.null(cols)){
-    cols <- 1
-  }
-  dados <- train # training data matrix
-  M <- c(unlist(cl)) # true classes
-  M <- factor(M, labels = sort(unique(M)))
+  p_data <- predata(train,cl)
+  # --
+  train <-  p_data$train
+  cols <- p_data$cols
+  dados <- p_data$dados
+  M <- p_data$M
+  intervalos <- p_data$intervalos
   # --------------------------------------------------------
 
   # --------------------------------------------------------

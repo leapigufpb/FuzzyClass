@@ -1,4 +1,5 @@
 This is a resubmission. In this version I have:
 
-- Updates in estimation methods;
-- Added a new ordering method for functions with fuzzy parameters: `GauNBFuzzyParam`, `ExpNBFuzzyParam` and `PoiNBFuzzyParam`. The form can be used considering `metd = 4`.
+- Add the "double weighted fuzzy gamma naive bayes classifier" as `DWFuzzyGammaNaiveBayes`
+- Add the "geometric fuzzy gamma naive bayes classifier" as `GeometricFuzzyGammaNaiveBayes`
+- Add the "Fuzzy Bayes Rule classifier" as `FuzzyBayesRule`

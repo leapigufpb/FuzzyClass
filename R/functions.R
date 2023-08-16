@@ -1,3 +1,36 @@
+
+# Verify Columns
+#' @noRd
+verifyColumns <- function(dados){
+  cols <- ncol(dados)# Number of variables
+  if(is.null(cols) | cols == 0){
+    cols <- 1
+  }
+  return(cols)
+
+}
+
+# PreData
+#' @noRd
+predata <- function(dados,cl){
+  train <- as.data.frame(dados)
+  cols <- verifyColumns(dados)
+  M <- c(unlist(cl)) # true classes
+  M <- factor(M, labels = sort(unique(M)))
+  intervalos <- 10 # Division to memberships
+
+  lista = list(train = train,
+               dados = dados,
+               cols = cols,
+               M = M,
+               intervalos = intervalos)
+
+  return(lista)
+
+}
+
+
+
 #---- Sturges -----#
 
 #' @noRd
@@ -186,6 +219,44 @@ pertinencia_predict <- function(M, Sturges, minimos, Comprim_Intervalo, Pertinen
 
 
 
+#' @noRd
+pertinencia_predictDW <- function(M, Sturges, minimos, Comprim_Intervalo, Pertinencia, cols, x, weta){
+
+  #---------------
+  ACHOU_t <- c()
+  ACHOU <- 0
+  #---------------
+  for (classe in 1:length(unique(M))) {
+    # --
+    # --
+    for (coluna in 1:cols) { # class column
+      for (linhaF in 1:Sturges[[classe]]) { # class row
+        faixa <- minimos[[classe]][coluna] + Comprim_Intervalo[[classe]][coluna] # initial frequency band
+        if (x[coluna] < faixa) { # checks if the class value belongs to that range
+          ACHOU[coluna] <- weta[coluna]*Pertinencia[[classe]][linhaF, coluna] # accumulates value in the frequency range and interrupts this last 'for'
+          break
+        }
+        if (linhaF == Sturges[[classe]]) {
+          ACHOU[coluna] <- weta[coluna]*Pertinencia[[classe]][linhaF, coluna]
+          break
+        }
+        faixa <- faixa + Comprim_Intervalo[[classe]][coluna] # track change -> next
+      }
+    }
+    # ---
+    ACHOU_t <- rbind(ACHOU_t, ACHOU) # Classes são as linhas
+    # ---
+  }
+  #-----
+  row.names(ACHOU_t) <- unique(M)
+  #--------------------------------------------------------
+  ACHOU_t <- apply(ACHOU_t, 1, prod)
+
+  return(ACHOU_t)
+
+}
+
+
 # ----------------
 #' @noRd
 function_membership_predict <- function(x, M = M, Sturges = Sturges, minimos = minimos, Comprim_Intervalo = Comprim_Intervalo, Pertinencia = Pertinencia, cols = cols){
@@ -195,6 +266,17 @@ function_membership_predict <- function(x, M = M, Sturges = Sturges, minimos = m
 
 }
 # ----------------
+
+# ----------------
+#' @noRd
+function_membership_predict_dw <- function(x, M = M, Sturges = Sturges, minimos = minimos, Comprim_Intervalo = Comprim_Intervalo, Pertinencia = Pertinencia, cols = cols, weta = weta){
+
+  ACHOU_t <- pertinencia_predictDW(M, Sturges, minimos, Comprim_Intervalo, Pertinencia, cols, x, weta);
+  return(ACHOU_t)
+
+}
+# ----------------
+
 
 # ----------------
 #' @noRd
@@ -209,6 +291,21 @@ function_fuzzy_predict <- function(retorno, P, M){
 
 }
 # ----------------
+
+# ----------------
+#' @noRd
+function_fuzzy_predict_log <- function(retorno, P, M){
+
+  retorno2 <- data.frame(matrix(unlist(retorno), nrow=length(retorno), byrow=TRUE))
+  f <- sapply(1:length(unique(M)), function(i) {
+    P[[i]] + log(retorno2[,i])
+  })
+
+  return(f)
+
+}
+# ----------------
+
 
 
 
@@ -226,9 +323,9 @@ log_ver_Gamma <- function(theta,y){
 }
 
 
-#' @noRd
 #' Barycenter
 #' Yager method
+#' @noRd
 Yagerdistance <- function(vec_trian, M){
 
   value <- sapply(1:length(unique(M)), function(i) (vec_trian[[i]][1] + 2*vec_trian[[i]][2] + vec_trian[[i]][3]) / 4)
@@ -236,8 +333,8 @@ Yagerdistance <- function(vec_trian, M){
 
 }
 
-#' @noRd
 #' Using distance Q
+#' @noRd
 Qdistance <- function(vec_trian, M){
 
   # ------------
@@ -264,13 +361,10 @@ Qdistance <- function(vec_trian, M){
 }
 
 
-#' @noRd
-#' Yagger
-
-#' @noRd
 #' Thorani
 #' Article: Ordering Generalized Trapezoidal Fuzzy Numbers Using Orthocentre of Centroids
 #' "changes were made"
+#' @noRd
 Thoranidistance <- function(vec_trian, M){
 
   # ------------
@@ -286,10 +380,10 @@ Thoranidistance <- function(vec_trian, M){
 }
 
 
-#' @noRd
 #' Alpha-Order for a class of fuzzy sets
 #' Article: Alpha-Order for a class of fuzzy sets
 #' "changes were made"
+#' @noRd
 AlphaOrderFuzzy <- function(vec_trian, w,  M){
 
   vec_mean <- lapply(1:length(vec_trian), function(i) rowMeans(vec_trian[[i]]))

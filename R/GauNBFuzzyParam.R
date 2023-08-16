@@ -7,9 +7,7 @@
 #' @param cl factor of true classifications of training set
 #' @param alphacut value of the alpha-cut parameter, this value is between 0 and 1.
 #' @param metd Method of transforming the triangle into scalar, It is the type of data entry for the test sample, use metd 1 if you want to use the Yager technique, metd 2 if you want to use the Q technique of the uniformity test (article: Directional Statistics and Shape analysis), and metd 3 if you want to use the Thorani technique
-#' @param alp When metd for 4, it is necessary to have alp which are alpha-cut defined
-#' @param w When metd for 4, it is necessary to have w which are alpha-cut weights defined
-#' @param cores  how many cores of the computer do you want to use (default = 2)
+#' @param cores  how many cores of the computer do you want to use to use for prediction (default = 2)
 #'
 #' @return A vector of classifications
 #'
@@ -43,23 +41,23 @@
 #' @importFrom Rdpack reprompt
 #'
 #' @export
-GauNBFuzzyParam <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
+GauNBFuzzyParam <- function(train, cl, alphacut = 0.0001, metd = 2, cores = 2) {
   UseMethod("GauNBFuzzyParam")
 }
 
 #' @export
-GauNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
+GauNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, cores = 2) {
 
   # --------------------------------------------------------
   # Estimating class parameters
-  train <- as.data.frame(train)
-  cols <- ncol(train) # Number of variables
-  if(is.null(cols)){
-    cols <- 1
-  }
-  dados <- train # training data matrix
-  M <- c(unlist(cl)) # true classes
-  M <- factor(M, labels = sort(unique(M)))
+  p_data <- predata(train,cl)
+  # --
+  train <-  p_data$train
+  cols <- p_data$cols
+  dados <- p_data$dados
+  M <- p_data$M
+  intervalos <- p_data$intervalos
+  #--------------------------------------------------------
   # --------------------------------------------------------
   # Finding Mu and Sigma for each class
   medias <- lapply(1:length(unique(M)), function(i) colMeans(subset(dados, M == unique(M)[i])))
@@ -67,6 +65,12 @@ GauNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp 
   # --------------------------------------------------------
   # --------------------------------------------------------
   # Estimating Triangular Parameters
+  # --------------------------------------------------------
+  if(metd > 3){ stop("metd argument must be <= 3.") }
+  # --------------------------------------------------------
+  alp=1
+  w=1
+  # --------------------------------------------------------
   alpha = alp
   if (metd != 4) {
     alpha <- seq(alphacut, 1.1, 0.1)
@@ -228,11 +232,6 @@ predict.GauNBFuzzyParam <- function(object,
         # Thorani Distance
         Thoranidistance(vec_trian, M)
         # ------------
-      },
-      "4" = {
-        # ------------
-        # Alpha-Order for a class of fuzzy sets
-        AlphaOrderFuzzy(vec_trian, w, M)
       }
     )
     # --------------------------------------------------------
