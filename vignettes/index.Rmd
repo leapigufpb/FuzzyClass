@@ -1,5 +1,5 @@
 ---
-title: "Using FuzzyClass"
+title: "Using FuzzyClass: Solving a Classification Problem"
 author: "Jodavid Ferreira"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

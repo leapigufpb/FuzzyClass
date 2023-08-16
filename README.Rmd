@@ -133,6 +133,23 @@ saidaMatrix |> head()
 ```
 
 
+This code appears to be related to the application of a classification algorithm called "Fuzzy Gaussian Naive Bayes with Fuzzy Parameters." An analysis of the steps present in the code:
+
+1. **Model Training** (`fit_FGNB`):
+   - A Fuzzy Gaussian Naive Bayes model is being fitted to the training data.
+   - The training set consists of attributes (`Train[,-4]`) and classes (`Train[,4]`), where the categorical response variable or label is in column 4.
+
+2. **Prediction and Confusion Matrix Creation**:
+   - The `predict` function is used to make predictions based on the fitted model using the test set (`test`).
+   - A confusion matrix (`Table`) is created using the `table` function. The confusion matrix compares the actual (expected) classes with the classes predicted by the model.
+
+3. **Accuracy Calculation**:
+   - The accuracy of the model is calculated by dividing the sum of the diagonal values of the confusion matrix (true positives and true negatives) by the total sum of the confusion matrix. This provides a measure of how well the model is performing predictions.
+
+Overall, this code performs the training of a Fuzzy Gaussian Naive Bayes model with fuzzy parameters, makes predictions using the test set, creates a confusion matrix to evaluate the model's performance, and calculates its accuracy.
+
+---
+
 This enhanced documentation provides a comprehensive guide to using the FuzzyClass package for probabilistic classification tasks. It covers installation, package usage, data preparation, and examples of applying the Fuzzy Gaussian Naive Bayes algorithm with fuzzy parameters. Feel free to explore the package further to leverage its capabilities for your classification tasks.
 
 ---

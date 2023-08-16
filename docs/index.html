@@ -48,6 +48,12 @@
 <li class="nav-item">
   <a class="nav-link" href="reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="articles/index.html">Using FuzzyClass: Solving a Classification Problem</a>
+  </div>
+</li>
 <li class="nav-item">
   <a class="nav-link" href="news/index.html">Changelog</a>
 </li>
@@ -77,7 +83,7 @@
 </div>
 <!-- badges: start -->
 
-<p>Last update: 11-08-2023</p>
+<p>Last update: 16-08-2023</p>
 <div class="section level2">
 <h2 id="a-family-of-probabilities-based-classifiers-fuzzy-and-non-fuzzy">A family of probabilities-based classifiers fuzzy and non-fuzzy<a class="anchor" aria-label="anchor" href="#a-family-of-probabilities-based-classifiers-fuzzy-and-non-fuzzy"></a>
 </h2>
@@ -169,13 +175,13 @@
 <span><span class="va">Table</span></span>
 <span><span class="co">#&gt;    saida</span></span>
 <span><span class="co">#&gt;      1  2  3</span></span>
-<span><span class="co">#&gt;   1 57  5  0</span></span>
-<span><span class="co">#&gt;   2  9 36 11</span></span>
-<span><span class="co">#&gt;   3  1  8 53</span></span>
+<span><span class="co">#&gt;   1 45  6  0</span></span>
+<span><span class="co">#&gt;   2  7 51 14</span></span>
+<span><span class="co">#&gt;   3  0 10 47</span></span>
 <span></span>
 <span><span class="co">#Accuracy:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">Table</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Table</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.8111111</span></span>
+<span><span class="co">#&gt; [1] 0.7944444</span></span>
 <span></span>
 <span><span class="va">saidaMatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_FGNB</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"matrix"</span><span class="op">)</span></span></code></pre></div>
 <p>Additionally, you can visualize the results:</p>
@@ -188,13 +194,38 @@
 <span><span class="co">#&gt; Levels: 1 2 3</span></span>
 <span></span>
 <span><span class="va">saidaMatrix</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              1           2            3</span></span>
-<span><span class="co">#&gt; [1,] 0.9409533 0.058494042 5.526780e-04</span></span>
-<span><span class="co">#&gt; [2,] 0.8307950 0.112747515 5.645750e-02</span></span>
-<span><span class="co">#&gt; [3,] 0.9554715 0.044401137 1.273269e-04</span></span>
-<span><span class="co">#&gt; [4,] 0.9922347 0.007761474 3.827954e-06</span></span>
-<span><span class="co">#&gt; [5,] 0.7429942 0.241923033 1.508276e-02</span></span>
-<span><span class="co">#&gt; [6,] 0.8587876 0.125696231 1.551619e-02</span></span></code></pre></div>
+<span><span class="co">#&gt;              1            2            3</span></span>
+<span><span class="co">#&gt; [1,] 0.9992589 0.0007410196 8.975386e-08</span></span>
+<span><span class="co">#&gt; [2,] 0.8379036 0.0985419165 6.355443e-02</span></span>
+<span><span class="co">#&gt; [3,] 0.9952859 0.0047108312 3.226157e-06</span></span>
+<span><span class="co">#&gt; [4,] 0.9917273 0.0082661561 6.539650e-06</span></span>
+<span><span class="co">#&gt; [5,] 0.6723077 0.3112579462 1.643434e-02</span></span>
+<span><span class="co">#&gt; [6,] 0.9828923 0.0170274151 8.028614e-05</span></span></code></pre></div>
+<p>This code appears to be related to the application of a classification algorithm called “Fuzzy Gaussian Naive Bayes with Fuzzy Parameters.” An analysis of the steps present in the code:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Model Training</strong> (<code>fit_FGNB</code>):
+<ul>
+<li>A Fuzzy Gaussian Naive Bayes model is being fitted to the training data.</li>
+<li>The training set consists of attributes (<code>Train[,-4]</code>) and classes (<code>Train[,4]</code>), where the categorical response variable or label is in column 4.</li>
+</ul>
+</li>
+<li>
+<strong>Prediction and Confusion Matrix Creation</strong>:
+<ul>
+<li>The <code>predict</code> function is used to make predictions based on the fitted model using the test set (<code>test</code>).</li>
+<li>A confusion matrix (<code>Table</code>) is created using the <code>table</code> function. The confusion matrix compares the actual (expected) classes with the classes predicted by the model.</li>
+</ul>
+</li>
+<li>
+<strong>Accuracy Calculation</strong>:
+<ul>
+<li>The accuracy of the model is calculated by dividing the sum of the diagonal values of the confusion matrix (true positives and true negatives) by the total sum of the confusion matrix. This provides a measure of how well the model is performing predictions.</li>
+</ul>
+</li>
+</ol>
+<p>Overall, this code performs the training of a Fuzzy Gaussian Naive Bayes model with fuzzy parameters, makes predictions using the test set, creates a confusion matrix to evaluate the model’s performance, and calculates its accuracy.</p>
+<hr>
 <p>This enhanced documentation provides a comprehensive guide to using the FuzzyClass package for probabilistic classification tasks. It covers installation, package usage, data preparation, and examples of applying the Fuzzy Gaussian Naive Bayes algorithm with fuzzy parameters. Feel free to explore the package further to leverage its capabilities for your classification tasks.</p>
 <hr>
 </div>

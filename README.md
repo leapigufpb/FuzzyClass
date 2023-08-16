@@ -9,7 +9,7 @@ version](https://www.r-pkg.org/badges/version/FuzzyClass)](https://cran.r-projec
 Download](https://cranlogs.r-pkg.org/badges/grand-total/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
 <!-- badges: end -->
 
-Last update: 11-08-2023
+Last update: 16-08-2023
 
 ## A family of probabilities-based classifiers fuzzy and non-fuzzy
 
@@ -122,13 +122,13 @@ Table <- table(factor(Test[,4]), saida)
 Table
 #>    saida
 #>      1  2  3
-#>   1 57  5  0
-#>   2  9 36 11
-#>   3  1  8 53
+#>   1 45  6  0
+#>   2  7 51 14
+#>   3  0 10 47
 
 #Accuracy:
 sum(diag(Table))/sum(Table)
-#> [1] 0.8111111
+#> [1] 0.7944444
 
 saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
 ```
@@ -144,14 +144,43 @@ saida |> head()
 #> Levels: 1 2 3
 
 saidaMatrix |> head()
-#>              1           2            3
-#> [1,] 0.9409533 0.058494042 5.526780e-04
-#> [2,] 0.8307950 0.112747515 5.645750e-02
-#> [3,] 0.9554715 0.044401137 1.273269e-04
-#> [4,] 0.9922347 0.007761474 3.827954e-06
-#> [5,] 0.7429942 0.241923033 1.508276e-02
-#> [6,] 0.8587876 0.125696231 1.551619e-02
+#>              1            2            3
+#> [1,] 0.9992589 0.0007410196 8.975386e-08
+#> [2,] 0.8379036 0.0985419165 6.355443e-02
+#> [3,] 0.9952859 0.0047108312 3.226157e-06
+#> [4,] 0.9917273 0.0082661561 6.539650e-06
+#> [5,] 0.6723077 0.3112579462 1.643434e-02
+#> [6,] 0.9828923 0.0170274151 8.028614e-05
 ```
+
+This code appears to be related to the application of a classification
+algorithm called “Fuzzy Gaussian Naive Bayes with Fuzzy Parameters.” An
+analysis of the steps present in the code:
+
+1.  **Model Training** (`fit_FGNB`):
+    - A Fuzzy Gaussian Naive Bayes model is being fitted to the training
+      data.
+    - The training set consists of attributes (`Train[,-4]`) and classes
+      (`Train[,4]`), where the categorical response variable or label is
+      in column 4.
+2.  **Prediction and Confusion Matrix Creation**:
+    - The `predict` function is used to make predictions based on the
+      fitted model using the test set (`test`).
+    - A confusion matrix (`Table`) is created using the `table`
+      function. The confusion matrix compares the actual (expected)
+      classes with the classes predicted by the model.
+3.  **Accuracy Calculation**:
+    - The accuracy of the model is calculated by dividing the sum of the
+      diagonal values of the confusion matrix (true positives and true
+      negatives) by the total sum of the confusion matrix. This provides
+      a measure of how well the model is performing predictions.
+
+Overall, this code performs the training of a Fuzzy Gaussian Naive Bayes
+model with fuzzy parameters, makes predictions using the test set,
+creates a confusion matrix to evaluate the model’s performance, and
+calculates its accuracy.
+
+------------------------------------------------------------------------
 
 This enhanced documentation provides a comprehensive guide to using the
 FuzzyClass package for probabilistic classification tasks. It covers
