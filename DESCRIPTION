@@ -18,11 +18,9 @@ Imports:
     EnvStats,
     foreach,
     MASS,
-    maxLik,
     mvtnorm,
     parallel,
     purrr,
-    dplyr,
     Rdpack,
     rootSolve,
     stats
@@ -33,7 +31,9 @@ Depends:
 Suggests: 
     testthat (>= 3.0.0),
     knitr,
-    rmarkdown
+    rmarkdown,
+    maxLik,
+    dplyr
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://github.com/leapigufpb/FuzzyClass
