@@ -1,5 +1,5 @@
 ---
-title: 'FuzzyClass: An R package for Fuzzy and Non-Fuzzy probabilistic-based classifiers'
+title: 'FuzzyClass: A family of Fuzzy and Non-Fuzzy probabilistic-based classifiers'
 tags:
   - R
   - fuzzy
@@ -17,7 +17,7 @@ authors:
 affiliations:
  - name: Department of Statistics, Federal University of Paraiba, João Pessoa, Brazil
    index: 1
-date: 31 March 2023
+date: 16 August 2023
 bibliography: refs.bib
 # Optional fields if submitting to a AAS journal too, see this blog post:
 # https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
@@ -67,13 +67,15 @@ theory for fuzzy events [@de2008fuzzy; @moraes2014psychomotor;
 @moraes2020double]. Classifiers based on probability and Zadeh's probability 
 were implemented using the 
 Binomial distribution [@moraes2016fuzzyBinom], the Poisson distribution
-[@moraes2015fuzzy], the Beta distribution [@de2020new], the Exponencial
+[@moraes2015fuzzy], the Beta distribution [@de2020new], the Exponential
 distribution [@moraes2016fuzzy], the Gamma distribution
 [@de2018fuzzyGamma], the Gaussian distribution [@marcos2012online], 
 the Triangular distribution [@de2020online] and Trapezoidal distribution [@lopes2023new]. These classifiers 
 were implemented in the `R` and made available through a package named 
 `FuzzyClass`, which will be the basis of this article and can be found
-at the link: <https://cran.r-project.org/web/packages/FuzzyClass/>. It
+at the link: <https://cran.r-project.org/web/packages/FuzzyClass/>.
+Classifiers such as Naive Bayes, Gaussian Naive Bayes, Bernoulli Naive Bayes, and Poisson Naive Bayes can be found in libraries and software like `scikit-learn` (`python`), `Weka`, and `R` packages `naivebayes` and `e1071`. However, none of them offer implementations with fuzzy. All implementations involving fuzzy probability and distributions not mentioned earlier are contributions provided by this package. 
+It
 is worth noting that these works were developed in the LabTEVE
 (<http://www.de.ufpb.br/~labteve/>) and LEAPIG
 (<http://www.de.ufpb.br/~leapig/>) research laboratories, both at Federal
