@@ -26,6 +26,8 @@ Last update: `r format(Sys.Date(),"%d-%m-%Y")`
 
 The classification predicament involves assigning labels or categories to data instances based on observed features. Consider, for instance, the task of discriminating between "spam" and "non-spam" emails. This constitutes a classification task, where the algorithm must acquire the ability to discern patterns that distinguish the two email types based on their keywords, structure, or other attributes. Classification algorithms employ a training dataset containing pre-labeled examples to learn these patterns. When faced with unclassified data, the algorithm applies the acquired patterns to predict the class to which they belong, enabling efficient and precise automation in the categorization of new cases. Algorithms like those in `FuzzyClass` address this task by leveraging data probabilities and characteristics, thus becoming valuable tools for addressing intricate and ambiguous classification problems.
 
+> A package manual that showcases the existing classifiers and demonstrates how to use it can be found at the following link: https://cran.r-project.org/web/packages/FuzzyClass/FuzzyClass.pdf
+
 ### Dependencies
 
 Below is the list of packages on which `FuzzyClass` depends. However, during its installation, `FuzzyClass` automatically installs the dependencies:
