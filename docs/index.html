@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) (&lt;http://www.de.ufpb.br/~labteve/&gt;) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) (&lt;http://www.de.ufpb.br/~leapig/&gt;) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;.">
+<meta name="description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;.">
 <title>Fuzzy and Non-Fuzzy Classifiers • FuzzyClass</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -18,7 +18,7 @@
 <script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Fuzzy and Non-Fuzzy Classifiers">
-<meta property="og:description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) (&lt;http://www.de.ufpb.br/~labteve/&gt;) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) (&lt;http://www.de.ufpb.br/~leapig/&gt;) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;.">
+<meta property="og:description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;.">
 <meta property="og:image" content="/logo.png">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -83,11 +83,14 @@
 </div>
 <!-- badges: start -->
 
-<p>Last update: 16-08-2023</p>
+<p>Last update: 21-08-2023</p>
 <div class="section level2">
 <h2 id="a-family-of-probabilities-based-classifiers-fuzzy-and-non-fuzzy">A family of probabilities-based classifiers fuzzy and non-fuzzy<a class="anchor" aria-label="anchor" href="#a-family-of-probabilities-based-classifiers-fuzzy-and-non-fuzzy"></a>
 </h2>
 <p>The classification predicament involves assigning labels or categories to data instances based on observed features. Consider, for instance, the task of discriminating between “spam” and “non-spam” emails. This constitutes a classification task, where the algorithm must acquire the ability to discern patterns that distinguish the two email types based on their keywords, structure, or other attributes. Classification algorithms employ a training dataset containing pre-labeled examples to learn these patterns. When faced with unclassified data, the algorithm applies the acquired patterns to predict the class to which they belong, enabling efficient and precise automation in the categorization of new cases. Algorithms like those in <code>FuzzyClass</code> address this task by leveraging data probabilities and characteristics, thus becoming valuable tools for addressing intricate and ambiguous classification problems.</p>
+<blockquote>
+<p>A package manual that showcases the existing classifiers and demonstrates how to use it can be found at the following link: <a href="https://cran.r-project.org/web/packages/FuzzyClass/FuzzyClass.pdf" class="external-link uri">https://cran.r-project.org/web/packages/FuzzyClass/FuzzyClass.pdf</a></p>
+</blockquote>
 <div class="section level3">
 <h3 id="dependencies">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies"></a>
 </h3>
@@ -175,13 +178,13 @@
 <span><span class="va">Table</span></span>
 <span><span class="co">#&gt;    saida</span></span>
 <span><span class="co">#&gt;      1  2  3</span></span>
-<span><span class="co">#&gt;   1 45  6  0</span></span>
-<span><span class="co">#&gt;   2  7 51 14</span></span>
-<span><span class="co">#&gt;   3  0 10 47</span></span>
+<span><span class="co">#&gt;   1 57  8  0</span></span>
+<span><span class="co">#&gt;   2  3 49 14</span></span>
+<span><span class="co">#&gt;   3  0  5 44</span></span>
 <span></span>
 <span><span class="co">#Accuracy:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">Table</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Table</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.7944444</span></span>
+<span><span class="co">#&gt; [1] 0.8333333</span></span>
 <span></span>
 <span><span class="va">saidaMatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_FGNB</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"matrix"</span><span class="op">)</span></span></code></pre></div>
 <p>Additionally, you can visualize the results:</p>
@@ -194,13 +197,13 @@
 <span><span class="co">#&gt; Levels: 1 2 3</span></span>
 <span></span>
 <span><span class="va">saidaMatrix</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              1            2            3</span></span>
-<span><span class="co">#&gt; [1,] 0.9992589 0.0007410196 8.975386e-08</span></span>
-<span><span class="co">#&gt; [2,] 0.8379036 0.0985419165 6.355443e-02</span></span>
-<span><span class="co">#&gt; [3,] 0.9952859 0.0047108312 3.226157e-06</span></span>
-<span><span class="co">#&gt; [4,] 0.9917273 0.0082661561 6.539650e-06</span></span>
-<span><span class="co">#&gt; [5,] 0.6723077 0.3112579462 1.643434e-02</span></span>
-<span><span class="co">#&gt; [6,] 0.9828923 0.0170274151 8.028614e-05</span></span></code></pre></div>
+<span><span class="co">#&gt;              1           2            3</span></span>
+<span><span class="co">#&gt; [1,] 0.5061855 0.397270429 9.654408e-02</span></span>
+<span><span class="co">#&gt; [2,] 0.9044041 0.094486662 1.109274e-03</span></span>
+<span><span class="co">#&gt; [3,] 0.9806723 0.009069594 1.025806e-02</span></span>
+<span><span class="co">#&gt; [4,] 0.9882999 0.011690821 9.281920e-06</span></span>
+<span><span class="co">#&gt; [5,] 0.8560721 0.129471402 1.445646e-02</span></span>
+<span><span class="co">#&gt; [6,] 0.8512719 0.144558801 4.169263e-03</span></span></code></pre></div>
 <p>This code appears to be related to the application of a classification algorithm called “Fuzzy Gaussian Naive Bayes with Fuzzy Parameters.” An analysis of the steps present in the code:</p>
 <ol style="list-style-type: decimal">
 <li>

@@ -16,6 +16,7 @@
 #'
 #' @examples
 #'
+#' # Example Fuzzy with Discrete Features
 #' set.seed(1) # determining a seed
 #' data(HouseVotes84)
 #'
@@ -36,6 +37,30 @@
 #'
 #' head(pred_FNB)
 #' head(Test[, 1])
+#'
+#'
+#' # Example Fuzzy with Continuous Features
+#' set.seed(1) # determining a seed
+#' data(iris)
+#'
+#' # Splitting into Training and Testing
+#' split <- caTools::sample.split(t(iris[, 1]), SplitRatio = 0.7)
+#' Train <- subset(iris, split == "TRUE")
+#' Test <- subset(iris, split == "FALSE")
+#' # ----------------
+#' # matrix or data frame of test set cases.
+#' # A vector will be interpreted as a row vector for a single case.
+#' test <- Test[, -5]
+#' fit_FNB <- FuzzyNaiveBayes(
+#'   train = Train[, -5],
+#'   cl = Train[, 5]
+#' )
+#'
+#' pred_FNB <- predict(fit_FNB, test)
+#'
+#' head(pred_FNB)
+#' head(Test[, 5])
+#'
 #'
 #' @importFrom stats model.extract na.pass sd terms predict
 #'
@@ -233,6 +258,7 @@ FuzzyNaiveBayes.categorical <- function(train, cl, fuzzy = T, m = NULL, Pi = NUL
 # -------------------------
 
 # -------------------------
+#' @export
 FuzzyNaiveBayes.continuo <- function(train, cl, fuzzy = T, m = NULL, Pi = NULL) {
 
   # --------------------------------------------------------

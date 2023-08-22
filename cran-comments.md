@@ -1,4 +1,4 @@
-This is a resubmission. In this version I have:
+This is a resubmission. In this version we have:
 
 - Add the "double weighted fuzzy gamma naive bayes classifier" as `DWFuzzyGammaNaiveBayes`
 - Add the "geometric fuzzy gamma naive bayes classifier" as `GeometricFuzzyGammaNaiveBayes`
