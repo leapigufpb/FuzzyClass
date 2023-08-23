@@ -60,78 +60,23 @@ FuzzyGaussianNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) 
   N <- nrow(dados) # Number of observations
   # -------------------------------
   # --------------------------------------------------------
-  class <- length(unique(M))
   names_class <- unique(M)
-  sizes <- table(factor(M))
-  Sturges <- round(1 + 3.3 * log10(sizes)) # Sturges
-  # -----------------------------
-  # Minimum of each class for each variable
-  # Class rows, variable columns
-  minimo <- lapply(1:class, function(j) {
-    sapply(1:cols, function(i) {
-      min(dados[M == names_class[j], i])
-    })
-  })
-  # -----------------------------
-  # Maximum of each class for each variable
-  # Row classes, variable columns
-  maximo <- lapply(1:class, function(j) {
-    sapply(1:cols, function(i) {
-      max(dados[M == names_class[j], i])
-    })
-  })
-  # -----------------------------
-  AT_classe <- lapply(1:class, function(i) maximo[[i]] - minimo[[i]])
-  # -----------------------------
-  Comprim_Intervalo <- lapply(1:class, function(i) AT_classe[[i]] / Sturges[i])
+  Sturges <- Sturges(dados, M);
   # --------------------------------------------------------
-  # List within List, dimensions
-  Freq <- lapply(1:class, function(i) {
-    array(0, dim = Sturges)
-  })
-  # ----------------------
-
-  # Looping in data by class [CRIAR]
-
-  Pertinencias <- lapply(1:length(unique(M)), function(i) {
-    dados2 <- dados[M == names_class[i], ]
-    # loop in the observations of each group
-    for (t in 1:nrow(dados2)) {
-      x <- dados2[t, ]
-
-      saida <- floor((x - minimo[[i]]) / Comprim_Intervalo[[i]]) + 1
-      # ---
-      aux <- (saida > Sturges[i])
-      aux <- which(aux == T)
-      if (length(aux) > 0) saida[aux] <- saida[aux] - 1
-      # ---
-      # Finding a position to increase a frequency
-      res <- 0
-      tamanho_saida <- length(saida)
-      if (tamanho_saida > 1) {
-        for (j in tamanho_saida:2) res <- res + (saida[j] - 1) * (Sturges[i]^(j - 1))
-      }
-      res <- res + saida[1]
-      # ---
-      # ---
-      Freq[[i]][as.numeric(res)] <- Freq[[i]][as.numeric(res)] + 1
-      # ---
-      Freq[[i]][is.na(Freq[[i]])] <- 0
-    }
-    # Fim do for
-
-
-    Pertinencia <- Freq[[i]] / sizes[i]
-
-    return(Pertinencia)
-  })
+  Comprim_Intervalo <- Comprim_Intervalo(dados, M, Sturges);
+  minimos <- minimos(dados, M, cols);
+  maximos <- maximos(dados, M, cols);
+  # --------------------------------------------------------
+  MinimosDataFrame <- minomosdt_function(minimos, M, Comprim_Intervalo, Sturges, cols)
+  Frequencia <- Freq_esparsa(dados = dados,M = M, minomosdt = MinimosDataFrame, cols = cols)
+  Pertinencias <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)
   # --------------------------------------------------------
   # Finding Mu and Sigma for each class
   medias <- lapply(1:length(unique(M)), function(i) colMeans(subset(dados, M == unique(M)[i])))
   varian <- lapply(1:length(unique(M)), function(i) diag(diag(cov(subset(dados, M == unique(M)[i]))), (cols), (cols)))
   # --------------------------------------------------------
   # A priori probability of classes - considered equal
-  pk <- rep(1 / class, class)
+  pk <- rep(1 / length(unique(M)), length(unique(M)))
   # -----------------------
   logaritmo <- log(pk)
   log_determinante <- lapply(1:length(unique(M)), function(i) 0.5 * log(det(varian[[i]])))
@@ -140,8 +85,9 @@ FuzzyGaussianNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) 
 
   # -------------------------------------------------------
   structure(list(
-    minimo = minimo,
-    maximo = maximo,
+    minimo = minimos,
+    MinimosDataFrame = MinimosDataFrame,
+    maximo = maximos,
     Comprim_Intervalo = Comprim_Intervalo,
     fuzzy = fuzzy,
     Sturges = Sturges,
@@ -189,6 +135,7 @@ predict.FuzzyGaussianNaiveBayes <- function(object,
   # --------------------------------------------------------
   minimo <- object$minimo
   maximo <- object$maximo
+  MinimosDataFrame <-  object$MinimosDataFrame
   Comprim_Intervalo <- object$Comprim_Intervalo
   Sturges <- object$Sturges
   log_determinante <- object$log_determinante
@@ -217,27 +164,9 @@ predict.FuzzyGaussianNaiveBayes <- function(object,
     x <- test[h, ]
     # ------------
     R_M <- lapply(1:length(unique(M)), function(i) {
-      saida <- abs(floor((x - minimo[[i]]) / Comprim_Intervalo[[i]]) + 1)
-      # ---
-      aux1 <- x < minimo[[i]]
-      aux2 <- x > maximo[[i]]
-      # ---
-      log_Pertinencia <- ifelse((T %in% aux1) | (T %in% aux2), -50, 0)
-      # ---
-      # ---
-      # Finding a position to increase a frequency
-      res <- 0
-      tamanho_saida <- length(saida)
-      if (tamanho_saida > 1) {
-        for (j in tamanho_saida:2) res <- res + (saida[j] - 1) * (Sturges[i]^(j - 1))
-      }
-      res <- abs(res + saida[1])
-      # ---
-      # ---
-      if (log_Pertinencia == -50) {
-        pert <- ifelse(is.na(Pertinencias[[i]][as.numeric(res)]) == T, 0, Pertinencias[[i]][as.numeric(res)])
-        log_Pertinencia <- ifelse(pert <= 0, -50, log(Pertinencias[[i]][as.numeric(res)]))
-      }
+
+      Pertinencia_r <- pertinencia_predict_esparsa(minomosdt = MinimosDataFrame, x, Pert_joda = Pertinencias, cols,i)
+      log_Pertinencia <- log(Pertinencia_r)
 
       if (fuzzy == T) {
         # --------------
