@@ -99,8 +99,11 @@ FuzzyBinomialNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
   Sturges <- Sturges(dados, M);
   Comprim_Intervalo <- Comprim_Intervalo(dados, M, Sturges);
   minimos <- minimos(dados, M, cols);
-  Freq <- Freq(dados, M, Comprim_Intervalo, Sturges, minimos, cols);
-  Pertinencia <- Pertinencia(Freq, dados, M);
+  #Freq <- Freq(dados, M, Comprim_Intervalo, Sturges, minimos, cols);
+  #Pertinencia <- Pertinencia(Freq, dados, M);
+  MinimosDataFrame <- minomosdt_function(minimos, M, Comprim_Intervalo, Sturges, cols)
+  Frequencia <- Freq_esparsa(dados = dados,M = M, minomosdt = MinimosDataFrame, cols = cols)
+  Pertinencia <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)
   #------
   # A priori probability of classes - considered equal
   pk <- rep(1 / length(unique(M)), length(unique(M)))
@@ -111,6 +114,7 @@ FuzzyBinomialNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
   structure(list(
     parametersC = parametersC,
     minimos = minimos,
+    MinimosDataFrame = MinimosDataFrame,
     cols = cols,
     M = M,
     cores = cores,
@@ -152,6 +156,7 @@ predict.FuzzyBinomialNaiveBayes <- function(object,
   #--------------------------------------------------------
   parametersC <- object$parametersC
   minimos <- object$minimos
+  MinimosDataFrame <-  object$MinimosDataFrame
   cols <- object$cols
   M <- object$M
   cores <- object$cores
@@ -169,11 +174,10 @@ predict.FuzzyBinomialNaiveBayes <- function(object,
   # ---------
   N_test <- nrow(test)
   # --
-  test <- split(test, seq(nrow(test)))
   # --
   if(fuzzy == T){
-    retorno <- purrr::map(test, function_membership_predict, M, Sturges, minimos, Comprim_Intervalo, Pertinencia, cols)
-    R_M_obs <- function_fuzzy_predict(retorno, P, M)
+    Pertinencia_r <- function_new_membership_predict(test, M = M, MinimosDataFrame, Pertinencia, cols = cols)
+    R_M_obs <- function_new_fuzzy_predict(retorno = Pertinencia_r, P, M)
   }else{
     R_M_obs <- t(data.frame(matrix(unlist(P), nrow=length(P), byrow=TRUE)))
   }

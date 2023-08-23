@@ -23,7 +23,8 @@ Imports:
     purrr,
     Rdpack,
     rootSolve,
-    stats
+    stats,
+    trapezoid
 RdMacros:
     Rdpack
 Depends: 

@@ -84,34 +84,36 @@ FuzzyGeoNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
 
   # --------------------------------------------------------
   # --------------------------------------------------------
+  # Estimating Parameters
+  parametersC <- estimation_parameters_geo(M, cols, dados)
+  # --------------------------------------------------------
   # Estimating class memberships
-  pertinicesC <- lapply(1:length(unique(M)), function(i) {
-    lapply(1:cols, function(j) {
-      SubSet <- dados[M == unique(M)[i], j]
-      getMemberships(SubSet, intervalos)
-    })
-  })
+  Sturges <- Sturges(dados, M);
+  Comprim_Intervalo <- Comprim_Intervalo(dados, M, Sturges);
+  minimos <- minimos(dados, M, cols);
+  #Freq <- Freq(dados, M, Comprim_Intervalo, Sturges, minimos, cols);
+  #Pertinencia <- Pertinencia(Freq, dados, M);
+  MinimosDataFrame <- minomosdt_function(minimos, M, Comprim_Intervalo, Sturges, cols)
+  Frequencia <- Freq_esparsa(dados = dados,M = M, minomosdt = MinimosDataFrame, cols = cols)
+  Pertinencia <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)
   # --------------------------------------------------------
+  # A priori probability of classes - considered equal
+  pk <- rep(1 / length(unique(M)), length(unique(M)))
   # --------------------------------------------------------
-  # Estimating Geometric Parameters
-  parametersC <- lapply(1:length(unique(M)), function(i) {
-    lapply(1:cols, function(j) {
-      SubSet <- dados[M == unique(M)[i], j]
-      param <- MASS::fitdistr(SubSet, "geometric")$estimate
-      return(param)
-    })
-  })
 
-  # --------------------------------------------------------
 
   # -------------------------------------------------------
   structure(list(
-    pertinicesC = pertinicesC,
     parametersC = parametersC,
+    minimos = minimos,
+    MinimosDataFrame = MinimosDataFrame,
     cols = cols,
     M = M,
     cores = cores,
-    intervalos = intervalos,
+    Comprim_Intervalo = Comprim_Intervalo,
+    Pertinencia = Pertinencia,
+    Sturges = Sturges,
+    pk = pk,
     fuzzy = fuzzy
   ),
   class = "FuzzyGeoNaiveBayes"
@@ -144,80 +146,32 @@ predict.FuzzyGeoNaiveBayes <- function(object,
   # --------------------------------------------------------
   test <- as.data.frame(newdata)
   # --------------------------------------------------------
-  pertinicesC <- object$pertinicesC
   parametersC <- object$parametersC
+  minimos <- object$minimos
+  MinimosDataFrame <-  object$MinimosDataFrame
   cols <- object$cols
   M <- object$M
   cores <- object$cores
-  intervalos <- object$intervalos
+  Comprim_Intervalo <- object$Comprim_Intervalo
+  Pertinencia <- object$Pertinencia
+  Sturges <- object$Sturges
+  pk <- object$pk
   fuzzy <- object$fuzzy
   # --------------------------------------------------------
 
   # --------------------------------------------------------
   # Classification
   # --------------
+  P <- density_values_geo(M, cols, test, parametersC, pk)
+  # --------------
   N_test <- nrow(test)
   # --------------
-  # Defining how many CPU cores to use
-  core <- parallel::makePSOCKcluster(cores)
-  doParallel::registerDoParallel(core)
-  # --------------
-  # loop start
-  R_M_obs <- foreach::foreach(h = 1:N_test, .combine = rbind) %dopar% {
-
-    # ------------
-    x <- test[h, ]
-    # ------------
-    res <- sapply(1:length(unique(M)), function(i) {
-
-      # -------------
-      resultadoPerClass <- 1
-      # ------------
-
-      sapply(1:cols, function(j) {
-
-        resultadoPerClass <- ((1 - parametersC[[i]][[j]])^(x[j] - 1)) * parametersC[[i]][[j]]
-
-        # -----------------------------------------------------------------------
-        # -----------------------------------------------------------------------
-        if (fuzzy == T) {
-          # --------------
-          # Mcl(Xi)
-          for (st in 1:intervalos) {
-            if (st == intervalos) {
-              if ((x[j] >= pertinicesC[[i]][[j]][st, 1]) & (x[j] <= pertinicesC[[i]][[j]][st, 2])) {
-                resultadoPerClass <- resultadoPerClass * pertinicesC[[i]][[j]][st, 3]
-              }
-            } else {
-              if ((x[j] > pertinicesC[[i]][[j]][st, 1]) & (x[j] < pertinicesC[[i]][[j]][st, 2])) {
-                resultadoPerClass <- resultadoPerClass * pertinicesC[[i]][[j]][st, 3]
-              }
-            }
-          }
-        }
-        # -----------------------------------------------------------------------
-        # -----------------------------------------------------------------------
-
-        # --------------
-        # P(Wcl)
-        resultadoPerClass <- resultadoPerClass * 1 / length(unique(M))
-        # --------------
-        return(resultadoPerClass)
-      })
-      # --------------------------------------------------------
-    })
-    # --------------------------------------------------------
-    produto <- matrix(as.numeric(res), ncol = length(unique(M)))
-    produto <- apply(produto, 2, prod)
-    # --------------------------------------------------------
-    R_M_class <- produto
-    # --------------------------------------------------------
-    return(R_M_class)
+  if(fuzzy == T){
+    Pertinencia_r <- function_new_membership_predict(test, M = M, MinimosDataFrame, Pertinencia, cols = cols)
+    R_M_obs <- function_new_fuzzy_predict(retorno = Pertinencia_r, P, M)
+  }else{
+    R_M_obs <- t(data.frame(matrix(unlist(P), nrow=length(P), byrow=TRUE)))
   }
-
-  # ------------
-  # -------------------------
-  parallel::stopCluster(core)
   # ---------
   if (type == "class") {
     # -------------------------
@@ -238,6 +192,38 @@ predict.FuzzyGeoNaiveBayes <- function(object,
     # -------------------------
   }
 }
+
+
+# ----------------
+density_values_geo <- function(M, cols, test, parametersC, pk){
+  lapply(1:length(unique(M)), function(i) {
+    densidades <- sapply(1:cols, function(j) {
+      stats::dgeom(round(test[, j]), prob = parametersC[[i]][[j]][1])
+    })
+    densidades <- apply(densidades, 1, prod)
+    # Calcula a P(w_i) * P(X_k | w_i)
+    p <- pk[[i]] * densidades
+    # ---
+    return(p)
+  })
+
+}
+# ----------------
+
+
+# ----------------
+estimation_parameters_geo <- function(M, cols, dados){
+  lapply(1:length(unique(M)), function(i) {
+    lapply(1:cols, function(j) {
+      SubSet <- dados[M == unique(M)[i], j]
+      param <- MASS::fitdistr(SubSet, "geometric")$estimate
+      return(param)
+    })
+  })
+}
+# ----------------
+
+
 
 #' @importFrom stats median.default var
 getMemberships <- function(sample, breaks) {
