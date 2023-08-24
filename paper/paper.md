@@ -63,13 +63,13 @@ which determines how much the element belongs to the fuzzy set.
 Zadeh assumed that imprecision can be modeled using a fuzzy membership
 function on probability distributions (see more @zadeh1988fuzzy).
 Several classification methods have been proposed using probability
-theory for fuzzy events [@de2008fuzzy; @moraes2014psychomotor;
+theory for fuzzy events [@de2006line; @moraes2014psychomotor;
 @moraes2020double]. Classifiers based on probability and Zadeh's probability 
 were implemented using the 
 Binomial distribution [@moraes2016fuzzyBinom], the Poisson distribution
 [@moraes2015fuzzy], the Beta distribution [@de2020new], the Exponential
 distribution [@moraes2016fuzzy], the Gamma distribution
-[@de2018fuzzyGamma], the Gaussian distribution [@marcos2012online], 
+[@de2018fuzzyGamma], the Gaussian distribution [@de2010fuzzy], 
 the Triangular distribution [@de2020online] and Trapezoidal distribution [@lopes2023new]. These classifiers 
 were implemented in the `R` and made available through a package named 
 `FuzzyClass`, which will be the basis of this article and can be found
@@ -143,7 +143,7 @@ and others can be consulted in the package's documentation. So, follow:
 - *fuzzy* boolean variable to use or not the membership function;
 
 In the example below, an application
-with real data will be presented using data from the paper [@marcos2012online], appliying the
+with real data will be presented using data from the paper [@de2010fuzzy], appliying the
 classifier Fuzzy Gaussian Naive Bayes, which in the package has the
 nomenclature of `FuzzyGaussianNaiveBayes`.
 
