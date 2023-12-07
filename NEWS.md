@@ -1,5 +1,9 @@
 # FuzzyClass (development version)
 
+# FuzzyClass 0.1.5.900
+
+- Add the "Fuzzy Rule-based System" with some functions
+
 # FuzzyClass 0.1.5
 
 - Add the "double weighted fuzzy gamma naive bayes classifier" as `DWFuzzyGammaNaiveBayes`

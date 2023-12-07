@@ -46,6 +46,7 @@
     These data have been taken from the UCI Repository Of Machine Learning
     Databases at
     \itemize{
+      \item \url{https://archive.ics.uci.edu/ml/machine-learning-databases/}
       \item \url{http://www.ics.uci.edu/~mlearn/MLRepository.html}
     }
     and were converted to R format by Friedrich Leisch.

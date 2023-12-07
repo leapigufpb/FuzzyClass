@@ -1,5 +1,3 @@
 This is a resubmission. In this version we have:
 
-- Add the "double weighted fuzzy gamma naive bayes classifier" as `DWFuzzyGammaNaiveBayes`
-- Add the "geometric fuzzy gamma naive bayes classifier" as `GeometricFuzzyGammaNaiveBayes`
-- Add the "Fuzzy Bayes Rule classifier" as `FuzzyBayesRule`
+- Add the "Fuzzy Rule-based System" with some functions
