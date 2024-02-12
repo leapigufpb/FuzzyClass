@@ -7,6 +7,7 @@
 version](https://www.r-pkg.org/badges/version/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
 [![CRAN
 Download](https://cranlogs.r-pkg.org/badges/grand-total/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
+[![R-CMD-check](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/leapigufpb/FuzzyClass/graph/badge.svg?token=WYX13RYCPS)](https://codecov.io/gh/leapigufpb/FuzzyClass)
 <!-- badges: end -->
 
@@ -127,13 +128,13 @@ Table <- table(factor(Test[,4]), saida)
 Table
 #>    saida
 #>      1  2  3
-#>   1 41  7  1
-#>   2  3 43 19
-#>   3  0 14 52
+#>   1 49  5  0
+#>   2  6 43 19
+#>   3  0  7 51
 
 #Accuracy:
 sum(diag(Table))/sum(Table)
-#> [1] 0.7555556
+#> [1] 0.7944444
 
 saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
 ```
@@ -145,17 +146,17 @@ Additionally, you can visualize the results:
 # head view
 
 saida |> head()
-#> [1] 1 2 1 1 1 2
+#> [1] 1 1 1 1 1 1
 #> Levels: 1 2 3
 
 saidaMatrix |> head()
 #>              1           2            3
-#> [1,] 0.8788668 0.065932294 5.520088e-02
-#> [2,] 0.4217535 0.483928543 9.431796e-02
-#> [3,] 0.9818805 0.018104349 1.519404e-05
-#> [4,] 0.9910442 0.008947779 8.042588e-06
-#> [5,] 0.9874525 0.012542516 4.961851e-06
-#> [6,] 0.4972741 0.502176710 5.491937e-04
+#> [1,] 0.9856906 0.004793421 9.516022e-03
+#> [2,] 0.9640732 0.007472894 2.845392e-02
+#> [3,] 0.6117055 0.361367859 2.692668e-02
+#> [4,] 0.7953909 0.189952725 1.465637e-02
+#> [5,] 0.8217613 0.173156157 5.082529e-03
+#> [6,] 0.9878197 0.012157722 2.257695e-05
 ```
 
 This code appears to be related to the application of a classification
