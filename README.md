@@ -9,7 +9,7 @@ version](https://www.r-pkg.org/badges/version/FuzzyClass)](https://cran.r-projec
 Download](https://cranlogs.r-pkg.org/badges/grand-total/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
 <!-- badges: end -->
 
-Last update: 21-08-2023
+Last update: 12-02-2024
 
 ## A family of probabilities-based classifiers fuzzy and non-fuzzy
 
@@ -126,13 +126,13 @@ Table <- table(factor(Test[,4]), saida)
 Table
 #>    saida
 #>      1  2  3
-#>   1 57  8  0
-#>   2  3 49 14
-#>   3  0  5 44
+#>   1 54  5  0
+#>   2  4 48  8
+#>   3  1 15 45
 
 #Accuracy:
 sum(diag(Table))/sum(Table)
-#> [1] 0.8333333
+#> [1] 0.8166667
 
 saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
 ```
@@ -149,12 +149,12 @@ saida |> head()
 
 saidaMatrix |> head()
 #>              1           2            3
-#> [1,] 0.5061855 0.397270429 9.654408e-02
-#> [2,] 0.9044041 0.094486662 1.109274e-03
-#> [3,] 0.9806723 0.009069594 1.025806e-02
-#> [4,] 0.9882999 0.011690821 9.281920e-06
-#> [5,] 0.8560721 0.129471402 1.445646e-02
-#> [6,] 0.8512719 0.144558801 4.169263e-03
+#> [1,] 0.5731143 0.335075369 9.181030e-02
+#> [2,] 0.9264966 0.072815761 6.876053e-04
+#> [3,] 0.9794873 0.009413896 1.109882e-02
+#> [4,] 0.8222122 0.119485426 5.830235e-02
+#> [5,] 0.9460485 0.053801893 1.496416e-04
+#> [6,] 0.9939105 0.006087390 2.072086e-06
 ```
 
 This code appears to be related to the application of a classification

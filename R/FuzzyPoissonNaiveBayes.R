@@ -58,25 +58,14 @@ FuzzyPoissonNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
   # Estimating class parameters
   p_data <- predata(train,cl)
   # --
-  train <-  p_data$train
+  dados <- train <-  p_data$train
   cols <- p_data$cols
-  dados <- p_data$dados
   M <- p_data$M
   intervalos <- p_data$intervalos
-  #--------------------------------------------------------
   # --------------------------------------------------------
-  # Verify data types
-  verifyNumbers <- sapply(1:cols, function(i){
-    n = 3
-    subset <- sample(dados[,i],size = n, replace = F)
-    result <- subset == floor(subset)
-    if(sum(result) == n){
-      result <- 1
-    }else{
-      result <- 0
-    }
-    return(result)
-  })
+  # --------------------------------------------------------
+  # Verify if all variables are discrete
+  verifyNumbers <- verifyNumbersFunction(dados, cols)
 
   # --------------------------------------------------------
   if(sum(verifyNumbers) != cols){ stop("All variables must be discrete values.") }
@@ -87,11 +76,9 @@ FuzzyPoissonNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
   # Estimating Parameters
   parametersC <- estimation_parameters_poi(M, cols, dados)
   # --------------------------------------------------------
-  Sturges <- Sturges(dados, M);
-  Comprim_Intervalo <- Comprim_Intervalo(dados, M, Sturges);
+  Sturges <- Sturges_discrete(dados, M);
+  Comprim_Intervalo <- Comprim_Intervalo_discrete(dados, M);
   minimos <- minimos(dados, M, cols);
-  #Freq <- Freq(dados, M, Comprim_Intervalo, Sturges, minimos, cols);
-  #Pertinencia <- Pertinencia(Freq, dados, M);
   MinimosDataFrame <- minomosdt_function(minimos, M, Comprim_Intervalo, Sturges, cols)
   Frequencia <- Freq_esparsa(dados = dados,M = M, minomosdt = MinimosDataFrame, cols = cols)
   Pertinencia <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)

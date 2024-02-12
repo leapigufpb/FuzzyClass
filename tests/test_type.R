@@ -24,6 +24,12 @@ test_that("Test for FuzzyBinomialNaiveBayes", {
   expect_equal(TRUE, is.factor(pred))
 })
 
+test_that("Test for FuzzyBinomialNaiveBayes - one column", {
+  fit <- FuzzyBinomialNaiveBayes(train = round(iris[,1]), cl = iris[,5])
+  pred <- predict(fit,round(iris[,1]))
+  expect_equal(TRUE, is.factor(pred))
+})
+
 # Test for FuzzyExponentialNaiveBayes
 test_that("Test for FuzzyExponentialNaiveBayes", {
   fit <- FuzzyExponentialNaiveBayes(train = iris[,-5], cl = iris[,5])
@@ -56,6 +62,12 @@ test_that("Test for FuzzyNaiveBayes", {
 test_that("Test for FuzzyPoissonNaiveBayes", {
   fit <- FuzzyPoissonNaiveBayes(train = round(iris[,-5]), cl = iris[,5])
   pred <- predict(fit,round(iris[,-5]))
+  expect_equal(TRUE, is.factor(pred))
+})
+
+test_that("Test for FuzzyPoissonNaiveBayes - one column", {
+  fit <- FuzzyPoissonNaiveBayes(train = round(iris[,1]), cl = iris[,5])
+  pred <- predict(fit,round(iris[,1]))
   expect_equal(TRUE, is.factor(pred))
 })
 

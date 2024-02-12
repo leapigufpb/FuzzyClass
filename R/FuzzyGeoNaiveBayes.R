@@ -56,28 +56,14 @@ FuzzyGeoNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
   # Estimating class parameters
   p_data <- predata(train,cl)
   # --
-  train <-  p_data$train
+  dados <- train <-  p_data$train
   cols <- p_data$cols
-  dados <- p_data$dados
   M <- p_data$M
   intervalos <- p_data$intervalos
-  #--------------------------------------------------------
-
-
-  #------------------------------------------------------------
-  # Verify data types
-  verifyNumbers <- sapply(1:cols, function(i){
-    set.seed(3)
-    n = 3
-    subset <- sample(dados[,i],size = n, replace = F)
-    result <- subset == floor(subset)
-    if(sum(result) == n){
-      result <- 1
-    }else{
-      result <- 0
-    }
-    return(result)
-  })
+  # --------------------------------------------------------
+  # --------------------------------------------------------
+  # Verify if all variables are discrete
+  verifyNumbers <- verifyNumbersFunction(dados, cols)
 
   # --------------------------------------------------------
   if(sum(verifyNumbers) != cols){ stop("All variables must be discrete values.") }

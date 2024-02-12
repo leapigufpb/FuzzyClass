@@ -24,7 +24,6 @@ Useful links:
 Other contributors:
 \itemize{
   \item Ronei Moraes \email{ronei@de.ufpb.br} (\href{https://orcid.org/0000-0001-8436-8950}{ORCID}) [contributor]
-  \item Arthur Ricardo \email{arthur.ricardo17@gmail.com} [contributor]
 }
 
 }

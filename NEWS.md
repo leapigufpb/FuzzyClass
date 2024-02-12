@@ -1,8 +1,12 @@
 # FuzzyClass (development version)
 
-# FuzzyClass 0.1.5.900
+# FuzzyClass 0.1.6
 
 - Add the "Fuzzy Rule-based System" with some functions
+- Fix: `FuzzyNaiveBayes` to one column in the data
+- Fix: Search "Pertinence" to one column in the data
+- Fix: "Frequency" to discrete distributions
+
 
 # FuzzyClass 0.1.5
 

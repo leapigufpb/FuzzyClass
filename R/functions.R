@@ -1,4 +1,19 @@
 
+# Verify data types
+#' @noRd
+verifyNumbersFunction <- function(dados, cols){
+
+  resul <- sapply(1:cols, function(i){
+    n = 3
+    subset <- sample(dados[,i],size = n, replace = F)
+    result <- ceiling(subset) == floor(subset) # check if the variable is discrete
+    resulsum <- ifelse(sum(result) == n, 1, 0)
+    return(resulsum)
+  })
+
+  return(resul)
+}
+
 # Verify Columns
 #' @noRd
 verifyColumns <- function(dados){
@@ -14,7 +29,7 @@ verifyColumns <- function(dados){
 #' @noRd
 predata <- function(dados,cl){
   train <- as.data.frame(dados)
-  cols <- verifyColumns(dados)
+  cols <- verifyColumns(train)
   M <- c(unlist(cl)) # true classes
   M <- factor(M, labels = sort(unique(M)))
   intervalos <- 10 # Division to memberships
@@ -49,6 +64,21 @@ Sturges <- function(dados, M) {
   return(Output)
 }
 
+#' @noRd
+Sturges_discrete <- function(dados, M) {
+
+  Output <- lapply(1:length(unique(M)), function(i) {
+    SubSet <- dados[M == unique(M)[i], 1]
+    if(ncol(dados) == 1){
+      return((length(unique(SubSet))))
+    }else{
+      return((length(unique(SubSet))))
+    }
+
+  })
+
+  return(Output)
+}
 
 #---- Range Length ----#
 
@@ -62,6 +92,15 @@ Comprim_Intervalo <- function(dados, M, Sturges) {
     }else{
       comp <- (apply(SubSet, 2, max) - apply(SubSet, 2, min)) / Sturges[[i]]
     }
+  })
+
+  return(Output)
+}
+
+#' @noRd
+Comprim_Intervalo_discrete <- function(dados,M){
+  Output <- lapply(1:length(unique(M)),function(i){
+    rep(1,ncol(dados))
   })
 
   return(Output)
@@ -157,6 +196,12 @@ Intervalos_Valores <- function(dados, M, Comprim_Intervalo, Sturges, minimos, co
   for (classe in 1:length(unique(M))) {
     # --
     SubSet <- dados[M == unique(M)[classe], ]
+    #train <- as.data.frame(train)
+    cols <- ncol(SubSet) # Number of variables
+    if(is.null(cols)){
+      cols <- 1
+      SubSet <- as.data.frame(SubSet)
+    }
     # --
     for (coluna in 1:cols) { # class column
       for (linhaClasse in 1:nrow(SubSet)) { # class row
@@ -515,7 +560,6 @@ pertinencia_predict_esparsa <- function(minomosdt, x, Pert_joda, cols,i){
       return(0)
     }
 
-
   }),silent = T)
 
   if(any(0 %in% vetor)){
@@ -523,8 +567,13 @@ pertinencia_predict_esparsa <- function(minomosdt, x, Pert_joda, cols,i){
     return(Pertinencia_r)
   }else{
     Perts <- Pert_joda[[i]]
-    posicao <- which(apply(Perts[,-(cols+1)], 1, function(row) all(row == vetor)))
-
+    if(cols ==1){
+      # Search for the position of the pertinence in vector
+      posicao <- which(Perts[,-(cols+1)] == vetor)
+    }else{
+      # Search for the position of the pertinence in sparse matrix
+      posicao <- which(apply(Perts[,-(cols+1)], 1, function(row) all(row == vetor)))
+    }
     if(length(posicao) == 0){
       Pertinencia_r <- 2.2e-16
       return(Pertinencia_r)
