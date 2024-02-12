@@ -46,15 +46,15 @@
     These data have been taken from the UCI Repository Of Machine Learning
     Databases at
     \itemize{
-      \item \url{https://archive.ics.uci.edu/ml/machine-learning-databases/}
-      \item \url{http://www.ics.uci.edu/~mlearn/MLRepository.html}
+      \item \url{https://archive.ics.uci.edu/datasets}
+      \item \url{https://archive.ics.uci.edu/datasets}
     }
     and were converted to R format by Friedrich Leisch.
 }
 \references{
   Newman, D.J. & Hettich, S. & Blake, C.L. & Merz, C.J. (1998).
   UCI Repository of machine learning databases
-  [http://www.ics.uci.edu/~mlearn/MLRepository.html]. Irvine, CA:
+  [https://archive.ics.uci.edu/datasets]. Irvine, CA:
   University of California, Department of Information and Computer
   Science.
 }

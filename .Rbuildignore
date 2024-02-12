@@ -12,3 +12,4 @@
 ^.github/$
 .github/
 cran-comments.md
+^\.github$

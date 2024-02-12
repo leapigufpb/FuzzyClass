@@ -4,7 +4,7 @@
 
 - Add the "Fuzzy Rule-based System" with some functions
 - Fix: `FuzzyNaiveBayes` to one column in the data
-- Fix: Search "Pertinence" to one column in the data
+- Fix: "membership" to dataframe with one column in the data
 - Fix: "Frequency" to discrete distributions
 
 

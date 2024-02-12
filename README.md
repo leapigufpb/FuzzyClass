@@ -7,6 +7,7 @@
 version](https://www.r-pkg.org/badges/version/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
 [![CRAN
 Download](https://cranlogs.r-pkg.org/badges/grand-total/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
+[![codecov](https://codecov.io/gh/leapigufpb/FuzzyClass/graph/badge.svg?token=WYX13RYCPS)](https://codecov.io/gh/leapigufpb/FuzzyClass)
 <!-- badges: end -->
 
 Last update: 12-02-2024
@@ -30,7 +31,7 @@ problems.
 
 > A package manual that showcases the existing classifiers and
 > demonstrates how to use it can be found at the following link:
-> <https://cran.r-project.org/web/packages/FuzzyClass/FuzzyClass.pdf>
+> <https://cran.r-project.org/package=FuzzyClass/FuzzyClass.pdf>
 
 ### Dependencies
 
@@ -126,13 +127,13 @@ Table <- table(factor(Test[,4]), saida)
 Table
 #>    saida
 #>      1  2  3
-#>   1 54  5  0
-#>   2  4 48  8
-#>   3  1 15 45
+#>   1 41  7  1
+#>   2  3 43 19
+#>   3  0 14 52
 
 #Accuracy:
 sum(diag(Table))/sum(Table)
-#> [1] 0.8166667
+#> [1] 0.7555556
 
 saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
 ```
@@ -144,17 +145,17 @@ Additionally, you can visualize the results:
 # head view
 
 saida |> head()
-#> [1] 1 1 1 1 1 1
+#> [1] 1 2 1 1 1 2
 #> Levels: 1 2 3
 
 saidaMatrix |> head()
 #>              1           2            3
-#> [1,] 0.5731143 0.335075369 9.181030e-02
-#> [2,] 0.9264966 0.072815761 6.876053e-04
-#> [3,] 0.9794873 0.009413896 1.109882e-02
-#> [4,] 0.8222122 0.119485426 5.830235e-02
-#> [5,] 0.9460485 0.053801893 1.496416e-04
-#> [6,] 0.9939105 0.006087390 2.072086e-06
+#> [1,] 0.8788668 0.065932294 5.520088e-02
+#> [2,] 0.4217535 0.483928543 9.431796e-02
+#> [3,] 0.9818805 0.018104349 1.519404e-05
+#> [4,] 0.9910442 0.008947779 8.042588e-06
+#> [5,] 0.9874525 0.012542516 4.961851e-06
+#> [6,] 0.4972741 0.502176710 5.491937e-04
 ```
 
 This code appears to be related to the application of a classification
