@@ -1,5 +1,5 @@
 
-# FuzzyClass <img src="man/figures/logo.png" style="float: right" height="139"/>
+# FuzzyClass <img src="man/figures/logo.png" height="139" style="float: right;max-width: 100%;">
 
 <!-- badges: start -->
 
