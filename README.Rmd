@@ -16,8 +16,7 @@ knitr::opts_chunk$set(
 
 [![CRAN version](https://www.r-pkg.org/badges/version/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
 [![CRAN Download](https://cranlogs.r-pkg.org/badges/grand-total/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
-[![R-CMD-check](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml)
-[![codecov](https://codecov.io/gh/leapigufpb/FuzzyClass/graph/badge.svg?token=WYX13RYCPS)](https://codecov.io/gh/leapigufpb/FuzzyClass)
+<!--[![R-CMD-check](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml)-->
 <!-- badges: end -->
 
 

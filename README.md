@@ -1,6 +1,5 @@
 
-# FuzzyClass
-<img src="man/figures/logo.png" height="139" style="float: right;max-width: 100%;">
+# FuzzyClass <img src="man/figures/logo.png" style="float: right" height="139"/>
 
 <!-- badges: start -->
 
@@ -8,11 +7,10 @@
 version](https://www.r-pkg.org/badges/version/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
 [![CRAN
 Download](https://cranlogs.r-pkg.org/badges/grand-total/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
-[![R-CMD-check](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml)
-[![codecov](https://codecov.io/gh/leapigufpb/FuzzyClass/graph/badge.svg?token=WYX13RYCPS)](https://codecov.io/gh/leapigufpb/FuzzyClass)
+<!--[![R-CMD-check](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml)-->
 <!-- badges: end -->
 
-Last update: 12-02-2024
+Last update: 14-02-2024
 
 ## A family of probabilities-based classifiers fuzzy and non-fuzzy
 
@@ -129,13 +127,13 @@ Table <- table(factor(Test[,4]), saida)
 Table
 #>    saida
 #>      1  2  3
-#>   1 49  5  0
-#>   2  6 43 19
-#>   3  0  7 51
+#>   1 50  5  2
+#>   2  6 42 15
+#>   3  0 11 49
 
 #Accuracy:
 sum(diag(Table))/sum(Table)
-#> [1] 0.7944444
+#> [1] 0.7833333
 
 saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
 ```
@@ -152,12 +150,12 @@ saida |> head()
 
 saidaMatrix |> head()
 #>              1           2            3
-#> [1,] 0.9856906 0.004793421 9.516022e-03
-#> [2,] 0.9640732 0.007472894 2.845392e-02
-#> [3,] 0.6117055 0.361367859 2.692668e-02
-#> [4,] 0.7953909 0.189952725 1.465637e-02
-#> [5,] 0.8217613 0.173156157 5.082529e-03
-#> [6,] 0.9878197 0.012157722 2.257695e-05
+#> [1,] 0.9989435 0.001056437 9.262171e-08
+#> [2,] 0.9939728 0.006011989 1.523144e-05
+#> [3,] 0.8213097 0.116368282 6.232206e-02
+#> [4,] 0.9946096 0.005386036 4.371040e-06
+#> [5,] 0.8684685 0.069905455 6.162602e-02
+#> [6,] 0.8015720 0.145765858 5.266218e-02
 ```
 
 This code appears to be related to the application of a classification

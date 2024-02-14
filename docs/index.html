@@ -83,7 +83,7 @@
 </div>
 <!-- badges: start -->
 
-<p>Last update: 12-02-2024</p>
+<p>Last update: 14-02-2024</p>
 <div class="section level2">
 <h2 id="a-family-of-probabilities-based-classifiers-fuzzy-and-non-fuzzy">A family of probabilities-based classifiers fuzzy and non-fuzzy<a class="anchor" aria-label="anchor" href="#a-family-of-probabilities-based-classifiers-fuzzy-and-non-fuzzy"></a>
 </h2>
@@ -178,13 +178,13 @@
 <span><span class="va">Table</span></span>
 <span><span class="co">#&gt;    saida</span></span>
 <span><span class="co">#&gt;      1  2  3</span></span>
-<span><span class="co">#&gt;   1 55  8  0</span></span>
-<span><span class="co">#&gt;   2  5 37 15</span></span>
-<span><span class="co">#&gt;   3  0 12 48</span></span>
+<span><span class="co">#&gt;   1 50  5  2</span></span>
+<span><span class="co">#&gt;   2  6 42 15</span></span>
+<span><span class="co">#&gt;   3  0 11 49</span></span>
 <span></span>
 <span><span class="co">#Accuracy:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">Table</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Table</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.7777778</span></span>
+<span><span class="co">#&gt; [1] 0.7833333</span></span>
 <span></span>
 <span><span class="va">saidaMatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_FGNB</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"matrix"</span><span class="op">)</span></span></code></pre></div>
 <p>Additionally, you can visualize the results:</p>
@@ -193,17 +193,17 @@
 <span><span class="co"># head view</span></span>
 <span></span>
 <span><span class="va">saida</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1 1 1 1 1 2</span></span>
+<span><span class="co">#&gt; [1] 1 1 1 1 1 1</span></span>
 <span><span class="co">#&gt; Levels: 1 2 3</span></span>
 <span></span>
 <span><span class="va">saidaMatrix</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              1           2            3</span></span>
-<span><span class="co">#&gt; [1,] 0.5196406 0.358530117 1.218292e-01</span></span>
-<span><span class="co">#&gt; [2,] 0.9938048 0.006187120 8.114985e-06</span></span>
-<span><span class="co">#&gt; [3,] 0.8180408 0.113152398 6.880676e-02</span></span>
-<span><span class="co">#&gt; [4,] 0.9393580 0.060364501 2.775356e-04</span></span>
-<span><span class="co">#&gt; [5,] 0.9905908 0.009398872 1.034470e-05</span></span>
-<span><span class="co">#&gt; [6,] 0.4666445 0.496515942 3.683955e-02</span></span></code></pre></div>
+<span><span class="co">#&gt; [1,] 0.9989435 0.001056437 9.262171e-08</span></span>
+<span><span class="co">#&gt; [2,] 0.9939728 0.006011989 1.523144e-05</span></span>
+<span><span class="co">#&gt; [3,] 0.8213097 0.116368282 6.232206e-02</span></span>
+<span><span class="co">#&gt; [4,] 0.9946096 0.005386036 4.371040e-06</span></span>
+<span><span class="co">#&gt; [5,] 0.8684685 0.069905455 6.162602e-02</span></span>
+<span><span class="co">#&gt; [6,] 0.8015720 0.145765858 5.266218e-02</span></span></code></pre></div>
 <p>This code appears to be related to the application of a classification algorithm called “Fuzzy Gaussian Naive Bayes with Fuzzy Parameters.” An analysis of the steps present in the code:</p>
 <ol style="list-style-type: decimal">
 <li>
