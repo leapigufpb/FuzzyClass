@@ -1,0 +1,147 @@
+---
+title: "Using FuzzyClass: Solving a Classification Problem"
+author: "Jodavid Ferreira"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{FuzzyClassSolvingProblem}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this vignette, we will explore how to utilize the `FuzzyClass` package to solve a classification problem. The problem at hand involves classifying different types of iris flowers based on their petal and sepal characteristics. The `iris` dataset, commonly available in R, will be used for this purpose.
+
+
+## Exploratory Data Analysis of the Iris Dataset
+
+In this vignette, we will perform an exploratory data analysis (EDA) of the classic `iris` dataset. This dataset consists of measurements of sepal length, sepal width, petal length, and petal width for three species of iris flowers. We will use various visualizations and summary statistics to gain insights into the data.
+
+### Loading the Data
+
+Let's start by loading the `iris` dataset and examining its structure:
+
+```{r}
+# Load the iris dataset
+data(iris)
+
+# Display the structure of the dataset
+str(iris)
+```
+
+The output provides a summary of the dataset's structure:
+
+- The dataset is a data.frame with 150 observations (rows) and 5 variables (columns).
+- Each variable is listed with its name and data type (num for numeric and Factor for categorical).
+- For numeric variables (Sepal.Length, Sepal.Width, Petal.Length, Petal.Width), summary statistics like the mean, median, and quartiles might be shown.
+- The Species variable is a categorical factor with 3 levels: "setosa", "versicolor", and "virginica".
+- This summary gives an overview of the dataset's dimensions, variable types, and some basic statistics, helping users understand the dataset's content before diving into further analysis.
+
+### Summary Statistics
+
+Next, let's calculate summary statistics for each species:
+
+```{r}
+# Calculate summary statistics by species
+summary_by_species <- by(iris[, -5], iris$Species, summary)
+summary_by_species
+
+```
+
+The output provides summary statistics for each numeric attribute within each species of iris flowers. For each species, statistics such as minimum, maximum, mean, median, and quartiles are presented for each attribute. This information gives insight into the distribution and variation of attributes across different species, aiding in understanding the characteristics of each iris species.
+
+### Data Visualization
+
+#### Sepal Length vs. Sepal Width
+
+We'll create a scatter plot to visualize the relationship between sepal length and sepal width:
+
+```{r}
+# Scatter plot of sepal length vs. sepal width
+plot(iris$Sepal.Length, iris$Sepal.Width, col = iris$Species, pch = 19,
+     xlab = "Sepal Length", ylab = "Sepal Width", main = "Sepal Length vs. Sepal Width")
+legend("topright", legend = levels(iris$Species), col = 1:3, pch = 19)
+
+```
+
+#### Petal Length vs. Petal Width
+
+Similarly, let's visualize the relationship between petal length and petal width:
+
+```{r}
+# Scatter plot of petal length vs. petal width
+plot(iris$Petal.Length, iris$Petal.Width, col = iris$Species, pch = 19,
+     xlab = "Petal Length", ylab = "Petal Width", main = "Petal Length vs. Petal Width")
+legend("topright", legend = levels(iris$Species), col = 1:3, pch = 19)
+
+```
+
+
+
+
+
+---
+
+## The Classification Problem
+
+The classification problem revolves around categorizing iris flowers into three species: setosa, versicolor, and virginica. These species are defined based on their physical attributes, specifically the length and width of their petals and sepals. Our goal is to create a classifier that can predict the species of an iris flower given its petal and sepal measurements.
+
+## Solving the Problem with FuzzyClass
+
+To solve this classification problem, we will use the `FuzzyClass` package, which offers tools for building probabilistic classifiers. The package leverages fuzzy logic to handle uncertainties and variations in the data.
+
+Let's start by loading the required libraries and preparing the data:
+
+```{r, message=FALSE, warning=FALSE}
+library(FuzzyClass)
+
+# Load the iris dataset
+data(iris)
+
+# Splitting the dataset into training and testing sets
+set.seed(123)
+train_index <- sample(nrow(iris), nrow(iris) * 0.7)
+train_data <- iris[train_index, ]
+test_data <- iris[-train_index, ]
+
+```
+
+Next, we will use the Fuzzy Gaussian Naive Bayes algorithm to build the classifier:
+
+```{r}
+
+# Build the Fuzzy Gaussian Naive Bayes classifier
+fit_FGNB <- GauNBFuzzyParam(train = train_data[, -5],
+                            cl = train_data[, 5], metd = 2, cores = 1)
+
+
+```
+
+Now that the classifier is trained, we can evaluate its performance on the testing data:
+
+
+```{r}
+
+# Make predictions on the testing data
+predictions <- predict(fit_FGNB, test_data[, -5])
+
+head(predictions)
+
+# Calculate the accuracy
+correct_predictions <- sum(predictions == test_data[, 5])
+total_predictions <- nrow(test_data)
+accuracy <- correct_predictions / total_predictions
+
+accuracy
+
+```
+
+The resulting accuracy gives us an indication of how well our classifier performs on unseen data.
+
+In conclusion, the `FuzzyClass` package provides a powerful toolset for solving classification problems with fuzzy logic. By leveraging probabilistic classifiers like the Fuzzy Gaussian Naive Bayes, we can effectively handle uncertainties and make accurate predictions based on intricate data patterns.
