@@ -1,5 +1,11 @@
 # FuzzyClass (development version)
 
+# FuzzyClass 0.1.7
+
+- Add the "Fuzzy Hipergeometric Naive Bayes classifier" as `FuzzyHipergeometricNaiveBayes`
+- Add the "Double Weighted Fuzzy Hipergeometric Naive Bayes classifier" as `DWFuzzyHipergeometricNaiveBayes`
+- Fix: memberships functions. Now they work correctly with dataframes 
+
 # FuzzyClass 0.1.6
 
 - Add the "Fuzzy Rule-based System" with some functions

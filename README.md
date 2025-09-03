@@ -1,4 +1,3 @@
-
 # FuzzyClass <img src="man/figures/logo.png" style="float: right" height="139"/>
 
 <!-- badges: start -->
@@ -10,7 +9,7 @@ Download](https://cranlogs.r-pkg.org/badges/grand-total/FuzzyClass)](https://cra
 <!--[![R-CMD-check](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml)-->
 <!-- badges: end -->
 
-Last update: 14-02-2024
+Last update: 03-09-2025
 
 ## A family of probabilities-based classifiers fuzzy and non-fuzzy
 
@@ -39,36 +38,32 @@ Below is the list of packages on which `FuzzyClass` depends. However,
 during its installation, `FuzzyClass` automatically installs the
 dependencies:
 
-- [caTools](https://cran.r-project.org/package=caTools)
-- [doParallel](https://cran.r-project.org/package=doParallel)
-- [e1071](https://cran.r-project.org/package=e1071)
-- [EnvStats](https://cran.r-project.org/package=EnvStats)
-- [foreach](https://cran.r-project.org/package=foreach)
-- [MASS](https://cran.r-project.org/package=MASS)
-- [maxLik](https://cran.r-project.org/package=maxLik)
-- [mvtnorm](https://cran.r-project.org/package=mvtnorm)
-- [purrr](https://cran.r-project.org/package=purrr)
-- [dplyr](https://cran.r-project.org/package=dplyr)
-- [Rdpack](https://cran.r-project.org/package=Rdpack)
-- [rootSolve](https://cran.r-project.org/package=rootSolve)
+-   [caTools](https://cran.r-project.org/package=caTools)
+-   [doParallel](https://cran.r-project.org/package=doParallel)
+-   [e1071](https://cran.r-project.org/package=e1071)
+-   [EnvStats](https://cran.r-project.org/package=EnvStats)
+-   [foreach](https://cran.r-project.org/package=foreach)
+-   [MASS](https://cran.r-project.org/package=MASS)
+-   [maxLik](https://cran.r-project.org/package=maxLik)
+-   [mvtnorm](https://cran.r-project.org/package=mvtnorm)
+-   [purrr](https://cran.r-project.org/package=purrr)
+-   [dplyr](https://cran.r-project.org/package=dplyr)
+-   [Rdpack](https://cran.r-project.org/package=Rdpack)
+-   [rootSolve](https://cran.r-project.org/package=rootSolve)
 
 ### Installation
 
-``` r
-# Installation
-install.packages("devtools")
-devtools::install_github("leapigufpb/FuzzyClass")
-```
+    # Installation
+    install.packages("devtools")
+    devtools::install_github("leapigufpb/FuzzyClass")
 
 ### Usage
 
 Once installed, you can load the `FuzzyClass` package into your R
 session:
 
-``` r
-# Package import
-library(FuzzyClass)
-```
+    # Package import
+    library(FuzzyClass)
 
 <img src="man/figures/FuzzyClass_instalation.png"  height="700"/>
 
@@ -77,108 +72,103 @@ library(FuzzyClass)
 To demonstrate the usage of `FuzzyClass`, let’s look at reading and
 preparing data:
 
-``` r
 
-library(FuzzyClass)
+    library(FuzzyClass)
 
-#' ---------------------------------------------
-#' The following shows how the functions are used:
-#' --------------
-#' Reading a database:
-#'
-#' Actual training data:
-data(VirtualRealityData)
+    #' ---------------------------------------------
+    #' The following shows how the functions are used:
+    #' --------------
+    #' Reading a database:
+    #'
+    #' Actual training data:
+    data(VirtualRealityData)
 
-VirtualRealityData <- as.data.frame(VirtualRealityData)
+    VirtualRealityData <- as.data.frame(VirtualRealityData)
 
-# Splitting into Training and Testing
-split <- caTools::sample.split(t(VirtualRealityData[,1]), SplitRatio = 0.7)
-Train <- subset(VirtualRealityData, split == "TRUE")
-Test <- subset(VirtualRealityData, split == "FALSE")
-# ----------------
+    # Splitting into Training and Testing
+    split <- caTools::sample.split(t(VirtualRealityData[,1]), SplitRatio = 0.7)
+    Train <- subset(VirtualRealityData, split == "TRUE")
+    Test <- subset(VirtualRealityData, split == "FALSE")
+    # ----------------
 
-test = Test[,-4]
-```
+    test = Test[,-4]
 
 #### Fuzzy Gaussian Naive Bayes with Fuzzy Parameters
 
 Let’s delve into the example of using the `Fuzzy Gaussian Naive Bayes`
 algorithm with fuzzy parameters:
 
-``` r
-# --------------------------------------------------
-# Fuzzy Gaussian Naive Bayes with Fuzzy Parameters
+    # --------------------------------------------------
+    # Fuzzy Gaussian Naive Bayes with Fuzzy Parameters
 
 
-fit_FGNB <- GauNBFuzzyParam(train =  Train[,-4],
-                                    cl = Train[,4], metd = 2, cores = 1)
+    fit_FGNB <- GauNBFuzzyParam(train =  Train[,-4],
+                                        cl = Train[,4], metd = 2, cores = 1)
 
 
-print(fit_FGNB)
-#> 
-#> Fuzzy Gaussian Naive Bayes Classifier for Discrete Predictors
-#> 
-#> Variables:
-#> [1] "V1" "V2" "V3"
-#> Class:
-#> [1] "1" "2" "3"
-saida <- predict(fit_FGNB, test)
-Table <- table(factor(Test[,4]), saida)
-Table
-#>    saida
-#>      1  2  3
-#>   1 50  5  2
-#>   2  6 42 15
-#>   3  0 11 49
+    print(fit_FGNB)
+    #> 
+    #> Fuzzy Gaussian Naive Bayes Classifier for Discrete Predictors
+    #> 
+    #> Variables:
+    #> [1] "V1" "V2" "V3"
+    #> Class:
+    #> [1] "1" "2" "3"
+    saida <- predict(fit_FGNB, test)
+    Table <- table(factor(Test[,4]), saida)
+    Table
+    #>    saida
+    #>      1  2  3
+    #>   1 44  3  1
+    #>   2 10 42 13
+    #>   3  1 15 51
 
-#Accuracy:
-sum(diag(Table))/sum(Table)
-#> [1] 0.7833333
+    #Accuracy:
+    sum(diag(Table))/sum(Table)
+    #> [1] 0.7611111
 
-saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
-```
+    saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
 
 Additionally, you can visualize the results:
 
-``` r
-# --------------------------------------------------
-# head view
+    # --------------------------------------------------
+    # head view
 
-saida |> head()
-#> [1] 1 1 1 1 1 1
-#> Levels: 1 2 3
+    saida |> head()
+    #> [1] 1 1 1 1 1 1
+    #> Levels: 1 2 3
 
-saidaMatrix |> head()
-#>              1           2            3
-#> [1,] 0.9989435 0.001056437 9.262171e-08
-#> [2,] 0.9939728 0.006011989 1.523144e-05
-#> [3,] 0.8213097 0.116368282 6.232206e-02
-#> [4,] 0.9946096 0.005386036 4.371040e-06
-#> [5,] 0.8684685 0.069905455 6.162602e-02
-#> [6,] 0.8015720 0.145765858 5.266218e-02
-```
+    saidaMatrix |> head()
+    #>              1           2            3
+    #> [1,] 0.9262471 0.072931518 8.214228e-04
+    #> [2,] 0.9491720 0.050617799 2.101942e-04
+    #> [3,] 0.9955184 0.004477542 4.036002e-06
+    #> [4,] 0.9971080 0.002889240 2.786242e-06
+    #> [5,] 0.9617581 0.010201873 2.804005e-02
+    #> [6,] 0.8794633 0.108092655 1.244401e-02
 
 This code appears to be related to the application of a classification
 algorithm called “Fuzzy Gaussian Naive Bayes with Fuzzy Parameters.” An
 analysis of the steps present in the code:
 
 1.  **Model Training** (`fit_FGNB`):
-    - A Fuzzy Gaussian Naive Bayes model is being fitted to the training
-      data.
-    - The training set consists of attributes (`Train[,-4]`) and classes
-      (`Train[,4]`), where the categorical response variable or label is
-      in column 4.
+    -   A Fuzzy Gaussian Naive Bayes model is being fitted to the
+        training data.
+    -   The training set consists of attributes (`Train[,-4]`) and
+        classes (`Train[,4]`), where the categorical response variable
+        or label is in column 4.
 2.  **Prediction and Confusion Matrix Creation**:
-    - The `predict` function is used to make predictions based on the
-      fitted model using the test set (`test`).
-    - A confusion matrix (`Table`) is created using the `table`
-      function. The confusion matrix compares the actual (expected)
-      classes with the classes predicted by the model.
+    -   The `predict` function is used to make predictions based on the
+        fitted model using the test set (`test`).
+    -   A confusion matrix (`Table`) is created using the `table`
+        function. The confusion matrix compares the actual (expected)
+        classes with the classes predicted by the model.
 3.  **Accuracy Calculation**:
-    - The accuracy of the model is calculated by dividing the sum of the
-      diagonal values of the confusion matrix (true positives and true
-      negatives) by the total sum of the confusion matrix. This provides
-      a measure of how well the model is performing predictions.
+    -   The accuracy of the model is calculated by dividing the sum of
+        the diagonal values of the confusion matrix (true positives and
+        true negatives) by the total sum of the confusion matrix. This
+        provides a measure of how well the model is performing
+        predictions.
 
 Overall, this code performs the training of a Fuzzy Gaussian Naive Bayes
 model with fuzzy parameters, makes predictions using the test set,
@@ -214,14 +204,14 @@ steps:
 
 #### Here are some additional tips for contributing to FuzzyClass:
 
-- Please use descriptive commit messages that explain what your changes
-  do.
-- If you are making a large or complex change, please consider creating
-  an issue in the `FuzzyClass` repository first to discuss your plans
-  with the maintainers.
-- Please be patient while your pull request is reviewed. The maintainers
-  may be busy with other things, but they will get to your pull request
-  as soon as they can.
+-   Please use descriptive commit messages that explain what your
+    changes do.
+-   If you are making a large or complex change, please consider
+    creating an issue in the `FuzzyClass` repository first to discuss
+    your plans with the maintainers.
+-   Please be patient while your pull request is reviewed. The
+    maintainers may be busy with other things, but they will get to your
+    pull request as soon as they can.
 
 #### Thank you for your interest in contributing to FuzzyClass!
 
@@ -248,13 +238,13 @@ new release of `FuzzyClass` will be made available.
 
 Here are some additional tips for reporting issues to FuzzyClass:
 
-- Please be as specific as possible when describing the bug.
-- If you can, try to reproduce the bug on a clean installation of R.
-- Include the output of sessionInfo() when reporting a bug. This will
-  help the maintainers to diagnose the problem.
-- Please be patient while your issue is being reviewed. The maintainers
-  may be busy with other things, but they will get to your issue as soon
-  as they can.
+-   Please be as specific as possible when describing the bug.
+-   If you can, try to reproduce the bug on a clean installation of R.
+-   Include the output of sessionInfo() when reporting a bug. This will
+    help the maintainers to diagnose the problem.
+-   Please be patient while your issue is being reviewed. The
+    maintainers may be busy with other things, but they will get to your
+    issue as soon as they can.
 
 ##### Thank you for your help in making FuzzyClass a better package
 

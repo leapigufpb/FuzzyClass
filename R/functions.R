@@ -1,3 +1,4 @@
+`%>%` <- magrittr::`%>%`
 
 # Verify data types
 #' @noRd
@@ -483,11 +484,10 @@ minomosdt_function <- function(minimos, M, Comprim_Intervalo, Sturges, cols){
 
 
 
-`%>%` <- magrittr::`%>%`
-
 # --------------------------------------------
 # Frequencia - Matriz Esparsa
 #' @noRd
+#' @importFrom rlang .data
 Freq_esparsa <- function(dados, M, minomosdt, cols){
 
   Freq_joda <- lapply(1:length(unique(M)), function(i){
@@ -501,15 +501,40 @@ Freq_esparsa <- function(dados, M, minomosdt, cols){
         max(which(as.numeric(x[j]) >= minomosdt[[i]][,j]))
       })
 
-      Frequencia <- rbind(Frequencia, c(vetor,1))
+      Frequencia <- rbind(Frequencia, c(vetor))#,i))
     }
 
     # --------------------------------------------
+    colnames(Frequencia) <- colnames(dados)
+    # Supondo que seu data.frame se chame Frequencia
     result <- Frequencia %>%
-      dplyr::group_by(Frequencia[,-(cols+1)]) %>%
-      dplyr::summarize(Freq = dplyr::n())
+      tidyr::pivot_longer(cols = dplyr::everything(),
+      names_to = "variavel", values_to = "valor") %>%
+      #dplyr::count(variavel, valor) %>%
+      #tidyr::pivot_wider(names_from = variavel, values_from = n,
+      # #values_fill = 0) %>%
+      dplyr::count(.data$variavel, .data$valor, name = "n") %>%
+      tidyr::pivot_wider(names_from = .data$variavel,
+                values_from = .data$n,
+                values_fill = 0) %>%
+      dplyr::arrange(.data$valor)
     # --------------------------------------------
-    result <- data.frame(result)
+    # Verificando se a quantidade de linhas de result é igual a minomosdt[[i]]
+    # número de linhas de minomosdt[[i]]
+    n_lin <- nrow(minomosdt[[i]])
+    # garantir que result tenha todas as linhas de 1 até n_lin
+    result_completo <- result %>%
+      dplyr::right_join(
+        tibble::tibble(valor = 1:n_lin),
+        by = "valor"
+      ) %>%
+      dplyr::arrange(.data$valor) #%>%
+      #base::replace(base::is.na(.), 0)
+      # substituir NA por 0 sem usar o pronome `.`
+      result_completo[is.na(result_completo)] <- 0
+    # --------------------------------------------
+    result_completo <- result_completo[,-1]
+    result <- data.frame(result_completo)
     return(result)
   })
   # --------------------------------------------
@@ -538,7 +563,9 @@ Pertinencia_esparsa <- function(M, Freq_joda, cols){
   # --------------------------------------------
   Pert_joda <- lapply(1:length(unique(M)), function(i){
     result <- Freq_joda[[i]]
-    result[,(cols+1)] <- Freq_joda[[i]][,(cols+1)]/sum(Freq_joda[[i]][,(cols+1)])
+    for (j in 1:cols){
+      result[,j] <- Freq_joda[[i]][,j]/sum(Freq_joda[[i]][,j])
+    }
     return(result)
   })
   # --------------------------------------------

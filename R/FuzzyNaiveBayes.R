@@ -245,6 +245,7 @@ FuzzyNaiveBayes.categorical <- function(train, cl, fuzzy = T, m = NULL, Pi = NUL
 # -------------------------
 
 # -------------------------
+#' @export
 FuzzyNaiveBayes.continuo <- function(train, cl, fuzzy = T, m = NULL, Pi = NULL) {
 
   # --------------------------------------------------------
