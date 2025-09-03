@@ -1,93 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>/articles/FuzzyClass.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/DWFuzzyGammaNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ExpNBFuzzyParam.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyBayesRule.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyBetaNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyBinomialNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyClass-package.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyExponentialNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyGammaNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyGaussianNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyGeoNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyPoissonNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyTrapezoidalNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FuzzyTriangularNaiveBayes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/GamWeightData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/GauNBFuzzyParam.html</loc>
-  </url>
-  <url>
-    <loc>/reference/HouseVotes84.html</loc>
-  </url>
-  <url>
-    <loc>/reference/PoiNBFuzzyParam.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SimulatedData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/VirtualRealityData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/hidden_functions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/LICENSE.html</loc></url>
+<url><loc>/articles/FuzzyClass.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/DWFuzzyGammaNaiveBayes.html</loc></url>
+<url><loc>/reference/DWFuzzyHipergeometricNaiveBayes.html</loc></url>
+<url><loc>/reference/ExpNBFuzzyParam.html</loc></url>
+<url><loc>/reference/FuzzyBayesRule.html</loc></url>
+<url><loc>/reference/FuzzyBetaNaiveBayes.html</loc></url>
+<url><loc>/reference/FuzzyBinomialNaiveBayes.html</loc></url>
+<url><loc>/reference/FuzzyClass-package.html</loc></url>
+<url><loc>/reference/FuzzyExponentialNaiveBayes.html</loc></url>
+<url><loc>/reference/FuzzyGammaNaiveBayes.html</loc></url>
+<url><loc>/reference/FuzzyGaussianNaiveBayes.html</loc></url>
+<url><loc>/reference/FuzzyGeoNaiveBayes.html</loc></url>
+<url><loc>/reference/FuzzyHipergeometricNaiveBayes.html</loc></url>
+<url><loc>/reference/FuzzyNaiveBayes.html</loc></url>
+<url><loc>/reference/FuzzyPoissonNaiveBayes.html</loc></url>
+<url><loc>/reference/FuzzyTrapezoidalNaiveBayes.html</loc></url>
+<url><loc>/reference/FuzzyTriangularNaiveBayes.html</loc></url>
+<url><loc>/reference/GamWeightData.html</loc></url>
+<url><loc>/reference/GauNBFuzzyParam.html</loc></url>
+<url><loc>/reference/HouseVotes84.html</loc></url>
+<url><loc>/reference/PoiNBFuzzyParam.html</loc></url>
+<url><loc>/reference/SimulatedData.html</loc></url>
+<url><loc>/reference/VirtualRealityData.html</loc></url>
+<url><loc>/reference/hidden_functions.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
 </urlset>
+

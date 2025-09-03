@@ -5,7 +5,6 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;.">
 <title>Fuzzy and Non-Fuzzy Classifiers • FuzzyClass</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -15,64 +14,49 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Fuzzy and Non-Fuzzy Classifiers">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Fuzzy and Non-Fuzzy Classifiers">
+<meta name="description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;.">
 <meta property="og:description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;.">
 <meta property="og:image" content="/logo.png">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="index.html">FuzzyClass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="articles/FuzzyClass.html">Get started</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="articles/FuzzyClass.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="articles/index.html">Using FuzzyClass: Solving a Classification Problem</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/index.html">Using FuzzyClass: Solving a Classification Problem</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/leapigufpb/FuzzyClass/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/leapigufpb/FuzzyClass/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-home">
 <div class="row">
@@ -83,7 +67,7 @@
 </div>
 <!-- badges: start -->
 
-<p>Last update: 14-02-2024</p>
+<p>Last update: 03-09-2025</p>
 <div class="section level2">
 <h2 id="a-family-of-probabilities-based-classifiers-fuzzy-and-non-fuzzy">A family of probabilities-based classifiers fuzzy and non-fuzzy<a class="anchor" aria-label="anchor" href="#a-family-of-probabilities-based-classifiers-fuzzy-and-non-fuzzy"></a>
 </h2>
@@ -113,97 +97,91 @@
 <div class="section level3">
 <h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h3>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Installation</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"leapigufpb/FuzzyClass"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Installation</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"devtools"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"leapigufpb/FuzzyClass"</span>)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h3>
 <p>Once installed, you can load the <code>FuzzyClass</code> package into your R session:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Package import</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/leapigufpb/FuzzyClass" class="external-link">FuzzyClass</a></span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Package import</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(FuzzyClass)</span></code></pre></div>
 <p><img src="reference/figures/FuzzyClass_instalation.png" height="700"></p>
 </div>
 <div class="section level3">
 <h3 id="data-reading-and-preparation">Data Reading and Preparation]<a class="anchor" aria-label="anchor" href="#data-reading-and-preparation"></a>
 </h3>
 <p>To demonstrate the usage of <code>FuzzyClass</code>, let’s look at reading and preparing data:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/leapigufpb/FuzzyClass" class="external-link">FuzzyClass</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">#' ---------------------------------------------</span></span>
-<span><span class="co">#' The following shows how the functions are used:</span></span>
-<span><span class="co">#' --------------</span></span>
-<span><span class="co">#' Reading a database:</span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' Actual training data:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">VirtualRealityData</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">VirtualRealityData</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">VirtualRealityData</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Splitting into Training and Testing</span></span>
-<span><span class="va">split</span> <span class="op">&lt;-</span> <span class="fu">caTools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/caTools/man/sample.split.html" class="external-link">sample.split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">VirtualRealityData</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span>, SplitRatio <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span>
-<span><span class="va">Train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">VirtualRealityData</span>, <span class="va">split</span> <span class="op">==</span> <span class="st">"TRUE"</span><span class="op">)</span></span>
-<span><span class="va">Test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">VirtualRealityData</span>, <span class="va">split</span> <span class="op">==</span> <span class="st">"FALSE"</span><span class="op">)</span></span>
-<span><span class="co"># ----------------</span></span>
-<span></span>
-<span><span class="va">test</span> <span class="op">=</span> <span class="va">Test</span><span class="op">[</span>,<span class="op">-</span><span class="fl">4</span><span class="op">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(FuzzyClass)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#' ---------------------------------------------</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#' The following shows how the functions are used:</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#' --------------</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#' Reading a database:</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#'</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#' Actual training data:</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">data</span>(VirtualRealityData)</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>VirtualRealityData <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(VirtualRealityData)</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co"># Splitting into Training and Testing</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>split <span class="ot">&lt;-</span> caTools<span class="sc">::</span><span class="fu">sample.split</span>(<span class="fu">t</span>(VirtualRealityData[,<span class="dv">1</span>]), <span class="at">SplitRatio =</span> <span class="fl">0.7</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>Train <span class="ot">&lt;-</span> <span class="fu">subset</span>(VirtualRealityData, split <span class="sc">==</span> <span class="st">"TRUE"</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>Test <span class="ot">&lt;-</span> <span class="fu">subset</span>(VirtualRealityData, split <span class="sc">==</span> <span class="st">"FALSE"</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co"># ----------------</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>test <span class="ot">=</span> Test[,<span class="sc">-</span><span class="dv">4</span>]</span></code></pre></div>
 <div class="section level4">
 <h4 id="fuzzy-gaussian-naive-bayes-with-fuzzy-parameters">Fuzzy Gaussian Naive Bayes with Fuzzy Parameters<a class="anchor" aria-label="anchor" href="#fuzzy-gaussian-naive-bayes-with-fuzzy-parameters"></a>
 </h4>
 <p>Let’s delve into the example of using the <code>Fuzzy Gaussian Naive Bayes</code> algorithm with fuzzy parameters:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># --------------------------------------------------</span></span>
-<span><span class="co"># Fuzzy Gaussian Naive Bayes with Fuzzy Parameters</span></span>
-<span></span>
-<span></span>
-<span><span class="va">fit_FGNB</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GauNBFuzzyParam.html">GauNBFuzzyParam</a></span><span class="op">(</span>train <span class="op">=</span>  <span class="va">Train</span><span class="op">[</span>,<span class="op">-</span><span class="fl">4</span><span class="op">]</span>,</span>
-<span>                                    cl <span class="op">=</span> <span class="va">Train</span><span class="op">[</span>,<span class="fl">4</span><span class="op">]</span>, metd <span class="op">=</span> <span class="fl">2</span>, cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_FGNB</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Fuzzy Gaussian Naive Bayes Classifier for Discrete Predictors</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Variables:</span></span>
-<span><span class="co">#&gt; [1] "V1" "V2" "V3"</span></span>
-<span><span class="co">#&gt; Class:</span></span>
-<span><span class="co">#&gt; [1] "1" "2" "3"</span></span>
-<span><span class="va">saida</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_FGNB</span>, <span class="va">test</span><span class="op">)</span></span>
-<span><span class="va">Table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">Test</span><span class="op">[</span>,<span class="fl">4</span><span class="op">]</span><span class="op">)</span>, <span class="va">saida</span><span class="op">)</span></span>
-<span><span class="va">Table</span></span>
-<span><span class="co">#&gt;    saida</span></span>
-<span><span class="co">#&gt;      1  2  3</span></span>
-<span><span class="co">#&gt;   1 50  5  2</span></span>
-<span><span class="co">#&gt;   2  6 42 15</span></span>
-<span><span class="co">#&gt;   3  0 11 49</span></span>
-<span></span>
-<span><span class="co">#Accuracy:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">Table</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Table</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.7833333</span></span>
-<span></span>
-<span><span class="va">saidaMatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_FGNB</span>, <span class="va">test</span>, type <span class="op">=</span> <span class="st">"matrix"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># --------------------------------------------------</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co"># Fuzzy Gaussian Naive Bayes with Fuzzy Parameters</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>fit_FGNB <span class="ot">&lt;-</span> <span class="fu">GauNBFuzzyParam</span>(<span class="at">train =</span>  Train[,<span class="sc">-</span><span class="dv">4</span>],</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>                                    <span class="at">cl =</span> Train[,<span class="dv">4</span>], <span class="at">metd =</span> <span class="dv">2</span>, <span class="at">cores =</span> <span class="dv">1</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">print</span>(fit_FGNB)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; Fuzzy Gaussian Naive Bayes Classifier for Discrete Predictors</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; Variables:</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; [1] "V1" "V2" "V3"</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Class:</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; [1] "1" "2" "3"</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>saida <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_FGNB, test)</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>Table <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">factor</span>(Test[,<span class="dv">4</span>]), saida)</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>Table</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt;    saida</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt;      1  2  3</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt;   1 44  3  1</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt;   2 10 42 13</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt;   3  1 15 51</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#Accuracy:</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">diag</span>(Table))<span class="sc">/</span><span class="fu">sum</span>(Table)</span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt; [1] 0.7611111</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a>saidaMatrix <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_FGNB, test, <span class="at">type =</span> <span class="st">"matrix"</span>)</span></code></pre></div>
 <p>Additionally, you can visualize the results:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># --------------------------------------------------</span></span>
-<span><span class="co"># head view</span></span>
-<span></span>
-<span><span class="va">saida</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1 1 1 1 1 1</span></span>
-<span><span class="co">#&gt; Levels: 1 2 3</span></span>
-<span></span>
-<span><span class="va">saidaMatrix</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              1           2            3</span></span>
-<span><span class="co">#&gt; [1,] 0.9989435 0.001056437 9.262171e-08</span></span>
-<span><span class="co">#&gt; [2,] 0.9939728 0.006011989 1.523144e-05</span></span>
-<span><span class="co">#&gt; [3,] 0.8213097 0.116368282 6.232206e-02</span></span>
-<span><span class="co">#&gt; [4,] 0.9946096 0.005386036 4.371040e-06</span></span>
-<span><span class="co">#&gt; [5,] 0.8684685 0.069905455 6.162602e-02</span></span>
-<span><span class="co">#&gt; [6,] 0.8015720 0.145765858 5.266218e-02</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># --------------------------------------------------</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># head view</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>saida <span class="sc">|&gt;</span> <span class="fu">head</span>()</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; [1] 1 1 1 1 1 1</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; Levels: 1 2 3</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>saidaMatrix <span class="sc">|&gt;</span> <span class="fu">head</span>()</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt;              1           2            3</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; [1,] 0.9262471 0.072931518 8.214228e-04</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; [2,] 0.9491720 0.050617799 2.101942e-04</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; [3,] 0.9955184 0.004477542 4.036002e-06</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; [4,] 0.9971080 0.002889240 2.786242e-06</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; [5,] 0.9617581 0.010201873 2.804005e-02</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; [6,] 0.8794633 0.108092655 1.244401e-02</span></span></code></pre></div>
 <p>This code appears to be related to the application of a classification algorithm called “Fuzzy Gaussian Naive Bayes with Fuzzy Parameters.” An analysis of the steps present in the code:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -339,15 +317,15 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
