@@ -13,3 +13,6 @@
 .github/
 cran-comments.md
 ^\.github$
+^\.git$
+.git/
+

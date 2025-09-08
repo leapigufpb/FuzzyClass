@@ -6,8 +6,10 @@
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
 #' @param alphacut value of the alpha-cut parameter, this value is between 0 and 1.
-#' @param metd Method of transforming the triangle into scalar, It is the type of data entry for the test sample, use metd 1 if you want to use the Yager technique, metd 2 if you want to use the Q technique of the uniformity test (article: Directional Statistics and Shape analysis), and metd 3 if you want to use the Thorani technique
-#' @param cores  how many cores of the computer do you want to use to use for prediction (default = 2)
+#' @param metd Method of transforming the triangle into scalar, It is the type of data entry for the test sample, use 'metd=1' if you want to use the Yager technique, 'metd=2' if you want to use the Q technique of the uniformity test (article: Directional Statistics and Shape analysis), 'metd=3' if you want to use the Thorani technique, 'metd=4' if you want to use the alpha-order technique and 'metd=5' if you want to use the GTFN technique (article: A novel approach for arithmetic operations and ranking of generalized fuzzy numbers with application).
+#' @param alp When metd for 4, it is necessary to have alp which are alpha-cut defined
+#' @param w When metd for 4, it is necessary to have w which are alpha-cut weights defined
+#' @param cores  how many cores of the computer do you want to use (default = 2)
 #'
 #' @return A vector of classifications
 #'
@@ -51,12 +53,12 @@
 #' @importFrom MASS fitdistr
 #'
 #' @export
-PoiNBFuzzyParam <- function(train, cl, alphacut = 0.0001, metd = 2, cores = 2) {
+PoiNBFuzzyParam <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
   UseMethod("PoiNBFuzzyParam")
 }
 
 #' @export
-PoiNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, cores = 2) {
+PoiNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -98,12 +100,6 @@ PoiNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, core
   # --------------------------------------------------------
   # --------------------------------------------------------
   # Estimating Triangular Parameters
-  # --------------------------------------------------------
-  if(metd > 3){ stop("metd argument must be <= 3.") }
-  # --------------------------------------------------------
-  alp=1
-  w=1
-  # --------------------------------------------------------
   alpha = alp
   if (metd != 4) {
     alpha <- seq(alphacut, 1.1, 0.1)
@@ -183,7 +179,9 @@ predict.PoiNBFuzzyParam <- function(object,
   doParallel::registerDoParallel(core)
   # --------------
   # loop start
-  R_M_obs <- foreach::foreach(h = 1:N_test, .combine = rbind) %dopar% {
+  R_M_obs <- foreach::foreach(h = 1:N_test, .combine = rbind,
+  .export = c("Yagerdistance","Qdistance","Thoranidistance",
+              "AlphaOrderFuzzy","GTFNdistance")) %dopar% {
     # ------------
     x <- test[h, ]
     # ------------
@@ -216,26 +214,36 @@ predict.PoiNBFuzzyParam <- function(object,
     # Transforming Vector to Scalar
     # ------------
     R_M <- switch(metd,
-                  # ------------
-                  # Barycenter
-                  # yager Distance
-                  "1" = {
-                    # ------------
-                    Yagerdistance(vec_trian, M)
-                    # ------------
-                  },
-                  "2" = {
-                    # ------------
-                    # Using distance Q
-                    Qdistance(vec_trian, M)
-                    # ------------
-                  },
-                  "3" = {
-                    # ------------
-                    # Thorani Distance
-                    Thoranidistance(vec_trian, M)
-                    # ------------
-                  }
+      # ------------
+      # Barycenter
+      # yager Distance
+      "1" = {
+        # ------------
+        Yagerdistance(vec_trian, M)
+        # ------------
+      },
+      "2" = {
+        # ------------
+        # Using distance Q
+        Qdistance(vec_trian, M)
+        # ------------
+      },
+      "3" = {
+        # ------------
+        # Thorani Distance
+        Thoranidistance(vec_trian, M)
+        # ------------
+      },
+      "4" = {
+        # ------------
+        # Alpha-Order for a class of fuzzy sets
+        AlphaOrderFuzzy(vec_trian, w, M)
+      },
+      "5" = {
+        # ------------
+        # A novel approach for arithmetic operations and ranking of generalized fuzzy numbers with application
+        GTFNdistance(vec_trian, M)
+      }
     )
     # --------------------------------------------------------
     R_M_class <- R_M

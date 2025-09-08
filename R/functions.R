@@ -388,6 +388,7 @@ log_ver_Gamma <- function(theta,y){
 }
 
 
+#' 1980
 #' Barycenter
 #' Yager method
 #' @noRd
@@ -398,6 +399,7 @@ Yagerdistance <- function(vec_trian, M){
 
 }
 
+#' Não publicado
 #' Using distance Q
 #' @noRd
 Qdistance <- function(vec_trian, M){
@@ -426,14 +428,14 @@ Qdistance <- function(vec_trian, M){
 }
 
 
-#' Thorani
+#' Thorani - 2012
 #' Article: Ordering Generalized Trapezoidal Fuzzy Numbers Using Orthocentre of Centroids
 #' "changes were made"
 #' @noRd
 Thoranidistance <- function(vec_trian, M){
 
   # ------------
-  # Using distance Q
+  # Thorani
   value <- sapply(1:length(unique(M)), function(i) {
     (1/length(unique(M)))*
       vec_trian[[i]][2] * ((vec_trian[[i]][2] - vec_trian[[i]][1])*(vec_trian[[i]][3] - vec_trian[[i]][2]) + 1)
@@ -445,9 +447,8 @@ Thoranidistance <- function(vec_trian, M){
 }
 
 
-#' Alpha-Order for a class of fuzzy sets
-#' Article: Alpha-Order for a class of fuzzy sets
-#' "changes were made"
+#' 2023
+#' Article: The alpha-ordering for a wide class of fuzzy sets of the real line: the particular case of fuzzy numbers
 #' @noRd
 AlphaOrderFuzzy <- function(vec_trian, w,  M){
 
@@ -459,6 +460,26 @@ AlphaOrderFuzzy <- function(vec_trian, w,  M){
 
   return(value)
 }
+
+
+#' 2024
+#' Article: A novel approach for arithmetic operations and ranking of generalized fuzzy numbers with application
+#' @noRd
+GTFNdistance <- function(vec_trian, M){
+
+  # ------------
+  # GTFN
+  value <- sapply(1:length(unique(M)), function(i) {
+    w <- 1
+    pd <- vec_trian[[i]]/(10*ceiling(max(abs(vec_trian[[i]]))/10))
+    resul <- ceiling(max(abs(pd))/10)*w*sum((2*pd - pd^2))
+    return(resul)
+  })
+
+  return(value)
+}
+
+
 
 # --------------------------------------------------------------------------
 # New Pertinence Function
@@ -639,3 +660,99 @@ function_new_fuzzy_predict <- function(retorno, P, M){
 
 }
 # ----------------
+
+##################################################################################
+# FUNÇÕES DA G0I
+
+#Definie a função de log-verossimilhança
+#' @noRd
+log_likelihood <- function(params, Xobs, L){
+  
+  #Parâmetro alfa da g0i
+  alpha <- params[1]
+  
+  #Parâmetro gama da g0i
+  gama <- params[2]
+  
+  #Tamanho da amostra
+  n <- length(Xobs)
+  
+  #Parcela constante da log-verossimilhança
+  const <- n * L * log(L) + n * log(gamma(L - alpha)) - alpha * n * log(gama) -
+    n * log(gamma(-alpha)) - n * log(gamma(L))
+  
+  #Parcela variável da log-verossimilhança
+  var <- (L - 1) * sum(log(Xobs)) - (L - alpha) * sum(log(gama + L * Xobs))
+  
+  #Resultado (somas das duas parcelas)
+  res <- (const + var)
+  
+  #Retorno do resultado
+  return(res)
+  
+}
+
+#---------------------------------------------------------------------------------
+#GRADIENTE
+
+#Define o gradiente da log-verossimilhança
+#' @noRd
+grad0 = function(Theta, Xobs, L){
+  
+  #Parâmetro alfa da g0i
+  alpha=Theta[1] 
+  
+  #Parâmetro gama da g0i
+  gama=Theta[2]
+  
+  #Tamanho da amostra
+  n=length(Xobs) 
+  
+  #Vetor gradiente
+  c(
+    #Derivada da log-verossimilhança em relação a alfa
+    - n * log(gama)  - n * digamma(L-alpha) + n * digamma(-alpha) + sum( log(gama + L*Xobs) ),
+    
+    #Derivada da log-verossimilhança em relação a gama
+    - n * alpha / gama + (alpha-L) * sum( 1 / (gama + L * Xobs) )
+    
+  )
+  
+}
+
+#---------------------------------------------------------------------------------
+#GERADOR DA G0I
+
+#Gera uma amostra de tamanho n da distribuição g0i
+#' @noRd
+#' @importFrom stats rgamma
+rG0I = function(n,alpha,gama,L){
+  
+  #Gerando a g0i pela definição como a razão de duas gamas
+  res = rgamma(n,L,L) / rgamma(n,alpha,gama);
+  
+  return(res)
+  
+}
+
+#---------------------------------------------------------------------------------
+#DENSIDADE DA G0I
+#Calcula o valor da densidade da distribuição g0i
+#' @noRd
+dG0I <- function(x, alfa, gama, L){
+  
+  #Numerados da g0i
+  numerador <- L^L * gamma(L - alfa) * x^(L - 1)
+  
+  #Denominador da g0i
+  denominador <- (gama ^ alfa) * gamma(-alfa) * gamma(L) * (gama + L * x)^(L - alfa)
+  
+  #Densidade final (razão dos dois anteriores)
+  densidade <- numerador / denominador
+  
+  return(densidade)
+  
+}
+
+# Fim das funções da G0I
+##################################################################################

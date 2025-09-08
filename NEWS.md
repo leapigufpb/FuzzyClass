@@ -1,5 +1,10 @@
 # FuzzyClass (development version)
 
+# FuzzyClass 0.1.7.900
+
+- Add the "new method for fuzzy number ordering" as `metd=5` in functions `GauNBFuzzyParam`, `ExpNBFuzzyParam` and `PoiNBFuzzyParam`. The form can be used considering `metd = 5`.
+
+
 # FuzzyClass 0.1.7
 
 - Add the "Fuzzy Hipergeometric Naive Bayes classifier" as `FuzzyHipergeometricNaiveBayes`

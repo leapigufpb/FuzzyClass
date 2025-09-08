@@ -4,7 +4,15 @@
 \alias{PoiNBFuzzyParam}
 \title{Fuzzy Poisson Naive Bayes Classifier with Fuzzy parameters}
 \usage{
-PoiNBFuzzyParam(train, cl, alphacut = 1e-04, metd = 2, cores = 2)
+PoiNBFuzzyParam(
+  train,
+  cl,
+  alphacut = 1e-04,
+  metd = 2,
+  alp = c(0.35, 0.7, 0.86),
+  w = c(0.1, 0.3, 0.6),
+  cores = 2
+)
 }
 \arguments{
 \item{train}{matrix or data frame of training set cases.}
@@ -13,9 +21,13 @@ PoiNBFuzzyParam(train, cl, alphacut = 1e-04, metd = 2, cores = 2)
 
 \item{alphacut}{value of the alpha-cut parameter, this value is between 0 and 1.}
 
-\item{metd}{Method of transforming the triangle into scalar, It is the type of data entry for the test sample, use metd 1 if you want to use the Yager technique, metd 2 if you want to use the Q technique of the uniformity test (article: Directional Statistics and Shape analysis), and metd 3 if you want to use the Thorani technique}
+\item{metd}{Method of transforming the triangle into scalar, It is the type of data entry for the test sample, use 'metd=1' if you want to use the Yager technique, 'metd=2' if you want to use the Q technique of the uniformity test (article: Directional Statistics and Shape analysis), 'metd=3' if you want to use the Thorani technique, 'metd=4' if you want to use the alpha-order technique and 'metd=5' if you want to use the GTFN technique (article: A novel approach for arithmetic operations and ranking of generalized fuzzy numbers with application).}
 
-\item{cores}{how many cores of the computer do you want to use to use for prediction (default = 2)}
+\item{alp}{When metd for 4, it is necessary to have alp which are alpha-cut defined}
+
+\item{w}{When metd for 4, it is necessary to have w which are alpha-cut weights defined}
+
+\item{cores}{how many cores of the computer do you want to use (default = 2)}
 }
 \value{
 A vector of classifications
