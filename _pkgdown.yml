@@ -1,4 +1,47 @@
-url: ~
+url: https://leapigufpb.github.io/FuzzyClass/
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+reference:
+  - title: "Continuous Classifiers"
+    desc: "Probabilistic classifiers for continuous features using fuzzy sets and fuzzy parameters."
+    contents:
+      - FuzzyGaussianNaiveBayes
+      - GauNBFuzzyParam
+      - FuzzyExponentialNaiveBayes
+      - ExpNBFuzzyParam
+      - FuzzyGammaNaiveBayes
+      - DWFuzzyGammaNaiveBayes
+      - FuzzyBetaNaiveBayes
+      - FuzzyTriangularNaiveBayes
+      - FuzzyTrapezoidalNaiveBayes
+
+  - title: "Discrete and Count Classifiers"
+    desc: "Classifiers for discrete and count data with fuzzy memberships."
+    contents:
+      - FuzzyPoissonNaiveBayes
+      - PoiNBFuzzyParam
+      - FuzzyBinomialNaiveBayes
+      - FuzzyHipergeometricNaiveBayes
+      - DWFuzzyHipergeometricNaiveBayes
+
+  - title: "Geometric and Decision Rule Classifiers"
+    desc: "Classifiers using geometric distance memberships and fuzzy rule systems."
+    contents:
+      - FuzzyGeoNaiveBayes
+      - FuzzyNaiveBayes
+      - FuzzyBayesRule
+      - FuzzyClass-package
+
+  - title: "Datasets"
+    desc: "Example datasets included with FuzzyClass."
+    contents:
+      - VirtualRealityData
+      - SimulatedData
+      - HouseVotes84
+      - GamWeightData

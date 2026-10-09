@@ -5,7 +5,7 @@
 #'
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
-#' @param cores  how many cores of the computer do you want to use (default = 2)
+#' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
 #' @return A vector of classifications
@@ -71,18 +71,18 @@ FuzzyGeoNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
   # --------------------------------------------------------
   # --------------------------------------------------------
   # Estimating class memberships
-  pertinicesC <- lapply(1:length(unique(M)), function(i) {
+  pertinicesC <- lapply(1:length(get_classes(M)), function(i) {
     lapply(1:cols, function(j) {
-      SubSet <- dados[M == unique(M)[i], j]
+      SubSet <- dados[M == get_classes(M)[i], j]
       getMemberships(SubSet, intervalos)
     })
   })
   # --------------------------------------------------------
   # --------------------------------------------------------
   # Estimating Geometric Parameters
-  parametersC <- lapply(1:length(unique(M)), function(i) {
+  parametersC <- lapply(1:length(get_classes(M)), function(i) {
     lapply(1:cols, function(j) {
-      SubSet <- dados[M == unique(M)[i], j]
+      SubSet <- dados[M == get_classes(M)[i], j]
       param <- MASS::fitdistr(SubSet, "geometric")$estimate
       return(param)
     })
@@ -143,145 +143,66 @@ predict.FuzzyGeoNaiveBayes <- function(object,
   # Classification
   # --------------
   N_test <- nrow(test)
-  # --------------
-  # Defining how many CPU cores to use
-  core <- parallel::makePSOCKcluster(cores)
-  doParallel::registerDoParallel(core)
-  # --------------
-  # loop start
-  R_M_obs <- foreach::foreach(h = 1:N_test, .combine = rbind) %dopar% {
+  classes <- levels(M)
+  n_classes <- length(classes)
+  pk <- rep(1 / n_classes, n_classes)
 
-    # ------------
-    x <- test[h, ]
-    # ------------
-    res <- sapply(1:length(unique(M)), function(i) {
-
-      # -------------
-      resultadoPerClass <- 1
-      # ------------
-
-      sapply(1:cols, function(j) {
-
-        resultadoPerClass <- ((1 - parametersC[[i]][[j]])^(x[j] - 1)) * parametersC[[i]][[j]]
-
-        # -----------------------------------------------------------------------
-        # -----------------------------------------------------------------------
-        if (fuzzy == T) {
-          # --------------
-          # Mcl(Xi)
-          for (st in 1:intervalos) {
-            if (st == intervalos) {
-              if ((x[j] >= pertinicesC[[i]][[j]][st, 1]) & (x[j] <= pertinicesC[[i]][[j]][st, 2])) {
-                resultadoPerClass <- resultadoPerClass * pertinicesC[[i]][[j]][st, 3]
-              }
-            } else {
-              if ((x[j] > pertinicesC[[i]][[j]][st, 1]) & (x[j] < pertinicesC[[i]][[j]][st, 2])) {
-                resultadoPerClass <- resultadoPerClass * pertinicesC[[i]][[j]][st, 3]
-              }
-            }
-          }
-        }
-        # -----------------------------------------------------------------------
-        # -----------------------------------------------------------------------
-
-        # --------------
-        # P(Wcl)
-        resultadoPerClass <- resultadoPerClass * 1 / length(unique(M))
-        # --------------
-        return(resultadoPerClass)
-      })
-      # --------------------------------------------------------
-    })
-    # --------------------------------------------------------
-    produto <- matrix(as.numeric(res), ncol = length(unique(M)))
-    produto <- apply(produto, 2, prod)
-    # --------------------------------------------------------
-    R_M_class <- produto
-    # --------------------------------------------------------
-    return(R_M_class)
+  R_M_obs <- matrix(0, nrow = N_test, ncol = n_classes)
+  for (i in seq_len(n_classes)) {
+    densidades <- rep(pk[i], N_test)
+    for (j in seq_len(cols)) {
+      x_vals <- test[[j]]
+      # MASS::fitdistr(, "geometric") estimates p for the support {0, 1, 2, ...},
+      # so the matching probability mass function is p * (1 - p)^x (dgeom)
+      res_j <- stats::dgeom(round(x_vals), prob = parametersC[[i]][[j]])
+      if (fuzzy == TRUE) {
+        res_j <- res_j * membership_lookup(x_vals, pertinicesC[[i]][[j]])
+      }
+      densidades <- densidades * res_j
+    }
+    R_M_obs[, i] <- densidades
   }
 
-  # ------------
-  # -------------------------
-  parallel::stopCluster(core)
-  # ---------
-  if (type == "class") {
-    # -------------------------
-    R_M_obs <- matrix(R_M_obs,nrow = N_test)
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
-    # -------------------------
-  } else {
-    # -------------------------
-    Infpos <- which(R_M_obs==Inf)
-    R_M_obs[Infpos] <- .Machine$integer.max;
-    R_M_obs <- matrix(unlist(R_M_obs),ncol = length(unique(M)), nrow = N_test)
-    R_M_obs <- R_M_obs/rowSums(R_M_obs,na.rm = T)
-    # ----------
-    colnames(R_M_obs) <- unique(M)
-    return(R_M_obs)
-    # -------------------------
-  }
+  scores_to_output(R_M_obs, classes, type)
 }
 
+#' Histogram based membership function: the range of the sample is split in
+#' `breaks` intervals [a, b) (the last one closed), the membership of each
+#' interval is its frequency divided by the largest frequency, and empty
+#' intervals receive 0.001.
+#' @noRd
 #' @importFrom stats median.default var
 getMemberships <- function(sample, breaks) {
-  # -------------------------
-  # sample length
-  n <- length(sample)
-  # -------------------------
-  # min value
+  sample <- sample[!is.na(sample)]
   Min <- min(sample)
-  # -------------------------
-  # max value
   Max <- max(sample)
-  # -------------------------
   intervalos <- breaks
-  pertinences <- matrix(nrow = intervalos, ncol = 3)
-
-  # -------------------------
-
   passo <- (Max - Min) / intervalos
-  # -------------------------
-  freq <- matrix(nrow = intervalos, ncol = 3)
-  # -------------------------
-  for (i in 1:intervalos) {
-    freq[i, 1] <- Min + passo * (i - 1)
-    freq[i, 2] <- freq[i, 1] + passo
-    freq[i, 3] <- 0
-  }
-  # -------------------------
-  for (i in 1:n) {
-    for (j in 1:intervalos) {
-      # -------------------------
-      if (j == intervalos) {
-        if ((sample[i] >= freq[j, 1]) & (sample[i] <= freq[j, 2])) {
-          freq[j, 3] <- freq[j, 3] + 1
-        }
-      } else {
-        # -------------------------
-        if ((sample[i] >= freq[j, 1]) & (sample[i] < freq[j, 2])) {
-          freq[j, 3] <- freq[j, 3] + 1
-        }
-      }
-    }
-  }
-  # -------------------------
-  maxFreq <- max(freq[1:intervalos, 3])
-  # -------------------------
-  for (i in 1:intervalos) {
-    pertinences[i, 1] <- freq[i, 1]
-    pertinences[i, 2] <- freq[i, 2]
-    # -------------------------
-    if (freq[i, 1] == 0) {
-      pertinences[i, 3] <- 0.001
-    } else {
-      pertinences[i, 3] <- freq[i, 3] / maxFreq
-    }
-  }
-
-  # -------------------------
+  lower <- Min + passo * (seq_len(intervalos) - 1)
+  pertinences <- cbind(lower, lower + passo, 0)
+  freq <- tabulate(membership_bin(sample, pertinences), nbins = intervalos)
+  maxFreq <- max(max(freq), 1)
+  pertinences[, 3] <- ifelse(freq == 0, 0.001, freq / maxFreq)
   return(pertinences)
-  # -------------------------
+}
+
+#' Index of the interval of `getMemberships` that contains each value
+#' (NA outside the range of the training sample).
+#' @noRd
+membership_bin <- function(x, pertinences) {
+  k <- nrow(pertinences)
+  lo <- pertinences[1, 1]
+  hi <- pertinences[k, 2]
+  idx <- if (hi > lo) findInterval(x, pertinences[-1, 1]) + 1L else rep(k, length(x))
+  idx[is.na(x) | x < lo | x > hi] <- NA
+  idx
+}
+
+#' Membership of each value; values outside the training range behave as an
+#' empty interval (0.001), as in `getMemberships`.
+#' @noRd
+membership_lookup <- function(x, pertinences) {
+  mu <- pertinences[membership_bin(x, pertinences), 3]
+  mu[is.na(mu)] <- 0.001
+  mu
 }

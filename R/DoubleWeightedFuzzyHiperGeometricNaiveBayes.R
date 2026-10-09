@@ -5,7 +5,7 @@
 #'
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
-#' @param cores  how many cores of the computer do you want to use (default = 2)
+#' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #' @param wdelta vector weight each class
 #' @param weta vector  weight each feature
@@ -91,40 +91,20 @@ DWFuzzyHipergeometricNaiveBayes.default <- function(train, cl, cores = 2, fuzzy 
   
   train <- as.data.frame(train)
   cols <- ncol(train)
-  if(is.null(cols)){
-    cols <- 1
+  if (is.null(cols) || cols < 2 || cols %% 2 != 0) {
+    stop("Inconsistent number of columns: train must have an even number of columns (successes and attempts pairs)")
   }
-  if(cols %% 2 != 0){
-    stop("Inconsistent number of columns")
+  dados <- train
+  M <- c(unlist(cl))
+  M <- factor(M, labels = sort(unique(M)))
+
+  if (sum(verifyNumbersFunction(dados, cols)) != cols) {
+    stop("All variables must be discrete values.")
   }
-   if(is.null(cols)){
-    cols <- 2
-  }
-  dados <- train # training data matrix
-  M <- c(unlist(cl)) 
-  M <- factor(M, labels = sort(unique(M))) 
-  #--------------------------------------------------------
-  # --------------------------------------------------------
-  # Verify data typesR_M_obs
-  verifyNumbers <- sapply(1:cols, function(i){
-    n = 3
-    subset <- sample(dados[,i],size = n, replace = F)
-    result <- subset == floor(subset)
-    if(sum(result) == n){
-      result <- 1
-    }else{
-      result <- 0
-    }
-    return(result)
-  })
-  
-  # --------------------------------------------------------
-  if(sum(verifyNumbers) != cols){ stop("All variables must be discrete values.") }
-  # --------------------------------------------------------
-  
-  #Spliting attempts and successes
-  tentativas <- as.data.frame(dados[, seq(2, cols, by = 2)])
-  dados <- as.data.frame(dados[, seq(1, cols, by = 2)])
+
+  # Splitting attempts and successes
+  tentativas <- as.data.frame(dados[, seq(2, cols, by = 2), drop = FALSE])
+  dados <- as.data.frame(dados[, seq(1, cols, by = 2), drop = FALSE])
   cols <- cols / 2
   
   #--------------------------------------------------------
@@ -143,7 +123,7 @@ DWFuzzyHipergeometricNaiveBayes.default <- function(train, cl, cores = 2, fuzzy 
   Pertinencia <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)
   # ------
   # A priori probability of classes - considered equal
-  pk <- rep(1 / length(unique(M)), length(unique(M)))
+  pk <- rep(1 / length(get_classes(M)), length(get_classes(M)))
   # -------------------------------------------------------
   
   structure(list(
@@ -190,10 +170,15 @@ predict.DWFuzzyHipergeometricNaiveBayes <- function(object,
                                                   ...) {
   #--------------------------------------------------------
   test <- as.data.frame(newdata)
+  if (ncol(test) == 2 * object$cols) {
+    test <- as.data.frame(test[, seq(1, ncol(test), by = 2), drop = FALSE])
+  } else {
+    test <- as.data.frame(test[, seq_len(object$cols), drop = FALSE])
+  }
   #--------------------------------------------------------
   parametersC <- object$parametersC
   minimos <- object$minimos
-  MinimosDataFrame <-  object$MinimosDataFrame
+  MinimosDataFrame <- object$MinimosDataFrame
   cols <- object$cols
   M <- object$M
   cores <- object$cores
@@ -208,21 +193,15 @@ predict.DWFuzzyHipergeometricNaiveBayes <- function(object,
   
   #--------------------------------------------------------
   # Classification
-  #--------------
-  # ---------
   N_test <- nrow(test)
-  # --
-
-  # --
-  if(fuzzy == T){
+  if (fuzzy == TRUE) {
     Pertinencia_r <- function_new_membership_predict(test, M = M, MinimosDataFrame, Pertinencia, cols = cols)
     R_M_obs <- fuzzy_density_values_hipergeometric_dw(M = M, cols = cols,
                                                       test = test, parametersC = parametersC,
                                                       pk = pk, wdelta = wdelta,
                                                       weta = weta,
                                                       Pertinencia_r = Pertinencia_r)
-
-  }else{
+  } else {
     R_M_obs <- density_values_hipergeometric_dw(M = M, cols = cols,
                                                 test = test, parametersC = parametersC,
                                                 pk = pk, wdelta = wdelta,
@@ -230,92 +209,74 @@ predict.DWFuzzyHipergeometricNaiveBayes <- function(object,
   }
   # ---------
   if (type == "class") {
-    #-------------------------
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
-    #-------------------------
+    pred_idx <- max.col(as.matrix(R_M_obs), ties.method = "first")
+    resultado <- levels(M)[pred_idx]
+    return(as.factor(resultado))
   } else {
-    #-------------------------
-    Infpos <- which(R_M_obs==Inf)
-    R_M_obs[Infpos] <- .Machine$integer.max;
-    R_M_obs <- matrix(unlist(R_M_obs),ncol = length(unique(M)), nrow = N_test)
-    R_M_obs <- R_M_obs/rowSums(R_M_obs,na.rm = T)
-    #----------
-    colnames(R_M_obs) <- unique(M)
+    Infpos <- which(R_M_obs == Inf)
+    R_M_obs[Infpos] <- .Machine$integer.max
+    R_M_obs <- as.matrix(R_M_obs)
+    rs <- rowSums(R_M_obs, na.rm = TRUE)
+    rs[rs == 0] <- 1
+    R_M_obs <- R_M_obs / rs
+    colnames(R_M_obs) <- levels(M)
     return(R_M_obs)
-    #-------------------------
   }
 }
 
 # -------------------------------------------------------
 # Functions
 # -------------------------------------------------------
-density_values_hipergeometric_dw <- function(M, cols, test, parametersC, pk, wdelta, weta){
-  saida_temp <- lapply(1:length(unique(M)), function(i) {
-    densidades <- sapply(1:cols, function(j) {
-      t <- round(test[, j])
-      #casos_de_sucesso estimado   #fracassos da amostra = Total - sucessos   #número de tentativas estimado
-      (stats::dhyper(t, m = parametersC[[i]][[j]][2],
-                     n = parametersC[[i]][[j]][3],
-                     k = parametersC[[i]][[j]][1]))^(weta[j]) #calcula a probabilidade de p(x=k) de cada uma das variáveis contidas nas colunas dos dados de teste
-    })
-    densidades <- apply(densidades, 1, prod)
-    # Calcula a P(w_i) * P(X_k | w_i)
-    p <- (pk[[i]]^(wdelta[i])) * densidades
-    # ---
-    return(p)
-  })
+density_values_hipergeometric_dw <- function(M, cols, test, parametersC, pk, wdelta, weta) {
+  classes <- levels(M)
+  n_classes <- length(classes)
+  N_test <- nrow(test)
+  saida <- matrix(0, nrow = N_test, ncol = n_classes)
   
-  saida <- data.frame(matrix(unlist(saida_temp), ncol=length(saida_temp), byrow=F))
-  return(saida)
+  for (i in seq_len(n_classes)) {
+    dens_mat <- matrix(1, nrow = N_test, ncol = cols)
+    for (j in seq_len(cols)) {
+      t <- round(test[[j]])
+      k_val <- parametersC[[i]][[j]][1]
+      m_val <- parametersC[[i]][[j]][2]
+      n_val <- parametersC[[i]][[j]][3]
+      dens_mat[, j] <- (stats::dhyper(t, m = m_val, n = n_val, k = k_val))^(weta[j])
+    }
+    densidades <- dens_mat[, 1]
+    if (cols > 1) {
+      for (j in 2:cols) densidades <- densidades * dens_mat[, j]
+    }
+    saida[, i] <- (pk[i]^(wdelta[i])) * densidades
+  }
+  colnames(saida) <- classes
+  return(as.data.frame(saida))
 }
 # ----------------
 
 # ----------------
-fuzzy_density_values_hipergeometric_dw <- function(M, cols, test, parametersC, pk, wdelta, weta, Pertinencia_r){
-  saida_temp <- lapply(1:length(unique(M)), function(i) {
-    densidades <- sapply(1:cols, function(j) {
-      t <- round(test[, j])
-      #casos_de_sucesso estimado   #fracassos da amostra = Total - sucessos   #número de tentativas estimado
-      (stats::dhyper(t, m = parametersC[[i]][[j]][2],
-                    n = parametersC[[i]][[j]][3],
-                    k = parametersC[[i]][[j]][1])*
-        Pertinencia_r[[i]])^(weta[j]) #calcula a probabilidade de p(x=k) de cada uma das variáveis contidas nas colunas dos dados de teste
-    })
-    densidades <- apply(densidades, 1, prod)
-    # Calcula a P(w_i) * P(X_k | w_i)
-    p <- (pk[[i]]^(wdelta[i])) * densidades
-    # ---
-    return(p)
-  })
+fuzzy_density_values_hipergeometric_dw <- function(M, cols, test, parametersC, pk, wdelta, weta, Pertinencia_r) {
+  classes <- levels(M)
+  n_classes <- length(classes)
+  N_test <- nrow(test)
+  saida <- matrix(0, nrow = N_test, ncol = n_classes)
   
-  saida <- data.frame(matrix(unlist(saida_temp), ncol=length(saida_temp), byrow=F))
-  return(saida)
+  for (i in seq_len(n_classes)) {
+    dens_mat <- matrix(1, nrow = N_test, ncol = cols)
+    pert <- if (is.list(Pertinencia_r)) Pertinencia_r[[i]] else Pertinencia_r
+    for (j in seq_len(cols)) {
+      t <- round(test[[j]])
+      k_val <- parametersC[[i]][[j]][1]
+      m_val <- parametersC[[i]][[j]][2]
+      n_val <- parametersC[[i]][[j]][3]
+      dens_mat[, j] <- (stats::dhyper(t, m = m_val, n = n_val, k = k_val) * pert)^(weta[j])
+    }
+    densidades <- dens_mat[, 1]
+    if (cols > 1) {
+      for (j in 2:cols) densidades <- densidades * dens_mat[, j]
+    }
+    saida[, i] <- (pk[i]^(wdelta[i])) * densidades
+  }
+  colnames(saida) <- classes
+  return(as.data.frame(saida))
 }
-# ----------------
-
-# ----------------
-estimation_parameters_hipergeomeric <- function(M, cols, dados, tentativas){
-  lapply(1:length(unique(M)), function(i) {
-    lapply(1:cols, function(j) { 
-      subTent <- tentativas[M == unique(M)[i], j]
-      N_aux <- max(subTent)
-      SubSet <- dados[M == unique(M)[i], j]
-      k <- try(Mod(polyroot(c(-mean(SubSet)^2*N_aux, mean(SubSet)*N_aux - (mean(SubSet)^2) - var(SubSet)*N_aux + var(SubSet),-mean(SubSet))))[1], silent = TRUE) #Recebe o valor que zera a função de estimação_N
-      if(k < 0){
-        k <- k * -1
-      }
-      #ADICIONAR TRATAMENTO PARA RAIZES COMPLEXAS
-      m <- mean(SubSet) * (N_aux+1) / k
-      # --
-      param <- c(k = round(k), m = round(m), n = (N_aux - round(m)), N = N_aux)
-
-      if(param[1]==0){param[1] <- 1}
-      # --
-      return(param)
-    })
-  })
-}
-
 # ----------------

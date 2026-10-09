@@ -14,5 +14,8 @@
 cran-comments.md
 ^\.github$
 ^\.git$
-.git/
+^Rplots\.pdf$
+^FuzzyClass.*\.tar\.gz$
+^README\.html$
+^README\.knit\.md$
 

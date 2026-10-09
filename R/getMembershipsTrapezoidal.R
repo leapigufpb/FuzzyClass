@@ -1,3 +1,4 @@
+#' @noRd
 #' @importFrom stats median.default var
 getMembershipsTrapezoidal <- function(sample, breaks) {
   # -------------------------

@@ -10,195 +10,185 @@ knitr::opts_chunk$set(
 )
 ```
 
-# FuzzyClass <img src="man/figures/logo.png" style="float: right" height="139"/>
+# FuzzyClass <img src="man/figures/logo.png" align="right" height="150" alt="FuzzyClass logo" />
 
 <!-- badges: start -->
-
 [![CRAN version](https://www.r-pkg.org/badges/version/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
 [![CRAN Download](https://cranlogs.r-pkg.org/badges/grand-total/FuzzyClass)](https://cran.r-project.org/package=FuzzyClass)
-<!--[![R-CMD-check](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/leapigufpb/FuzzyClass/actions/workflows/R-CMD-check.yaml)-->
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://cran.r-project.org/package=FuzzyClass/LICENSE)
 <!-- badges: end -->
 
+**A comprehensive family of probability-based fuzzy and non-fuzzy classifiers.**
 
-Last update: `r format(Sys.Date(),"%d-%m-%Y")`
+Classification problems involve assigning categorical labels to data instances based on observed features. In real-world applications, classes often overlap, boundaries are imprecise, and measurements carry uncertainty. Traditional Bayesian classifiers assume rigid distributional parameters and crisp class assignments. 
 
-## A family of probabilities-based classifiers fuzzy and non-fuzzy
+**`FuzzyClass`** addresses these challenges by unifying **Fuzzy Set Theory** ($\mu \in [0, 1]$) with **Probabilistic Naive Bayes** classification. By leveraging soft membership degrees, fuzzy parameters (triangular and trapezoidal), and geometric distance weighting, `FuzzyClass` delivers robust, interpretable, and high-performance classification for complex and ambiguous data.
 
-
-The classification predicament involves assigning labels or categories to data instances based on observed features. Consider, for instance, the task of discriminating between "spam" and "non-spam" emails. This constitutes a classification task, where the algorithm must acquire the ability to discern patterns that distinguish the two email types based on their keywords, structure, or other attributes. Classification algorithms employ a training dataset containing pre-labeled examples to learn these patterns. When faced with unclassified data, the algorithm applies the acquired patterns to predict the class to which they belong, enabling efficient and precise automation in the categorization of new cases. Algorithms like those in `FuzzyClass` address this task by leveraging data probabilities and characteristics, thus becoming valuable tools for addressing intricate and ambiguous classification problems.
-
-> A package manual that showcases the existing classifiers and demonstrates how to use it can be found at the following link: https://cran.r-project.org/package=FuzzyClass/FuzzyClass.pdf
-
-### Dependencies
-
-Below is the list of packages on which `FuzzyClass` depends. However, during its installation, `FuzzyClass` automatically installs the dependencies:
-
-
-- [caTools](https://cran.r-project.org/package=caTools)
-- [doParallel](https://cran.r-project.org/package=doParallel)
-- [e1071](https://cran.r-project.org/package=e1071)
-- [EnvStats](https://cran.r-project.org/package=EnvStats)
-- [foreach](https://cran.r-project.org/package=foreach)
-- [MASS](https://cran.r-project.org/package=MASS)
-- [maxLik](https://cran.r-project.org/package=maxLik)
-- [mvtnorm](https://cran.r-project.org/package=mvtnorm)
-- [purrr](https://cran.r-project.org/package=purrr)
-- [dplyr](https://cran.r-project.org/package=dplyr)
-- [Rdpack](https://cran.r-project.org/package=Rdpack)
-- [rootSolve](https://cran.r-project.org/package=rootSolve)
-
-### Installation
-
-```{r, echo=TRUE, eval=FALSE}
-# Installation
-install.packages("devtools")
-devtools::install_github("leapigufpb/FuzzyClass")
-```
-
-
-### Usage
-
-Once installed, you can load the `FuzzyClass` package into your R session:
-
-```{r}
-# Package import
-library(FuzzyClass)
-```
-
-<img src="man/figures/FuzzyClass_instalation.png"  height="700"/>
-
-
-### Data Reading and Preparation]
-
-To demonstrate the usage of `FuzzyClass`, let's look at reading and preparing data:
-
-```{r, message=FALSE, warning=FALSE}
-
-library(FuzzyClass)
-
-#' ---------------------------------------------
-#' The following shows how the functions are used:
-#' --------------
-#' Reading a database:
-#'
-#' Actual training data:
-data(VirtualRealityData)
-
-VirtualRealityData <- as.data.frame(VirtualRealityData)
-
-# Splitting into Training and Testing
-split <- caTools::sample.split(t(VirtualRealityData[,1]), SplitRatio = 0.7)
-Train <- subset(VirtualRealityData, split == "TRUE")
-Test <- subset(VirtualRealityData, split == "FALSE")
-# ----------------
-
-test = Test[,-4]
-
-```
-
-#### Fuzzy Gaussian Naive Bayes with Fuzzy Parameters
-
-
-Let's delve into the example of using the `Fuzzy Gaussian Naive Bayes` algorithm with fuzzy parameters:
-
-
-
-```{r}
-# --------------------------------------------------
-# Fuzzy Gaussian Naive Bayes with Fuzzy Parameters
-
-
-fit_FGNB <- GauNBFuzzyParam(train =  Train[,-4],
-                                    cl = Train[,4], metd = 2, cores = 1)
-
-
-print(fit_FGNB)
-saida <- predict(fit_FGNB, test)
-Table <- table(factor(Test[,4]), saida)
-Table
-
-#Accuracy:
-sum(diag(Table))/sum(Table)
-
-saidaMatrix <- predict(fit_FGNB, test, type = "matrix")
-```
-
-Additionally, you can visualize the results:
-
-```{r}
-# --------------------------------------------------
-# head view
-
-saida |> head()
-
-saidaMatrix |> head()
-
-```
-
-
-This code appears to be related to the application of a classification algorithm called "Fuzzy Gaussian Naive Bayes with Fuzzy Parameters." An analysis of the steps present in the code:
-
-1. **Model Training** (`fit_FGNB`):
-   - A Fuzzy Gaussian Naive Bayes model is being fitted to the training data.
-   - The training set consists of attributes (`Train[,-4]`) and classes (`Train[,4]`), where the categorical response variable or label is in column 4.
-
-2. **Prediction and Confusion Matrix Creation**:
-   - The `predict` function is used to make predictions based on the fitted model using the test set (`test`).
-   - A confusion matrix (`Table`) is created using the `table` function. The confusion matrix compares the actual (expected) classes with the classes predicted by the model.
-
-3. **Accuracy Calculation**:
-   - The accuracy of the model is calculated by dividing the sum of the diagonal values of the confusion matrix (true positives and true negatives) by the total sum of the confusion matrix. This provides a measure of how well the model is performing predictions.
-
-Overall, this code performs the training of a Fuzzy Gaussian Naive Bayes model with fuzzy parameters, makes predictions using the test set, creates a confusion matrix to evaluate the model's performance, and calculates its accuracy.
+> A complete manual showcasing all classifiers and mathematical details is available at the [CRAN FuzzyClass Reference Manual](https://cran.r-project.org/package=FuzzyClass/FuzzyClass.pdf).
 
 ---
 
-This enhanced documentation provides a comprehensive guide to using the FuzzyClass package for probabilistic classification tasks. It covers installation, package usage, data preparation, and examples of applying the Fuzzy Gaussian Naive Bayes algorithm with fuzzy parameters. Feel free to explore the package further to leverage its capabilities for your classification tasks.
+## What's New in Version 0.2.0
+
+- 🐞 **Correct class labelling**: parameters and predicted labels now always follow the same class order (factor levels). Previous development code could mislabel predictions when the training data were not sorted by class.
+- 📐 **Estimation aligned with the literature**: exact Gamma maximum likelihood, unbounded Beta shapes, Geometric pmf consistent with its estimator, Binomial `n >= max(x)`, class-wise sample sizes in the fuzzy-parameter confidence intervals and nested alpha-cuts in `PoiNBFuzzyParam`.
+- ⚡ **Vectorized predictions**: prediction and fuzzy-number ranking (`metd = 1:5`) are vectorized over all observations, about 100× faster than version 0.1.7.
+- 🪶 **Lighter dependencies**: `dplyr`, `purrr`, `tibble`, `tidyr`, `rlang`, `parallel`, `foreach` and `doParallel` are no longer required (`cores` is kept only for backward compatibility).
+
+---
+
+## Available Classifiers (Taxonomy)
+
+`FuzzyClass` provides **18 dedicated classifiers** categorized by feature type and modeling paradigm:
+
+| Classifier | Paradigm | Description |
+| :--- | :--- | :--- |
+| [`FuzzyGaussianNaiveBayes`](#continuous-classifiers) | Continuous | Gaussian Naive Bayes weighted by fuzzy membership degrees. |
+| [`GauNBFuzzyParam`](#continuous-classifiers) | Continuous | Gaussian Naive Bayes with fuzzy parameters ($\tilde{\mu}, \tilde{\sigma}^2$) across 5 estimation methods. |
+| [`FuzzyExponentialNaiveBayes`](#continuous-classifiers) | Continuous | Exponential Naive Bayes with fuzzy memberships for positive continuous features. |
+| [`ExpNBFuzzyParam`](#continuous-classifiers) | Continuous | Exponential Naive Bayes with fuzzy rate parameters. |
+| [`FuzzyGammaNaiveBayes`](#continuous-classifiers) | Continuous | Gamma Naive Bayes with fuzzy memberships for skewed continuous data. |
+| [`DWFuzzyGammaNaiveBayes`](#continuous-classifiers) | Continuous | Double-Weighted Fuzzy Gamma Naive Bayes. |
+| [`FuzzyBetaNaiveBayes`](#continuous-classifiers) | Continuous | Beta Naive Bayes for continuous features bounded in $(0, 1)$ (rates/proportions). |
+| [`FuzzyTriangNaiveBayes`](#continuous-classifiers) | Continuous | Naive Bayes with triangular membership functions. |
+| [`FuzzyTrapeNaiveBayes`](#continuous-classifiers) | Continuous | Naive Bayes with trapezoidal membership functions. |
+| [`FuzzyPoissonNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Poisson Naive Bayes with fuzzy memberships for integer count data. |
+| [`PoiNBFuzzyParam`](#discrete-count-classifiers) | Discrete / Count | Poisson Naive Bayes with fuzzy rate parameters $\tilde{\lambda}$. |
+| [`FuzzyBinomialNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Binomial Naive Bayes with fuzzy memberships for binary/trial counts. |
+| [`FuzzyHipergeometricNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Hypergeometric Naive Bayes for sampling without replacement from finite populations. |
+| [`DoubleWeightedFuzzyHipergeometricNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Double-Weighted Hypergeometric Naive Bayes. |
+| [`FuzzyGeoNaiveBayes`](#geometric-rule-based-systems) | Geometric | Naive Bayes with distance-based geometric fuzzy memberships. |
+| [`FuzzyNaiveBayes`](#geometric-rule-based-systems) | General | Generalized fuzzy Naive Bayes supporting continuous and categorical features. |
+| [`FuzzyBayesRule`](#geometric-rule-based-systems) | Decision Rule | Fuzzy Bayes decision rule classifier. |
+| [`FuzzyRuleBasedSystem`](#geometric-rule-based-systems) | Inference Rule | Fuzzy rule-based inference and classification system. |
+
+---
+
+## Installation
+
+### Stable Version from CRAN
+
+You can install the released version of `FuzzyClass` from CRAN:
+
+```r
+install.packages("FuzzyClass")
+```
+
+### Development Version from GitHub
+
+To install the latest development version:
+
+```r
+# install.packages("devtools")
+devtools::install_github("leapigufpb/FuzzyClass")
+```
+
+---
+
+## Dependencies
+
+`FuzzyClass` is designed with minimal, stable, and battle-tested dependencies automatically installed by R:
+
+- [caTools](https://cran.r-project.org/package=caTools)
+- [e1071](https://cran.r-project.org/package=e1071)
+- [EnvStats](https://cran.r-project.org/package=EnvStats)
+- [MASS](https://cran.r-project.org/package=MASS)
+- [maxLik](https://cran.r-project.org/package=maxLik)
+- [mvtnorm](https://cran.r-project.org/package=mvtnorm)
+- [Rdpack](https://cran.r-project.org/package=Rdpack)
+- [rootSolve](https://cran.r-project.org/package=rootSolve)
+
+---
+
+## Quick Start & Examples
+
+### 1. Data Preparation
+
+We demonstrate package functionality using the built-in `VirtualRealityData` dataset:
+
+```{r, message=FALSE, warning=FALSE}
+library(FuzzyClass)
+
+# Load dataset
+data(VirtualRealityData)
+df <- as.data.frame(VirtualRealityData)
+
+# Split into Training (70%) and Testing (30%) sets
+set.seed(123)
+split <- caTools::sample.split(df[, 4], SplitRatio = 0.7)
+Train <- subset(df, split == TRUE)
+Test  <- subset(df, split == FALSE)
+
+X_train <- Train[, -4]
+y_train <- Train[, 4]
+X_test  <- Test[, -4]
+y_test  <- Test[, 4]
+```
+
+---
+
+### 2. Gaussian Naive Bayes with Fuzzy Parameters (`GauNBFuzzyParam`)
+
+Fit a Gaussian model where mean and variance are represented as fuzzy numbers:
+
+```{r}
+# Fit model using fuzzy estimation method 2
+fit_fgnb <- GauNBFuzzyParam(train = X_train, cl = y_train, metd = 2, cores = 1)
+
+# Predict classes
+pred_classes <- predict(fit_fgnb, X_test)
+
+# Confusion Matrix
+conf_mat <- table(Actual = y_test, Predicted = pred_classes)
+conf_mat
+
+# Classification Accuracy
+accuracy <- sum(diag(conf_mat)) / sum(conf_mat)
+cat(sprintf("Test Accuracy: %.2f%%\n", accuracy * 100))
+```
+
+You can also extract the full posterior membership / probability matrix:
+
+```{r}
+# Extract prediction probability matrix
+prob_matrix <- predict(fit_fgnb, X_test, type = "matrix")
+head(prob_matrix)
+```
+
+---
+
+### 3. Continuous Fuzzy Gaussian Naive Bayes (`FuzzyGaussianNaiveBayes`)
+
+Fit a Gaussian Naive Bayes classifier where observations have fuzzy membership degrees:
+
+```{r}
+# Fit standard fuzzy Gaussian Naive Bayes
+fit_gnb <- FuzzyGaussianNaiveBayes(train = X_train, cl = y_train)
+
+# Predict classes on test set
+pred_gnb <- predict(fit_gnb, X_test)
+
+# Confusion matrix
+table(Actual = y_test, Predicted = pred_gnb)
+```
 
 ---
 
 ## How to Contribute
 
-If you would like to contribute to FuzzyClass, please follow these steps:
+Contributions, bug reports, and suggestions are very welcome!
 
-1. Fork the `FuzzyClass` repository on GitHub.
-2. Create a new branch for your contribution.
-3. Make your changes to the code or documentation.
-4. Test your changes thoroughly.
-5. Add or update documentation for your changes.
-6. Submit a pull request to the main `FuzzyClass` repository.
-7. The `FuzzyClass` maintainers will review your pull request and may ask you to make some changes before it is merged. Once your pull request is merged, your contribution will be available to all `FuzzyClass` users.
-
-#### Here are some additional tips for contributing to FuzzyClass:
-
-* Please use descriptive commit messages that explain what your changes do.
-* If you are making a large or complex change, please consider creating an issue in the `FuzzyClass` repository first to discuss your plans with the maintainers.
-* Please be patient while your pull request is reviewed. The maintainers may be busy with other things, but they will get to your pull request as soon as they can.
-
-#### Thank you for your interest in contributing to FuzzyClass!
+1. Fork the [FuzzyClass repository](https://github.com/leapigufpb/FuzzyClass).
+2. Create a feature branch: `git checkout -b feature/my-new-feature`.
+3. Commit your changes: `git commit -am 'Add new feature'`.
+4. Push to the branch: `git push origin feature/my-new-feature`.
+5. Submit a Pull Request.
 
 ---
 
 ## Reporting Issues
 
-If you find a bug in `FuzzyClass`, please report it by creating an issue on the `FuzzyClass` repository on GitHub at the link: https://github.com/leapigufpb/FuzzyClass/issues. When reporting an issue, please include the following information:
+If you encounter any issues or unexpected behavior, please submit an issue on GitHub:
+👉 [https://github.com/leapigufpb/FuzzyClass/issues](https://github.com/leapigufpb/FuzzyClass/issues)
 
-1. A clear and concise description of the bug.
-2. The steps to reproduce the bug.
-3. The expected behavior.
-4. The actual behavior.
-5. Any relevant screenshots or code snippets.
-6. If possible, please also include the version of `FuzzyClass` that you are using.
-
-The `FuzzyClass` maintainers will review your issue and may ask you for more information before they can fix the bug. Once the bug is fixed, a new release of `FuzzyClass` will be made available.
-
-Here are some additional tips for reporting issues to FuzzyClass:
-
-* Please be as specific as possible when describing the bug.
-* If you can, try to reproduce the bug on a clean installation of R.
-* Include the output of sessionInfo() when reporting a bug. This will help the maintainers to diagnose the problem.
-* Please be patient while your issue is being reviewed. The maintainers may be busy with other things, but they will get to your issue as soon as they can.
-
-##### Thank you for your help in making FuzzyClass a better package
-
-I hope this helps! Let me know if you have any other questions.
+Please provide a reproducible example (`reprex`) and session information (`sessionInfo()`).

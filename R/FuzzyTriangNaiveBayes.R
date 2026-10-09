@@ -5,7 +5,7 @@
 #'
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
-#' @param cores  how many cores of the computer do you want to use to use for prediction (default = 2)
+#' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
 #' @return A vector of classifications
@@ -72,7 +72,7 @@ FuzzyTriangularNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
   Pertinencia <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)
   # ------
   # A priori probability of classes - considered equal
-  pk <- rep(1 / length(unique(M)), length(unique(M)))
+  pk <- rep(1 / length(get_classes(M)), length(get_classes(M)))
   # -------------------------------------------------------
 
 
@@ -134,91 +134,53 @@ predict.FuzzyTriangularNaiveBayes <- function(object,
   # --------------------------------------------------------
 
   # --------------------------------------------------------
+  # --------------------------------------------------------
   # Classification
   # --------------
   P <- density_values_triang(M, cols, test, parametersC, pk)
   # ---------
   N_test <- nrow(test)
-  # --
-  # --
-  if(fuzzy == T){
+  if (fuzzy == TRUE) {
     Pertinencia_r <- function_new_membership_predict(test, M = M, MinimosDataFrame, Pertinencia, cols = cols)
     R_M_obs <- function_new_fuzzy_predict(retorno = Pertinencia_r, P, M)
-  }else{
-    R_M_obs <- t(data.frame(matrix(unlist(P), nrow=length(P), byrow=TRUE)))
+  } else {
+    R_M_obs <- do.call(cbind, P)
   }
   # ---------
   if (type == "class") {
-    # -------------------------
-    #R_M_obs <- matrix(R_M_obs,nrow = N_test)
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
-    # -------------------------
+    pred_idx <- max.col(R_M_obs, ties.method = "first")
+    resultado <- levels(M)[pred_idx]
+    return(as.factor(resultado))
   } else {
-    # -------------------------
-    Infpos <- which(R_M_obs==Inf)
-    R_M_obs[Infpos] <- .Machine$integer.max;
-    R_M_obs <- matrix(unlist(R_M_obs),ncol = length(unique(M)), nrow = N_test)
-    R_M_obs <- R_M_obs/rowSums(R_M_obs,na.rm = T)
-    # ----------
-    colnames(R_M_obs) <- unique(M)
+    Infpos <- which(R_M_obs == Inf)
+    R_M_obs[Infpos] <- .Machine$integer.max
+    R_M_obs <- as.matrix(R_M_obs)
+    rs <- rowSums(R_M_obs, na.rm = TRUE)
+    rs[rs == 0] <- 1
+    R_M_obs <- R_M_obs / rs
+    colnames(R_M_obs) <- levels(M)
     return(R_M_obs)
-    # -------------------------
   }
 }
 
 # -------------------------------------------------------
 # Functions
 
-# --------------------------------------------------
-getParametersTriangular <- function(sample) {
-
-  # --------------------------------------------------
-  # Estimativa dos parametros a partir do método dado em Werner's Blog
-  # https://wernerantweiler.ca/blog.php?item=2019-06-05
-  # Verificar uma alternativa mais confiavel e melhor citada na literatura
-  # --------------------------------------------------
-  qc <- sapply(1:ncol(sample), function(i) stats::quantile(sample[, i], probs = c(0.0625, 0.25, 0.75, 0.9375)))
-  uc <- (qc[2, ] - qc[1, ])^2
-  vc <- (qc[4, ] - qc[3, ])^2
-  ac <- 2 * qc[1, ] - qc[2, ]
-  bc <- 2 * qc[4, ] - qc[3, ]
-  mc <- (uc * bc + vc * ac) / (uc + vc)
-  if( any(ac == bc)){
-    mc[which(ac==bc)] = ac[which(ac==bc)]
-  }
-  # ----------
-  names(ac) <- colnames(sample)
-  names(bc) <- colnames(sample)
-  names(mc) <- colnames(sample)
-  # -------------------------
-  # Parameters Return
-  return(rbind(ac, bc, mc))
-}
-
-
 # ----------------
-density_values_triang <- function(M, cols, test, parametersC, pk){
-  lapply(1:length(unique(M)), function(i) {
-    densidades <- sapply(1:cols, function(j) {
-      EnvStats::dtri(test[, j], min = parametersC[[i]][1, j], max = parametersC[[i]][2, j]+ 1e-7, mode = parametersC[[i]][3, j] + 1e-8)
-    })
-    densidades <- apply(densidades, 1, prod)
-    # Calcula a P(w_i) * P(X_k | w_i)
-    p <- pk[[i]] * densidades
-    # ---
-    return(p)
-  })
-
-}
-# ----------------
-
-# ----------------
-estimation_parameters_triang <- function(M, cols, dados){
-  lapply(1:length(unique(M)), function(i) {
-    SubSet <- dados[M == unique(M)[i], ]
-    getParametersTriangular(SubSet)
+density_values_triang <- function(M, cols, test, parametersC, pk) {
+  classes <- levels(M)
+  lapply(seq_along(classes), function(i) {
+    if (cols == 1) {
+      densidades <- pmax(EnvStats::dtri(test[[1]], min = parametersC[[i]][1, 1], max = parametersC[[i]][2, 1] + 1e-7, mode = parametersC[[i]][3, 1] + 1e-8), DENS_FLOOR)
+    } else {
+      dens_mat <- matrix(0, nrow = nrow(test), ncol = cols)
+      for (j in seq_len(cols)) {
+        dens_mat[, j] <- pmax(EnvStats::dtri(test[[j]], min = parametersC[[i]][1, j], max = parametersC[[i]][2, j] + 1e-7, mode = parametersC[[i]][3, j] + 1e-8), DENS_FLOOR)
+      }
+      densidades <- dens_mat[, 1]
+      for (j in 2:cols) densidades <- densidades * dens_mat[, j]
+    }
+    pk[i] * densidades
   })
 }
 # ----------------

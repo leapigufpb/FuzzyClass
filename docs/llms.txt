@@ -1,0 +1,500 @@
+# FuzzyClass
+
+**A comprehensive family of probability-based fuzzy and non-fuzzy
+classifiers.**
+
+Classification problems involve assigning categorical labels to data
+instances based on observed features. In real-world applications,
+classes often overlap, boundaries are imprecise, and measurements carry
+uncertainty. Traditional Bayesian classifiers assume rigid
+distributional parameters and crisp class assignments.
+
+**`FuzzyClass`** addresses these challenges by unifying **Fuzzy Set
+Theory** ($`\mu \in [0, 1]`$) with **Probabilistic Naive Bayes**
+classification. By leveraging soft membership degrees, fuzzy parameters
+(triangular and trapezoidal), and geometric distance weighting,
+`FuzzyClass` delivers robust, interpretable, and high-performance
+classification for complex and ambiguous data.
+
+> A complete manual showcasing all classifiers and mathematical details
+> is available at the [CRAN FuzzyClass Reference
+> Manual](https://cran.r-project.org/package=FuzzyClass/FuzzyClass.pdf).
+
+------------------------------------------------------------------------
+
+## What’s New in Version 0.2.0
+
+- 🐞 **Correct class labelling**: parameters and predicted labels now
+  always follow the same class order (factor levels). Previous
+  development code could mislabel predictions when the training data
+  were not sorted by class.
+- 📐 **Estimation aligned with the literature**: exact Gamma maximum
+  likelihood, unbounded Beta shapes, Geometric pmf consistent with its
+  estimator, Binomial `n >= max(x)`, class-wise sample sizes in the
+  fuzzy-parameter confidence intervals and nested alpha-cuts in
+  `PoiNBFuzzyParam`.
+- ⚡ **Vectorized predictions**: prediction and fuzzy-number ranking
+  (`metd = 1:5`) are vectorized over all observations, about 100× faster
+  than version 0.1.7.
+- 🪶 **Lighter dependencies**: `dplyr`, `purrr`, `tibble`, `tidyr`,
+  `rlang`, `parallel`, `foreach` and `doParallel` are no longer required
+  (`cores` is kept only for backward compatibility).
+
+------------------------------------------------------------------------
+
+## Available Classifiers (Taxonomy)
+
+`FuzzyClass` provides **18 dedicated classifiers** categorized by
+feature type and modeling paradigm:
+
+| Classifier | Paradigm | Description |
+|:---|:---|:---|
+| [`FuzzyGaussianNaiveBayes`](#continuous-classifiers) | Continuous | Gaussian Naive Bayes weighted by fuzzy membership degrees. |
+| [`GauNBFuzzyParam`](#continuous-classifiers) | Continuous | Gaussian Naive Bayes with fuzzy parameters ($`\tilde{\mu}, \tilde{\sigma}^2`$) across 5 estimation methods. |
+| [`FuzzyExponentialNaiveBayes`](#continuous-classifiers) | Continuous | Exponential Naive Bayes with fuzzy memberships for positive continuous features. |
+| [`ExpNBFuzzyParam`](#continuous-classifiers) | Continuous | Exponential Naive Bayes with fuzzy rate parameters. |
+| [`FuzzyGammaNaiveBayes`](#continuous-classifiers) | Continuous | Gamma Naive Bayes with fuzzy memberships for skewed continuous data. |
+| [`DWFuzzyGammaNaiveBayes`](#continuous-classifiers) | Continuous | Double-Weighted Fuzzy Gamma Naive Bayes. |
+| [`FuzzyBetaNaiveBayes`](#continuous-classifiers) | Continuous | Beta Naive Bayes for continuous features bounded in $`(0, 1)`$ (rates/proportions). |
+| [`FuzzyTriangNaiveBayes`](#continuous-classifiers) | Continuous | Naive Bayes with triangular membership functions. |
+| [`FuzzyTrapeNaiveBayes`](#continuous-classifiers) | Continuous | Naive Bayes with trapezoidal membership functions. |
+| [`FuzzyPoissonNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Poisson Naive Bayes with fuzzy memberships for integer count data. |
+| [`PoiNBFuzzyParam`](#discrete-count-classifiers) | Discrete / Count | Poisson Naive Bayes with fuzzy rate parameters $`\tilde{\lambda}`$. |
+| [`FuzzyBinomialNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Binomial Naive Bayes with fuzzy memberships for binary/trial counts. |
+| [`FuzzyHipergeometricNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Hypergeometric Naive Bayes for sampling without replacement from finite populations. |
+| [`DoubleWeightedFuzzyHipergeometricNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Double-Weighted Hypergeometric Naive Bayes. |
+| [`FuzzyGeoNaiveBayes`](#geometric-rule-based-systems) | Geometric | Naive Bayes with distance-based geometric fuzzy memberships. |
+| [`FuzzyNaiveBayes`](#geometric-rule-based-systems) | General | Generalized fuzzy Naive Bayes supporting continuous and categorical features. |
+| [`FuzzyBayesRule`](#geometric-rule-based-systems) | Decision Rule | Fuzzy Bayes decision rule classifier. |
+| [`FuzzyRuleBasedSystem`](#geometric-rule-based-systems) | Inference Rule | Fuzzy rule-based inference and classification system. |
+
+------------------------------------------------------------------------
+
+## Installation
+
+### Stable Version from CRAN
+
+You can install the released version of `FuzzyClass` from CRAN:
+
+``` r
+
+install.packages("FuzzyClass")
+```
+
+### Development Version from GitHub
+
+To install the latest development version:
+
+``` r
+
+# install.packages("devtools")
+devtools::install_github("leapigufpb/FuzzyClass")
+```
+
+------------------------------------------------------------------------
+
+## Dependencies
+
+`FuzzyClass` is designed with minimal, stable, and battle-tested
+dependencies automatically installed by R:
+
+- [caTools](https://cran.r-project.org/package=caTools)
+- [e1071](https://cran.r-project.org/package=e1071)
+- [EnvStats](https://cran.r-project.org/package=EnvStats)
+- [MASS](https://cran.r-project.org/package=MASS)
+- [maxLik](https://cran.r-project.org/package=maxLik)
+- [mvtnorm](https://cran.r-project.org/package=mvtnorm)
+- [Rdpack](https://cran.r-project.org/package=Rdpack)
+- [rootSolve](https://cran.r-project.org/package=rootSolve)
+
+------------------------------------------------------------------------
+
+## Quick Start & Examples
+
+### 1. Data Preparation
+
+We demonstrate package functionality using the built-in
+`VirtualRealityData` dataset:
+
+``` r
+
+library(FuzzyClass)
+
+# Load dataset
+data(VirtualRealityData)
+df <- as.data.frame(VirtualRealityData)
+
+# Split into Training (70%) and Testing (30%) sets
+set.seed(123)
+split <- caTools::sample.split(df[, 4], SplitRatio = 0.7)
+Train <- subset(df, split == TRUE)
+Test  <- subset(df, split == FALSE)
+
+X_train <- Train[, -4]
+y_train <- Train[, 4]
+X_test  <- Test[, -4]
+y_test  <- Test[, 4]
+```
+
+------------------------------------------------------------------------
+
+### 2. Gaussian Naive Bayes with Fuzzy Parameters (`GauNBFuzzyParam`)
+
+Fit a Gaussian model where mean and variance are represented as fuzzy
+numbers:
+
+``` r
+
+# Fit model using fuzzy estimation method 2
+fit_fgnb <- GauNBFuzzyParam(train = X_train, cl = y_train, metd = 2, cores = 1)
+
+# Predict classes
+pred_classes <- predict(fit_fgnb, X_test)
+
+# Confusion Matrix
+conf_mat <- table(Actual = y_test, Predicted = pred_classes)
+conf_mat
+#>       Predicted
+#> Actual  1  2  3
+#>      1 55  4  1
+#>      2  8 34 18
+#>      3  1  9 50
+
+# Classification Accuracy
+accuracy <- sum(diag(conf_mat)) / sum(conf_mat)
+cat(sprintf("Test Accuracy: %.2f%%\n", accuracy * 100))
+#> Test Accuracy: 77.22%
+```
+
+You can also extract the full posterior membership / probability matrix:
+
+``` r
+
+# Extract prediction probability matrix
+prob_matrix <- predict(fit_fgnb, X_test, type = "matrix")
+head(prob_matrix)
+#>              1           2            3
+#> [1,] 0.4991627 0.376053403 1.247839e-01
+#> [2,] 0.9942344 0.005757106 8.478896e-06
+#> [3,] 0.9818783 0.009466896 8.654851e-03
+#> [4,] 0.9943634 0.005634324 2.298521e-06
+#> [5,] 0.5559862 0.433612780 1.040104e-02
+#> [6,] 0.9520142 0.013665813 3.432000e-02
+```
+
+------------------------------------------------------------------------
+
+### 3. Continuous Fuzzy Gaussian Naive Bayes (`FuzzyGaussianNaiveBayes`)
+
+Fit a Gaussian Naive Bayes classifier where observations have fuzzy
+membership degrees:
+
+``` r
+
+# Fit standard fuzzy Gaussian Naive Bayes
+fit_gnb <- FuzzyGaussianNaiveBayes(train = X_train, cl = y_train)
+
+# Predict classes on test set
+pred_gnb <- predict(fit_gnb, X_test)
+
+# Confusion matrix
+table(Actual = y_test, Predicted = pred_gnb)
+#>       Predicted
+#> Actual  1  2  3
+#>      1 58  2  0
+#>      2  7 50  3
+#>      3  0 10 50
+```
+
+------------------------------------------------------------------------
+
+## How to Contribute
+
+Contributions, bug reports, and suggestions are very welcome!
+
+1.  Fork the [FuzzyClass
+    repository](https://github.com/leapigufpb/FuzzyClass).
+2.  Create a feature branch: `git checkout -b feature/my-new-feature`.
+3.  Commit your changes: `git commit -am 'Add new feature'`.
+4.  Push to the branch: `git push origin feature/my-new-feature`.
+5.  Submit a Pull Request.
+
+------------------------------------------------------------------------
+
+## Reporting Issues
+
+If you encounter any issues or unexpected behavior, please submit an
+issue on GitHub: 👉 <https://github.com/leapigufpb/FuzzyClass/issues>
+
+Please provide a reproducible example (`reprex`) and session information
+([`sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html)).
+
+# Package index
+
+## Continuous Classifiers
+
+Probabilistic classifiers for continuous features using fuzzy sets and
+fuzzy parameters.
+
+- [`FuzzyGaussianNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyGaussianNaiveBayes.md)
+  : Fuzzy Gaussian Naive Bayes Classifier Zadeh-based
+- [`GauNBFuzzyParam()`](https://leapigufpb.github.io/FuzzyClass/reference/GauNBFuzzyParam.md)
+  : Fuzzy Gaussian Naive Bayes Classifier with Fuzzy parameters
+- [`FuzzyExponentialNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyExponentialNaiveBayes.md)
+  : Fuzzy Exponential Naive Bayes
+- [`ExpNBFuzzyParam()`](https://leapigufpb.github.io/FuzzyClass/reference/ExpNBFuzzyParam.md)
+  : Fuzzy Exponential Naive Bayes Classifier with Fuzzy parameters
+- [`FuzzyGammaNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyGammaNaiveBayes.md)
+  : Fuzzy Gamma Naive Bayes
+- [`DWFuzzyGammaNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/DWFuzzyGammaNaiveBayes.md)
+  : Double Weighted Fuzzy Gamma Naive Bayes
+- [`FuzzyBetaNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyBetaNaiveBayes.md)
+  : Fuzzy Beta Naive Bayes
+- [`FuzzyTriangularNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyTriangularNaiveBayes.md)
+  : Fuzzy Naive Bayes Triangular Classifier
+- [`FuzzyTrapezoidalNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyTrapezoidalNaiveBayes.md)
+  : Fuzzy Naive Bayes Trapezoidal Classifier
+
+## Discrete and Count Classifiers
+
+Classifiers for discrete and count data with fuzzy memberships.
+
+- [`FuzzyPoissonNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyPoissonNaiveBayes.md)
+  : Fuzzy Poisson Naive Bayes
+- [`PoiNBFuzzyParam()`](https://leapigufpb.github.io/FuzzyClass/reference/PoiNBFuzzyParam.md)
+  : Fuzzy Poisson Naive Bayes Classifier with Fuzzy parameters
+- [`FuzzyBinomialNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyBinomialNaiveBayes.md)
+  : Fuzzy Binomial Naive Bayes
+- [`FuzzyHipergeometricNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyHipergeometricNaiveBayes.md)
+  : Fuzzy Hipergeometric Naive Bayes
+- [`DWFuzzyHipergeometricNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/DWFuzzyHipergeometricNaiveBayes.md)
+  : Double Weighted Fuzzy Hipergeometric Naive Bayes
+
+## Geometric and Decision Rule Classifiers
+
+Classifiers using geometric distance memberships and fuzzy rule systems.
+
+- [`FuzzyGeoNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyGeoNaiveBayes.md)
+  : Fuzzy Naive Bayes Geometric Classifier
+- [`FuzzyNaiveBayes()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyNaiveBayes.md)
+  : Fuzzy Naive Bayes
+- [`FuzzyBayesRule()`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyBayesRule.md)
+  : Fuzzy Bayes Rule
+- [`FuzzyClass`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyClass-package.md)
+  [`FuzzyClass-package`](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyClass-package.md)
+  : FuzzyClass: Fuzzy and Non-Fuzzy Classifiers
+
+## Datasets
+
+Example datasets included with FuzzyClass.
+
+- [`VirtualRealityData`](https://leapigufpb.github.io/FuzzyClass/reference/VirtualRealityData.md)
+  : Virtual Reality Simulator Data
+- [`SimulatedData`](https://leapigufpb.github.io/FuzzyClass/reference/SimulatedData.md)
+  : Simulated Data
+- [`HouseVotes84`](https://leapigufpb.github.io/FuzzyClass/reference/HouseVotes84.md)
+  : United States Congressional Voting Records 1984
+- [`GamWeightData`](https://leapigufpb.github.io/FuzzyClass/reference/GamWeightData.md)
+  : Gamma Weighted Data
+
+# Using FuzzyClass: Solving a Classification Problem
+
+In this vignette, we will explore how to utilize the `FuzzyClass`
+package to solve a classification problem. The problem at hand involves
+classifying different types of iris flowers based on their petal and
+sepal characteristics. The `iris` dataset, commonly available in R, will
+be used for this purpose.
+
+## Exploratory Data Analysis of the Iris Dataset
+
+In this vignette, we will perform an exploratory data analysis (EDA) of
+the classic `iris` dataset. This dataset consists of measurements of
+sepal length, sepal width, petal length, and petal width for three
+species of iris flowers. We will use various visualizations and summary
+statistics to gain insights into the data.
+
+### Loading the Data
+
+Let’s start by loading the `iris` dataset and examining its structure:
+
+``` r
+
+# Load the iris dataset
+data(iris)
+
+# Display the structure of the dataset
+str(iris)
+#> 'data.frame':    150 obs. of  5 variables:
+#>  $ Sepal.Length: num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
+#>  $ Sepal.Width : num  3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
+#>  $ Petal.Length: num  1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
+#>  $ Petal.Width : num  0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
+#>  $ Species     : Factor w/ 3 levels "setosa","versicolor",..: 1 1 1 1 1 1 1 1 1 1 ...
+```
+
+The output provides a summary of the dataset’s structure:
+
+- The dataset is a data.frame with 150 observations (rows) and 5
+  variables (columns).
+- Each variable is listed with its name and data type (num for numeric
+  and Factor for categorical).
+- For numeric variables (Sepal.Length, Sepal.Width, Petal.Length,
+  Petal.Width), summary statistics like the mean, median, and quartiles
+  might be shown.
+- The Species variable is a categorical factor with 3 levels: “setosa”,
+  “versicolor”, and “virginica”.
+- This summary gives an overview of the dataset’s dimensions, variable
+  types, and some basic statistics, helping users understand the
+  dataset’s content before diving into further analysis.
+
+### Summary Statistics
+
+Next, let’s calculate summary statistics for each species:
+
+``` r
+
+# Calculate summary statistics by species
+summary_by_species <- by(iris[, -5], iris$Species, summary)
+summary_by_species
+#> iris$Species: setosa
+#>   Sepal.Length    Sepal.Width     Petal.Length    Petal.Width   
+#>  Min.   :4.300   Min.   :2.300   Min.   :1.000   Min.   :0.100  
+#>  1st Qu.:4.800   1st Qu.:3.200   1st Qu.:1.400   1st Qu.:0.200  
+#>  Median :5.000   Median :3.400   Median :1.500   Median :0.200  
+#>  Mean   :5.006   Mean   :3.428   Mean   :1.462   Mean   :0.246  
+#>  3rd Qu.:5.200   3rd Qu.:3.675   3rd Qu.:1.575   3rd Qu.:0.300  
+#>  Max.   :5.800   Max.   :4.400   Max.   :1.900   Max.   :0.600  
+#> ------------------------------------------------------------ 
+#> iris$Species: versicolor
+#>   Sepal.Length    Sepal.Width     Petal.Length   Petal.Width   
+#>  Min.   :4.900   Min.   :2.000   Min.   :3.00   Min.   :1.000  
+#>  1st Qu.:5.600   1st Qu.:2.525   1st Qu.:4.00   1st Qu.:1.200  
+#>  Median :5.900   Median :2.800   Median :4.35   Median :1.300  
+#>  Mean   :5.936   Mean   :2.770   Mean   :4.26   Mean   :1.326  
+#>  3rd Qu.:6.300   3rd Qu.:3.000   3rd Qu.:4.60   3rd Qu.:1.500  
+#>  Max.   :7.000   Max.   :3.400   Max.   :5.10   Max.   :1.800  
+#> ------------------------------------------------------------ 
+#> iris$Species: virginica
+#>   Sepal.Length    Sepal.Width     Petal.Length    Petal.Width   
+#>  Min.   :4.900   Min.   :2.200   Min.   :4.500   Min.   :1.400  
+#>  1st Qu.:6.225   1st Qu.:2.800   1st Qu.:5.100   1st Qu.:1.800  
+#>  Median :6.500   Median :3.000   Median :5.550   Median :2.000  
+#>  Mean   :6.588   Mean   :2.974   Mean   :5.552   Mean   :2.026  
+#>  3rd Qu.:6.900   3rd Qu.:3.175   3rd Qu.:5.875   3rd Qu.:2.300  
+#>  Max.   :7.900   Max.   :3.800   Max.   :6.900   Max.   :2.500
+```
+
+The output provides summary statistics for each numeric attribute within
+each species of iris flowers. For each species, statistics such as
+minimum, maximum, mean, median, and quartiles are presented for each
+attribute. This information gives insight into the distribution and
+variation of attributes across different species, aiding in
+understanding the characteristics of each iris species.
+
+### Data Visualization
+
+#### Sepal Length vs. Sepal Width
+
+We’ll create a scatter plot to visualize the relationship between sepal
+length and sepal width:
+
+``` r
+
+# Scatter plot of sepal length vs. sepal width
+plot(iris$Sepal.Length, iris$Sepal.Width, col = iris$Species, pch = 19,
+     xlab = "Sepal Length", ylab = "Sepal Width", main = "Sepal Length vs. Sepal Width")
+legend("topright", legend = levels(iris$Species), col = 1:3, pch = 19)
+```
+
+![](index_files/figure-html/unnamed-chunk-3-1.png)
+
+#### Petal Length vs. Petal Width
+
+Similarly, let’s visualize the relationship between petal length and
+petal width:
+
+``` r
+
+# Scatter plot of petal length vs. petal width
+plot(iris$Petal.Length, iris$Petal.Width, col = iris$Species, pch = 19,
+     xlab = "Petal Length", ylab = "Petal Width", main = "Petal Length vs. Petal Width")
+legend("topright", legend = levels(iris$Species), col = 1:3, pch = 19)
+```
+
+![](index_files/figure-html/unnamed-chunk-4-1.png)
+
+------------------------------------------------------------------------
+
+## The Classification Problem
+
+The classification problem revolves around categorizing iris flowers
+into three species: setosa, versicolor, and virginica. These species are
+defined based on their physical attributes, specifically the length and
+width of their petals and sepals. Our goal is to create a classifier
+that can predict the species of an iris flower given its petal and sepal
+measurements.
+
+## Solving the Problem with FuzzyClass
+
+To solve this classification problem, we will use the `FuzzyClass`
+package, which offers tools for building probabilistic classifiers. The
+package leverages fuzzy logic to handle uncertainties and variations in
+the data.
+
+Let’s start by loading the required libraries and preparing the data:
+
+``` r
+
+library(FuzzyClass)
+
+# Load the iris dataset
+data(iris)
+
+# Splitting the dataset into training and testing sets
+set.seed(123)
+train_index <- sample(nrow(iris), nrow(iris) * 0.7)
+train_data <- iris[train_index, ]
+test_data <- iris[-train_index, ]
+```
+
+Next, we will use the Fuzzy Gaussian Naive Bayes algorithm to build the
+classifier:
+
+``` r
+
+
+# Build the Fuzzy Gaussian Naive Bayes classifier
+fit_FGNB <- GauNBFuzzyParam(train = train_data[, -5],
+                            cl = train_data[, 5], metd = 2, cores = 1)
+```
+
+Now that the classifier is trained, we can evaluate its performance on
+the testing data:
+
+``` r
+
+
+# Make predictions on the testing data
+predictions <- predict(fit_FGNB, test_data[, -5])
+
+head(predictions)
+#> [1] setosa setosa setosa setosa setosa setosa
+#> Levels: setosa versicolor virginica
+
+# Calculate the accuracy
+correct_predictions <- sum(predictions == test_data[, 5])
+total_predictions <- nrow(test_data)
+accuracy <- correct_predictions / total_predictions
+
+accuracy
+#> [1] 0.9777778
+```
+
+The resulting accuracy gives us an indication of how well our classifier
+performs on unseen data.
+
+In conclusion, the `FuzzyClass` package provides a powerful toolset for
+solving classification problems with fuzzy logic. By leveraging
+probabilistic classifiers like the Fuzzy Gaussian Naive Bayes, we can
+effectively handle uncertainties and make accurate predictions based on
+intricate data patterns.

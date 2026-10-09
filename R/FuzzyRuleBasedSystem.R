@@ -600,13 +600,9 @@ GauFS <- function(U,m,s) {
 ## Intersection is given by the Min (interFS)          ##
 #########################################################
 interFS  <- function(U,FS1, FS2) {
-  fs1 <- FS1[[3]][,2]
-  fs2 <- FS2[[3]][,2]
-  InterFS <- rep(0, length(U))
-  for ( i in 1:length(U) ) {
-    InterFS[i] <- min(fs1[i],fs2[i])
-  }
-  return(InterFS)
+  fs1 <- if (is.list(FS1) && length(FS1) >= 3 && is.matrix(FS1[[3]])) FS1[[3]][,2] else FS1
+  fs2 <- if (is.list(FS2) && length(FS2) >= 3 && is.matrix(FS2[[3]])) FS2[[3]][,2] else FS2
+  return(pmin(fs1, fs2))
 }
 ##################################################
 ## Union of two fuzzy sets on the same Universe ##
@@ -615,18 +611,15 @@ interFS  <- function(U,FS1, FS2) {
 #' @export
 #' @rdname hidden_functions
 uniFS  <- function(U,FS, FS1, FS2) {
-  MaxFS <- rep(0, length(U))
-  if (FS[[1]] == "Triangular" || FS[[1]] == "Trapezoidal") {
+  if (is.list(FS) && !is.null(FS[[1]]) && (FS[[1]] == "Triangular" || FS[[1]] == "Trapezoidal")) {
     fs1 <- FS1[[3]][,2]
     fs2 <- FS2[[3]][,2]
-    for ( i in 1:length(U) ) {
-      UniFS[i] <- max(fs1[i],fs2[i])
-    }
+    UniFS <- pmax(fs1, fs2)
   }
   else {
-    for ( i in 1:length(U) ) {
-      UniFS[i] <- max(FS1[i],FS2[i])
-    }
+    fs1 <- if (is.list(FS1) && length(FS1) >= 3 && is.matrix(FS1[[3]])) FS1[[3]][,2] else FS1
+    fs2 <- if (is.list(FS2) && length(FS2) >= 3 && is.matrix(FS2[[3]])) FS2[[3]][,2] else FS2
+    UniFS <- pmax(fs1, fs2)
   }
   return(UniFS)
 }
@@ -636,12 +629,8 @@ uniFS  <- function(U,FS, FS1, FS2) {
 #' @export
 #' @rdname hidden_functions
 compFS  <- function(U,FS) {
-  fs <- FS[[3]][,2]
-  CompFS <- rep(0, length(U))
-  for ( i in 1:length(U) ) {
-    CompFS[i] <- (1-fs[i])
-  }
-  return(CompFS)
+  fs <- if (is.list(FS) && length(FS) >= 3 && is.matrix(FS[[3]])) FS[[3]][,2] else FS
+  return(1 - fs)
 }
 ################################################################
 ## Degree of membership of an element x to a fuzzy set (dmFS) ##
@@ -723,13 +712,9 @@ dmFS <- function(x,U,FS) {
 #' @export
 #' @rdname hidden_functions
 centroidFS <- function(U,FS) {
-  centroid = 0
-  sum_memberhip = 0
-  for (i in 1: length(U)) {
-    centroid = centroid + (U[i] * FS[i])
-    sum_memberhip = sum_memberhip + FS[i]
-  }
-  centroid = centroid/sum_memberhip
+  sum_membership <- sum(FS)
+  if (sum_membership == 0) return(0)
+  centroid <- sum(U * FS) / sum_membership
   return(centroid)
 }
 #######################################
@@ -784,15 +769,15 @@ Implication <- function(FRBS,x,U,FS) {
 #############################################
 ## Method for computing Aggregation on FSs ##
 ## Mamdani type using MAX                  ##
-##############################################
+#############################################
 #' @export
 #' @rdname hidden_functions
 Aggregation <- function(FRBS,U,Lst) {
   if (FRBS == "Mandani") {
     MF <- Lst[[1]]
-    for (i in 2:length(Lst)) {
-      for ( j in 1:length(U) ) {
-        MF[j] <- max(MF[j], Lst[[i]][j])
+    if (length(Lst) > 1) {
+      for (i in 2:length(Lst)) {
+        MF <- pmax(MF, Lst[[i]])
       }
     }
   }
@@ -806,12 +791,12 @@ Aggregation <- function(FRBS,U,Lst) {
 plotFS <- function(Universe,FS) {
   if (FS[[1]] == "Triangular" || FS[[1]] == "Trapezoidal" || FS[[1]] == "Gaussian" || FS[[1]] == "Singleton" || is.na(FS[[1]])) {
     FuzzySet <- FS[[3]][,2]
-    plot(Universe, FuzzySet, pch=".", lty=1, ylim=c(0,1))
+    graphics::plot(Universe, FuzzySet, pch=".", lty=1, ylim=c(0,1))
     graphics::lines (Universe, FuzzySet, col='blue', lty=1, ylim=c(0,1))
   }
   else {
     FuzzySet <- FS
-    plot(Universe, FuzzySet, pch=".", lty=1,ylim=c(0,1))
+    graphics::plot(Universe, FuzzySet, pch=".", lty=1,ylim=c(0,1))
     graphics::lines (Universe, FuzzySet, col='blue', lty=1,ylim=c(0,1))
   }
 }

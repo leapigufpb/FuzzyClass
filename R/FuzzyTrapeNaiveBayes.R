@@ -5,7 +5,7 @@
 #'
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
-#' @param cores  how many cores of the computer do you want to use to use for prediction (default = 2)
+#' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
 #' @return A vector of classifications
@@ -69,7 +69,7 @@ FuzzyTrapezoidalNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) 
   Pertinencia <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)
   # ------
   # A priori probability of classes - considered equal
-  pk <- rep(1 / length(unique(M)), length(unique(M)))
+  pk <- rep(1 / length(get_classes(M)), length(get_classes(M)))
   # --------------------------------------------------------
 
   # -------------------------------------------------------
@@ -135,124 +135,55 @@ predict.FuzzyTrapezoidalNaiveBayes <- function(object,
   P <- density_values_trape(M, cols, test, parametersC, pk)
   # --------------
   N_test <- nrow(test)
-  # --------------
-  if(fuzzy == T){
+  if (fuzzy == TRUE) {
     Pertinencia_r <- function_new_membership_predict(test, M = M, MinimosDataFrame, Pertinencia, cols = cols)
     R_M_obs <- function_new_fuzzy_predict(retorno = Pertinencia_r, P, M)
-  }else{
-    R_M_obs <- t(data.frame(matrix(unlist(P), nrow=length(P), byrow=TRUE)))
+  } else {
+    R_M_obs <- do.call(cbind, P)
   }
   # ---------
   if (type == "class") {
-    # -------------------------
-    R_M_obs <- matrix(R_M_obs,nrow = N_test)
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
-    # -------------------------
+    pred_idx <- max.col(R_M_obs, ties.method = "first")
+    resultado <- levels(M)[pred_idx]
+    return(as.factor(resultado))
   } else {
-    # -------------------------
-    Infpos <- which(R_M_obs==Inf)
-    R_M_obs[Infpos] <- .Machine$integer.max;
-    R_M_obs <- matrix(unlist(R_M_obs),ncol = length(unique(M)), nrow = N_test)
-    R_M_obs <- R_M_obs/rowSums(R_M_obs,na.rm = T)
-    # ----------
-    colnames(R_M_obs) <- unique(M)
+    Infpos <- which(R_M_obs == Inf)
+    R_M_obs[Infpos] <- .Machine$integer.max
+    R_M_obs <- as.matrix(R_M_obs)
+    rs <- rowSums(R_M_obs, na.rm = TRUE)
+    rs[rs == 0] <- 1
+    R_M_obs <- R_M_obs / rs
+    colnames(R_M_obs) <- levels(M)
     return(R_M_obs)
-    # -------------------------
   }
 }
 
 # ----------------
-estimation_parameters_trape <- function(M, cols, dados){
-  lapply(1:length(unique(M)), function(i) {
-    lapply(1:cols, function(j) {
-      SubSet <- dados[M == unique(M)[i], j]
-      param <- getParametersTrapezoidal(SubSet)
-      return(param)
-    })
+density_values_trape <- function(M, cols, test, parametersC, pk) {
+  classes <- levels(M)
+  lapply(seq_along(classes), function(i) {
+    if (cols == 1) {
+      densidades <- trapezoid::dtrapezoid(test[[1]], min = parametersC[[i]][[1]][1],
+                                          mode1 = parametersC[[i]][[1]][2],
+                                          mode2 = parametersC[[i]][[1]][3],
+                                          max = parametersC[[i]][[1]][4] + 1e-2)
+      densidades[is.na(densidades)] <- 0
+      densidades <- pmax(densidades, DENS_FLOOR)
+    } else {
+      dens_mat <- matrix(0, nrow = nrow(test), ncol = cols)
+      for (j in seq_len(cols)) {
+        d <- trapezoid::dtrapezoid(test[[j]], min = parametersC[[i]][[j]][1],
+                                   mode1 = parametersC[[i]][[j]][2],
+                                   mode2 = parametersC[[i]][[j]][3],
+                                   max = parametersC[[i]][[j]][4] + 1e-2)
+        d[is.na(d)] <- 0
+        d <- pmax(d, DENS_FLOOR)
+        dens_mat[, j] <- d
+      }
+      densidades <- dens_mat[, 1]
+      for (j in 2:cols) densidades <- densidades * dens_mat[, j]
+    }
+    pk[i] * densidades
   })
 }
 # ----------------
-
-# ----------------
-density_values_trape <- function(M, cols, test, parametersC, pk){
-  lapply(1:length(unique(M)), function(i) {
-    densidades <- sapply(1:cols, function(j) {
-      trapezoid::dtrapezoid(test[, j], min = parametersC[[i]][[j]][1],
-                            mode1 = parametersC[[i]][[j]][2],
-                            mode2 = parametersC[[i]][[j]][3],
-                            max = parametersC[[i]][[j]][4]+1e-2)
-      })
-    densidades[which(is.na(densidades))] <- 0
-    densidades <- apply(densidades, 1, prod)
-    # Calcula a P(w_i) * P(X_k | w_i)
-    p <- pk[[i]] * densidades
-    # ---
-    return(p)
-  })
-
-}
-# ----------------
-
-
-
-# --------------------------------------------------
-getParametersTrapezoidal <- function(sample) {
-  # -------------------------
-  # sample length
-  n <- length(sample)
-  # -------------------------
-  # min value
-  minimum <- min(sample)
-  # -------------------------
-  # max value
-  maximum <- max(sample)
-  variance <- var(sample)
-  m <- expected <- median.default(sample)
-  # -------------------------
-  model <- function(x) {
-    # ----------
-    # Expected value
-    F1 <- ((-minimum * x[1] - x[1]^2 + maximum * x[2] + x[2]^2 + maximum^2 - minimum^2) /
-             (3 * x[2] - 3 * x[1] + 3 * maximum - 3 * minimum)) - expected
-    # ----------
-    # Variance Value
-    F2 <- (((6 * (x[2] - x[1])^4 + 12 * ((x[1] - minimum) + (maximum - x[2])) *
-               (x[2] - x[1])^3 + (12 * ((x[1] - minimum) + (maximum - x[2]))^2 - 6 * (x[1] - minimum) * (maximum - x[2])) * (x[2] - x[1])^2) / (18 * ((x[1] - minimum) + 2 * (x[2] - x[1]) + (maximum - x[2]))^2)) +
-             ((6 * ((x[1] - minimum) + (maximum - x[2])) * ((x[1] - minimum)^2 + (x[1] - minimum) * (maximum - x[2]) + (maximum - x[2])^2) * (x[2] - x[1]) +
-                 ((x[1] - minimum) + (maximum - x[2]))^2 * ((x[1] - minimum)^2 + (x[1] - minimum) * (maximum - x[2]) + (maximum - x[2])^2)) / (18 * ((x[1] - minimum) + 2 * (x[2] - x[1]) + (maximum - x[2]))^2))) - variance
-    # -------------------------
-    # Return
-    return(c(F1 = F1, F2 = F2))
-    # -------------------------
-  }
-  # -------------------------
-  # midpoint
-  pmedio <- minimum + ((maximum - minimum) / 2)
-  # --------
-  ss <- rootSolve::multiroot(f = model, start = c(pmedio, pmedio + .1))
-  ss <- c(ss$root[1], ss$root[2])
-  # --------
-  if (ss[1] > ss[2]) {
-    # --------
-    topo1 <- ss[2]
-    topo2 <- ss[1]
-    # --------
-  } else {
-    # --------
-    topo1 <- ss[1]
-    topo2 <- ss[2]
-    # --------
-  }
-  # -------------------------
-  # Verificando limites
-  topo1 <- ifelse(topo1 < minimum, minimum, topo1)
-  # ---
-  topo2 <- ifelse(topo2 <= topo1, topo1,
-                  ifelse(topo2 >= maximum, maximum, topo2)
-  )
-  # -------------------------
-  # Parameters Return
-  return(c(minimum, topo1, topo2, maximum))
-}

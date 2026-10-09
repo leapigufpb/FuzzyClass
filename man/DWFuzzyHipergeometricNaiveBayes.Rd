@@ -18,7 +18,7 @@ DWFuzzyHipergeometricNaiveBayes(
 
 \item{cl}{factor of true classifications of training set}
 
-\item{cores}{how many cores of the computer do you want to use (default = 2)}
+\item{cores}{kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)}
 
 \item{fuzzy}{boolean variable to use the membership function}
 

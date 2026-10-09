@@ -68,28 +68,28 @@ FuzzyNaiveBayes.default <- function(train, cl, fuzzy = TRUE, m = NULL, Pi = NULL
   }
   dados <- train # training data matrix
   M <- c(unlist(cl)) # true classes
-  if(!is.factor(M))  M <- factor(M, labels = sort(unique(M)))
+  M <- droplevels(factor(M))
   # --
 
   # --
   # converting character to factor
-  typescolumns <- sapply(1:cols, function(i) is.character(train[,i]))
+  typescolumns <- sapply(1:cols, function(i) is.character(train[, i]))
   columnscharac <- which(typescolumns)
-  trainTrans <- train[,columnscharac]
-  trainTrans <- data.frame(purrr::map_dfr(trainTrans,factor))
-  train[,columnscharac] <- trainTrans
+  if (length(columnscharac) > 0) {
+    train[columnscharac] <- lapply(train[columnscharac, drop = FALSE], as.factor)
+  }
   # --
 
 
   # --
   res <- sapply(1:cols, function(i) {is.factor(train[,i])})
   if(sum(res) == cols){
-    resul <- FuzzyNaiveBayes.categorical(train, cl, fuzzy = T, m = NULL, Pi = NULL)
+    resul <- FuzzyNaiveBayes.categorical(train, cl, fuzzy = T, m = m, Pi = Pi)
   }
   # --
   res <- sapply(1:cols, function(i) {is.numeric(train[,i])})
   if(sum(res) == cols){
-    resul <- FuzzyNaiveBayes.continuo(train, cl, fuzzy = T, m = NULL, Pi = NULL)
+    resul <- FuzzyNaiveBayes.continuo(train, cl, fuzzy = T, m = m, Pi = Pi)
   }
 
   # -------------------------------------------------------
@@ -189,7 +189,7 @@ FuzzyNaiveBayes.categorical <- function(train, cl, fuzzy = T, m = NULL, Pi = NUL
   }
   dados <- train # training data matrix
   M <- c(unlist(cl)) # true classes
-  if(!is.factor(M))  M <- factor(M, levels = unique(M))
+  M <- droplevels(factor(M))
 
   # --------------------------------------------------------
   res <- sapply(1:cols, function(i) {is.factor(train[,i])})
@@ -204,10 +204,10 @@ FuzzyNaiveBayes.categorical <- function(train, cl, fuzzy = T, m = NULL, Pi = NUL
   if(is.null(m) & is.null(Pi)){ m <- length(unique(cl))/nrow(dados); Pi <-  1/m}
   # ---
   # List: variable x target
-  parametersC <- lapply(1:length(unique(M)), function(i) {
+  parametersC <- lapply(1:length(get_classes(M)), function(i) {
     lapply(1:cols, function(j) {
-      SubSet <- dados[M == unique(M)[i], j]
-      param <- (table(SubSet) + m*pi)/(sum(table(SubSet)) + m)
+      SubSet <- dados[M == get_classes(M)[i], j]
+      param <- (table(SubSet) + m*Pi)/(sum(table(SubSet)) + m)
       return(param)
     })
   })
@@ -216,16 +216,16 @@ FuzzyNaiveBayes.categorical <- function(train, cl, fuzzy = T, m = NULL, Pi = NUL
   # --------------------------------------------------------
 
   #--------------------------------------------------------
-  Pertinencia <- lapply(1:length(unique(M)), function(i) {
+  Pertinencia <- lapply(1:length(get_classes(M)), function(i) {
     lapply(1:cols, function(j) {
-      SubSet <- dados[M == unique(M)[i], j]
+      SubSet <- dados[M == get_classes(M)[i], j]
       param <- (table(SubSet))/(sum(table(SubSet)))
       return(param)
     })
   })
   #------
   # A priori probability of classes - considered equal
-  pk <- rep(1 / length(unique(M)), length(unique(M)))
+  pk <- rep(1 / length(get_classes(M)), length(get_classes(M)))
   # -------------------------------------------------------
 
 
@@ -257,7 +257,7 @@ FuzzyNaiveBayes.continuo <- function(train, cl, fuzzy = T, m = NULL, Pi = NULL) 
   }
   dados <- train
   M <- c(unlist(cl)) # true classes
-  if(!is.factor(M))  M <- factor(M, levels = unique(M))
+  M <- droplevels(factor(M))
   # --
   res <- sapply(1:cols, function(i) {is.numeric(train[,i])})
   if(sum(res) != cols){ stop("All variables must be numerical.") }
@@ -278,7 +278,7 @@ FuzzyNaiveBayes.continuo <- function(train, cl, fuzzy = T, m = NULL, Pi = NULL) 
   Intervalos_Valores <- Intervalos_Valores(dados, M, Comprim_Intervalo, Sturges, minimos, cols);
   #------
   parametersC <- c()
-  for(i in 1:length(unique(M))){
+  for(i in 1:length(get_classes(M))){
     parametersC[[i]] <- apply(Freq[[i]], 2, function(x) ( (x + m*Pi) / ( sum(x) +m ) ) )
   }
 
@@ -286,7 +286,7 @@ FuzzyNaiveBayes.continuo <- function(train, cl, fuzzy = T, m = NULL, Pi = NULL) 
   Pertinencia <- Pertinencia(Freq, dados, M);
   #------
   # A priori probability of classes - considered equal
-  pk <- rep(1 / length(unique(M)), length(unique(M)))
+  pk <- rep(1 / length(get_classes(M)), length(get_classes(M)))
   # -------------------------------------------------------
 
   model <- parametersC
@@ -307,80 +307,58 @@ FuzzyNaiveBayes.continuo <- function(train, cl, fuzzy = T, m = NULL, Pi = NULL) 
 # -------------------------
 
 # -------------------------
-predict_categorical <- function(test, M, cols, parametersC, pk, Pertinencia, type  ) {
+predict_categorical <- function(test, M, cols, parametersC, pk, Pertinencia, type) {
 
   N <- nrow(test)
-  # --
-  P <- lapply(1:length(unique(M)), function(i) {
-    densidades <- sapply(1:cols, function(j) {
-      # --
-      sapply(1:N, function(v) {
-        if (is.na(test[v, j])) {
-          return(1e-5)
-        } else {
-          pos <- which(names(parametersC[[i]][[j]]) == (test[v, j]))
-          return(parametersC[[i]][[j]][pos])
-        }
-      })
-      # --
-    })
-    densidades <- apply(densidades, 1, prod)
-    # --
-    p <- pk[[i]] * densidades
-    # ---
-    return(p)
-  })
-  # --
+  classes <- get_classes(M)
+  n_classes <- length(classes)
 
-  # --
-  P_fuzzy <- lapply(1:length(unique(M)), function(i) {
-    densidades <- sapply(1:cols, function(j) {
-      # --
-      sapply(1:N, function(v) {
-        if (is.na(test[v, j])) {
-          return(1e-5)
-        } else {
-          pos <- which(names(Pertinencia[[i]][[j]]) == (test[v, j]))
-          return(Pertinencia[[i]][[j]][pos])
-        }
-      })
-      # --
-    })
-    densidades <- apply(densidades, 1, prod)
-    # --
-    p <- pk[[i]] * densidades
-    # ---
-    return(p)
+  P <- lapply(seq_len(n_classes), function(i) {
+    dens_mat <- matrix(1, nrow = N, ncol = cols)
+    for (j in seq_len(cols)) {
+      probs_j <- parametersC[[i]][[j]][as.character(test[[j]])]
+      probs_j[is.na(probs_j)] <- 1e-5
+      dens_mat[, j] <- as.numeric(probs_j)
+    }
+    densidades <- dens_mat[, 1]
+    if (cols > 1) {
+      for (j in 2:cols) densidades <- densidades * dens_mat[, j]
+    }
+    pk[[i]] * densidades
   })
-  # --
 
-  # --
-  R_M_obs <- array(NA, dim = c(length(P_fuzzy[[1]]), length(unique(M))))
-  for (i in 1:length(P)) {
+  P_fuzzy <- lapply(seq_len(n_classes), function(i) {
+    dens_mat <- matrix(1, nrow = N, ncol = cols)
+    for (j in seq_len(cols)) {
+      probs_j <- Pertinencia[[i]][[j]][as.character(test[[j]])]
+      probs_j[is.na(probs_j)] <- 1e-5
+      dens_mat[, j] <- as.numeric(probs_j)
+    }
+    densidades <- dens_mat[, 1]
+    if (cols > 1) {
+      for (j in 2:cols) densidades <- densidades * dens_mat[, j]
+    }
+    pk[[i]] * densidades
+  })
+
+  R_M_obs <- matrix(0, nrow = N, ncol = n_classes)
+  for (i in seq_len(n_classes)) {
     R_M_obs[, i] <- P[[i]] * P_fuzzy[[i]]
   }
-  # --
-  # ---------
+
   if (type == "class") {
-    # -------------------------
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
-    # -------------------------
+    pred_idx <- max.col(R_M_obs, ties.method = "first")
+    resultado <- classes[pred_idx]
+    return(as.factor(resultado))
   } else {
-    # -------------------------
     Infpos <- which(R_M_obs == Inf)
     R_M_obs[Infpos] <- .Machine$integer.max
-    R_M_obs <- matrix(unlist(R_M_obs), ncol = length(unique(M)))
-    R_M_obs <- R_M_obs / rowSums(R_M_obs, na.rm = T)
-    # ----------
-    colnames(R_M_obs) <- unique(M)
+    rs <- rowSums(R_M_obs, na.rm = TRUE)
+    rs[rs == 0] <- 1
+    R_M_obs <- R_M_obs / rs
+    colnames(R_M_obs) <- classes
     return(R_M_obs)
-    # -------------------------
   }
-
-  return(R_M_obs)
-
 }
 # -------------------------
 
@@ -389,60 +367,48 @@ predict_categorical <- function(test, M, cols, parametersC, pk, Pertinencia, typ
 predict_continuo <- function(test, M, cols, parametersC, pk, Pertinencia, Intervalo_Valores, type  ) {
 
   N <- nrow(test)
+  N_test <- N
+  classes <- get_classes(M)
   # --
-  P <- lapply(1:length(unique(M)), function(i) {
+  P <- lapply(1:length(classes), function(i) {
     densidades <- sapply(1:cols, function(j) {
-      # --
-      sapply(1:N, function(v) {
-        if (is.na(test[v, j])) {
-          return(1e-5)
-        } else {
-          numeros <- as.numeric(unlist(strsplit(Intervalo_Valores[[i]][,j],",")))
-          tamanho <- length(numeros)
-          pos <- which( numeros >= (test[v, j]))[1] / 2
-          pos <- ifelse(is.na(pos), tamanho/2,round(pos))
-          pos <- ifelse(pos < 1, 1, round(pos))
-          return(parametersC[[i]][,j][pos])
-        }
-      })
-      # --
+      cuts <- as.numeric(sapply(strsplit(Intervalo_Valores[[i]][, j], ","), `[`, 2))
+      pos <- pmin(pmax(findInterval(test[, j], cuts, left.open = FALSE) + 1L, 1L), length(cuts))
+      vals <- parametersC[[i]][, j][pos]
+      vals[is.na(vals) | is.na(test[, j])] <- 1e-5
+      return(vals)
     })
-    densidades <- apply(densidades, 1, prod)
-    # --
-    p <- pk[[i]] * densidades
-    # ---
-    return(p)
+    if (cols > 1) {
+      res <- densidades[, 1]
+      for (c_idx in 2:cols) res <- res * densidades[, c_idx]
+      res
+    } else {
+      as.numeric(densidades[, 1])
+    } * pk[[i]]
   })
   # --
 
   # --
-  P_fuzzy <- lapply(1:length(unique(M)), function(i) {
+  P_fuzzy <- lapply(1:length(classes), function(i) {
     densidades <- sapply(1:cols, function(j) {
-      # --
-      sapply(1:N, function(v) {
-        if (is.na(test[v, j])) {
-          return(1e-5)
-        } else {
-          numeros <- as.numeric(unlist(strsplit(Intervalo_Valores[[i]][,j],",")))
-          tamanho <- length(numeros)
-          pos <- which( numeros >= (test[v, j]))[1] / 2
-          pos <- ifelse(is.na(pos), tamanho/2,round(pos))
-          pos <- ifelse(pos < 1, 1, round(pos))
-          return(Pertinencia[[i]][,j][pos])
-        }
-      })
-      # --
+      cuts <- as.numeric(sapply(strsplit(Intervalo_Valores[[i]][, j], ","), `[`, 2))
+      pos <- pmin(pmax(findInterval(test[, j], cuts, left.open = FALSE) + 1L, 1L), length(cuts))
+      vals <- Pertinencia[[i]][, j][pos]
+      vals[is.na(vals) | is.na(test[, j])] <- 1e-5
+      return(vals)
     })
-    densidades <- apply(densidades, 1, prod)
-    # --
-    p <- pk[[i]] * densidades
-    # ---
-    return(p)
+    if (cols > 1) {
+      res <- densidades[, 1]
+      for (c_idx in 2:cols) res <- res * densidades[, c_idx]
+      res
+    } else {
+      as.numeric(densidades[, 1])
+    } * pk[[i]]
   })
   # --
 
   # --
-  R_M_obs <- array(NA, dim = c(length(P_fuzzy[[1]]), length(unique(M))))
+  R_M_obs <- matrix(0, nrow = N_test, ncol = length(classes))
   for (i in 1:length(P)) {
     R_M_obs[, i] <- P[[i]] * P_fuzzy[[i]]
   }
@@ -450,60 +416,51 @@ predict_continuo <- function(test, M, cols, parametersC, pk, Pertinencia, Interv
   # ---------
   if (type == "class") {
     # -------------------------
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
+    pred_idx <- max.col(R_M_obs, ties.method = "first")
+    resultado <- classes[pred_idx]
+    return(as.factor(resultado))
     # -------------------------
   } else {
     # -------------------------
     Infpos <- which(R_M_obs == Inf)
     R_M_obs[Infpos] <- .Machine$integer.max
-    R_M_obs <- matrix(unlist(R_M_obs), ncol = length(unique(M)))
-    R_M_obs <- R_M_obs / rowSums(R_M_obs, na.rm = T)
+    R_M_obs <- matrix(unlist(R_M_obs), ncol = length(classes), nrow = N_test)
+    R_M_obs <- R_M_obs / rowSums(R_M_obs, na.rm = TRUE)
     # ----------
-    colnames(R_M_obs) <- unique(M)
+    colnames(R_M_obs) <- classes
     return(R_M_obs)
     # -------------------------
   }
-
-  return(R_M_obs)
-
 }
 # -------------------------
 
 # -------------------------
-# -------------------------
 predict_continuo_nonfuzzy <- function(test, M, cols, parametersC, pk, Pertinencia, Intervalo_Valores, type  ) {
 
   N <- nrow(test)
+  N_test <- N
+  classes <- get_classes(M)
   # --
-  P <- lapply(1:length(unique(M)), function(i) {
+  P <- lapply(1:length(classes), function(i) {
     densidades <- sapply(1:cols, function(j) {
-      # --
-      sapply(1:N, function(v) {
-        if (is.na(test[v, j])) {
-          return(1e-5)
-        } else {
-          numeros <- as.numeric(unlist(strsplit(Intervalo_Valores[[i]][,j],",")))
-          tamanho <- length(numeros)
-          pos <- which( numeros >= (test[v, j]))[1] / 2
-          pos <- ifelse(is.na(pos), tamanho/2,round(pos))
-          pos <- ifelse(pos < 1, 1, round(pos))
-          return(parametersC[[i]][,j][pos])
-        }
-      })
-      # --
+      cuts <- as.numeric(sapply(strsplit(Intervalo_Valores[[i]][, j], ","), `[`, 2))
+      pos <- pmin(pmax(findInterval(test[, j], cuts, left.open = FALSE) + 1L, 1L), length(cuts))
+      vals <- parametersC[[i]][, j][pos]
+      vals[is.na(vals) | is.na(test[, j])] <- 1e-5
+      return(vals)
     })
-    densidades <- apply(densidades, 1, prod)
-    # --
-    p <- pk[[i]] * densidades
-    # ---
-    return(p)
+    if (cols > 1) {
+      res <- densidades[, 1]
+      for (c_idx in 2:cols) res <- res * densidades[, c_idx]
+      res
+    } else {
+      as.numeric(densidades[, 1])
+    } * pk[[i]]
   })
   # --
 
   # --
-  R_M_obs <- array(NA, dim = c(length(P[[1]]), length(unique(M))))
+  R_M_obs <- matrix(0, nrow = N_test, ncol = length(classes))
   for (i in 1:length(P)) {
     R_M_obs[, i] <- P[[i]]
   }
@@ -511,25 +468,21 @@ predict_continuo_nonfuzzy <- function(test, M, cols, parametersC, pk, Pertinenci
   # ---------
   if (type == "class") {
     # -------------------------
-    R_M_obs <- matrix(R_M_obs,nrow = N_test)
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
+    pred_idx <- max.col(R_M_obs, ties.method = "first")
+    resultado <- classes[pred_idx]
+    return(as.factor(resultado))
     # -------------------------
   } else {
     # -------------------------
     Infpos <- which(R_M_obs == Inf)
     R_M_obs[Infpos] <- .Machine$integer.max
-    R_M_obs <- matrix(unlist(R_M_obs),ncol = length(unique(M)), nrow = N_test)
-    R_M_obs <- R_M_obs / rowSums(R_M_obs, na.rm = T)
+    R_M_obs <- matrix(unlist(R_M_obs), ncol = length(classes), nrow = N_test)
+    R_M_obs <- R_M_obs / rowSums(R_M_obs, na.rm = TRUE)
     # ----------
-    colnames(R_M_obs) <- unique(M)
+    colnames(R_M_obs) <- classes
     return(R_M_obs)
     # -------------------------
   }
-
-  return(R_M_obs)
-
 }
 # -------------------------
 # -------------------------

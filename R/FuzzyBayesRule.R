@@ -5,7 +5,7 @@
 #'
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
-#' @param cores  how many cores of the computer do you want to use to use for prediction (default = 2)
+#' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
 #' @return A vector of classifications
@@ -70,7 +70,7 @@ FuzzyBayesRule.default <- function(train, cl, cores = 2, fuzzy = T) {
   Pertinencia <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)
   # ------
   # A priori probability of classes - considered equal
-  pk <- rep(1 / length(unique(M)), length(unique(M)))
+  pk <- rep(1 / length(get_classes(M)), length(get_classes(M)))
   # -------------------------------------------------------
 
 
@@ -141,30 +141,15 @@ predict.FuzzyBayesRule <- function(object,
   # --
   #test <- split(test, seq(nrow(test)))
   # --
-  if(fuzzy == T){
+  # ---------
+  if(fuzzy == TRUE){
     Pertinencia_r <- function_new_membership_predict(test, M = M, MinimosDataFrame, Pertinencia, cols = cols)
     R_M_obs <- function_new_fuzzy_predict(retorno = Pertinencia_r, P, M)
   }else{
-    R_M_obs <- t(data.frame(matrix(unlist(P), nrow=length(P), byrow=TRUE)))
+    R_M_obs <- do.call(cbind, P)
   }
   # ---------
-  if (type == "class") {
-    # -------------------------
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
-    # -------------------------
-  } else {
-    # -------------------------
-    Infpos <- which(R_M_obs==Inf)
-    R_M_obs[Infpos] <- .Machine$integer.max;
-    R_M_obs <- matrix(unlist(R_M_obs),ncol = length(unique(M)), nrow = N_test)
-    R_M_obs <- R_M_obs/rowSums(R_M_obs,na.rm = T)
-    # ----------
-    colnames(R_M_obs) <- unique(M)
-    return(R_M_obs)
-    # -------------------------
-  }
+  scores_to_output(R_M_obs, levels(M), type)
 }
 
 # -------------------------------------------------------
@@ -172,29 +157,10 @@ predict.FuzzyBayesRule <- function(object,
 
 # ----------------
 density_values_multivariate_normal <- function(M, cols, test, parametersC, pk){
-  lapply(1:length(unique(M)), function(i) {
-    densidades <- mvtnorm::dmvnorm(test,mean = parametersC[[i]][[1]], sigma = parametersC[[i]][[2]])
-    # Calcula a P(w_i) * P(X_k | w_i)
-    p <- pk[[i]] * densidades
-    # ---
-    return(p)
+  classes <- levels(M)
+  lapply(seq_along(classes), function(i) {
+    densidades <- mvtnorm::dmvnorm(test, mean = parametersC[[i]][[1]], sigma = parametersC[[i]][[2]])
+    pk[[i]] * densidades
   })
-
-}
-# ----------------
-
-# ----------------
-estimation_parameters_fuzzy_bayes_rule <- function(M, cols, dados){
-  lapply(1:length(unique(M)), function(i) {
-      SubSet <- dados[M == unique(M)[i],]
-      # --
-      Mean <- colMeans(SubSet)
-      VarMatrix <- var(SubSet)
-      # --
-      param <- list(Mean,VarMatrix)
-      # --
-      return(param)
-  })
-
 }
 # ----------------

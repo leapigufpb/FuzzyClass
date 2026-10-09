@@ -5,7 +5,7 @@
 #'
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
-#' @param cores  how many cores of the computer do you want to use to use for prediction (default = 2)
+#' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
 #' @return A vector of classifications
@@ -63,13 +63,10 @@ FuzzyPoissonNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
   M <- p_data$M
   intervalos <- p_data$intervalos
   # --------------------------------------------------------
-  # --------------------------------------------------------
   # Verify if all variables are discrete
-  verifyNumbers <- verifyNumbersFunction(dados, cols)
-
-  # --------------------------------------------------------
-  if(sum(verifyNumbers) != cols){ stop("All variables must be discrete values.") }
-  # --------------------------------------------------------
+  if (sum(verifyNumbersFunction(dados, cols)) != cols) {
+    stop("All variables must be discrete values.")
+  }
 
 
   # --------------------------------------------------------
@@ -84,7 +81,7 @@ FuzzyPoissonNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
   Pertinencia <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)
   # ------
   # A priori probability of classes - considered equal
-  pk <- rep(1 / length(unique(M)), length(unique(M)))
+  pk <- rep(1 / length(get_classes(M)), length(get_classes(M)))
   # -------------------------------------------------------
 
 
@@ -151,62 +148,47 @@ predict.FuzzyPoissonNaiveBayes <- function(object,
   P <- density_values_poi(M, cols, test, parametersC, pk)
   # ---------
   N_test <- nrow(test)
-  # --
-  # --
-  if(fuzzy == T){
+  if (fuzzy == TRUE) {
     Pertinencia_r <- function_new_membership_predict(test, M = M, MinimosDataFrame, Pertinencia, cols = cols)
     R_M_obs <- function_new_fuzzy_predict(retorno = Pertinencia_r, P, M)
-  }else{
-    R_M_obs <- t(data.frame(matrix(unlist(P), nrow=length(P), byrow=TRUE)))
+  } else {
+    R_M_obs <- do.call(cbind, P)
   }
   # ---------
   if (type == "class") {
-    # -------------------------
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
-    # -------------------------
+    pred_idx <- max.col(R_M_obs, ties.method = "first")
+    resultado <- levels(M)[pred_idx]
+    return(as.factor(resultado))
   } else {
-    # -------------------------
-    Infpos <- which(R_M_obs==Inf)
-    R_M_obs[Infpos] <- .Machine$integer.max;
-    R_M_obs <- matrix(unlist(R_M_obs),ncol = length(unique(M)), nrow = N_test)
-    R_M_obs <- R_M_obs/rowSums(R_M_obs,na.rm = T)
-    # ----------
-    colnames(R_M_obs) <- unique(M)
+    Infpos <- which(R_M_obs == Inf)
+    R_M_obs[Infpos] <- .Machine$integer.max
+    R_M_obs <- as.matrix(R_M_obs)
+    rs <- rowSums(R_M_obs, na.rm = TRUE)
+    rs[rs == 0] <- 1
+    R_M_obs <- R_M_obs / rs
+    colnames(R_M_obs) <- levels(M)
     return(R_M_obs)
-    # -------------------------
   }
 }
-
 
 # -------------------------------------------------------
 # Functions
 
 # ----------------
-density_values_poi <- function(M, cols, test, parametersC, pk){
-  lapply(1:length(unique(M)), function(i) {
-    densidades <- sapply(1:cols, function(j) {
-      stats::dpois(round(test[, j]), lambda = parametersC[[i]][[j]][1])
-    })
-    densidades <- apply(densidades, 1, prod)
-    # Calcula a P(w_i) * P(X_k | w_i)
-    p <- pk[[i]] * densidades
-    # ---
-    return(p)
-  })
-
-}
-# ----------------
-
-# ----------------
-estimation_parameters_poi <- function(M, cols, dados){
-  lapply(1:length(unique(M)), function(i) {
-    lapply(1:cols, function(j) {
-      SubSet <- dados[M == unique(M)[i], j]
-      param <- mean(SubSet, na.rm = TRUE)
-      return(param)
-    })
+density_values_poi <- function(M, cols, test, parametersC, pk) {
+  classes <- levels(M)
+  lapply(seq_along(classes), function(i) {
+    if (cols == 1) {
+      densidades <- stats::dpois(round(test[[1]]), lambda = parametersC[[i]][[1]][1])
+    } else {
+      dens_mat <- matrix(0, nrow = nrow(test), ncol = cols)
+      for (j in seq_len(cols)) {
+        dens_mat[, j] <- stats::dpois(round(test[[j]]), lambda = parametersC[[i]][[j]][1])
+      }
+      densidades <- dens_mat[, 1]
+      for (j in 2:cols) densidades <- densidades * dens_mat[, j]
+    }
+    pk[i] * densidades
   })
 }
 # ----------------

@@ -9,7 +9,7 @@
 #' @param metd Method of transforming the triangle into scalar, It is the type of data entry for the test sample, use 'metd=1' if you want to use the Yager technique, 'metd=2' if you want to use the Q technique of the uniformity test (article: Directional Statistics and Shape analysis), 'metd=3' if you want to use the Thorani technique, 'metd=4' if you want to use the alpha-order technique and 'metd=5' if you want to use the GTFN technique (article: A novel approach for arithmetic operations and ranking of generalized fuzzy numbers with application).
 #' @param alp When metd for 4, it is necessary to have alp which are alpha-cut defined
 #' @param w When metd for 4, it is necessary to have w which are alpha-cut weights defined
-#' @param cores  how many cores of the computer do you want to use (default = 2)
+#' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #'
 #' @return A vector of classifications
 #'
@@ -39,7 +39,6 @@
 #' head(pred_FGNB)
 #' head(Test[, 5])
 #' @importFrom stats cov dnorm qchisq qnorm
-#' @importFrom foreach '%dopar%'
 #' @importFrom Rdpack reprompt
 #'
 #' @export
@@ -62,8 +61,8 @@ GauNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp 
   #--------------------------------------------------------
   # --------------------------------------------------------
   # Finding Mu and Sigma for each class
-  medias <- lapply(1:length(unique(M)), function(i) colMeans(subset(dados, M == unique(M)[i])))
-  varian <- lapply(1:length(unique(M)), function(i) diag(diag(cov(subset(dados, M == unique(M)[i]))), (cols), (cols)))
+  medias <- lapply(1:length(get_classes(M)), function(i) colMeans(subset(dados, M == get_classes(M)[i])))
+  varian <- lapply(1:length(get_classes(M)), function(i) diag(diag(cov(subset(dados, M == get_classes(M)[i]))), (cols), (cols)))
   # --------------------------------------------------------
   # --------------------------------------------------------
   # Estimating Triangular Parameters
@@ -73,11 +72,14 @@ GauNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp 
     alpha <- ifelse(alpha > 1, 1, alpha)
   }
   # -------------------------------
-  N <- nrow(dados) # Number of observations
+  # Sample size of each class: the confidence intervals that define the
+  # alpha-cuts of the fuzzy mean and variance are built from the class sample
+  n_class <- as.numeric(table(factor(M, levels = get_classes(M))))
   # -------------------------------
   #  Average Parameters
   # ------------------
   Parameters_media <- lapply(1:length(medias), function(i) { # loop to groups
+    N <- n_class[i]
     lapply(1:length(medias[[1]]), function(k) { # loop to dimensions
       round(
         t(sapply(1:length(alpha), function(j) {
@@ -94,6 +96,7 @@ GauNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp 
   # Variance Parameters
   # ------------------
   Parameters_varian <- lapply(1:length(medias), function(i) { # loop to groups
+    N <- n_class[i]
     lapply(1:length(medias[[1]]), function(k) { # loop to dimensions
       round(
         t(sapply(1:length(alpha), function(j) {
@@ -170,103 +173,15 @@ predict.GauNBFuzzyParam <- function(object,
   # sum of Logs and calculation of Barycenter
   # --------------
   N_test <- nrow(test)
-  # --------------
-  # Defining how many CPU cores to use
-  core <- parallel::makePSOCKcluster(cores)
-  doParallel::registerDoParallel(core)
-  # --------------
-  # loop start
-  R_M_obs <- foreach::foreach(h = 1:N_test, .combine = rbind,
-  .export = c("Yagerdistance","Qdistance","Thoranidistance",
-              "AlphaOrderFuzzy","GTFNdistance")) %dopar% {
-    # ------------
-    x <- test[h, ]
-    # ------------
-    triangulos_obs <-
-      lapply(1:length(medias), function(i) { # loop to groups
-        trian <- lapply(1:length(medias[[1]]), function(k) { # loop to dimensions
-          nn <- length(alpha)
-          if(metd != 4){ nn <- 2 }
-          t(sapply(1:nn, function(j) {
-            if((j == 2) && (metd != 4) ){ j = length(alpha) }
-            # ------------
-            a <- dnorm(x = as.numeric(x[k]), mean = as.numeric(Parameters_media[[i]][[k]][j, 1]), sd = sqrt(as.numeric(Parameters_varian[[i]][[k]][j, 1])))
-            b <- dnorm(x = as.numeric(x[k]), mean = as.numeric(Parameters_media[[i]][[k]][j, 2]), sd = sqrt(as.numeric(Parameters_varian[[i]][[k]][j, 2])))
-            # ------------
-            c(min(a, b), max(a, b))
-            # ------------
-          }))
-        })
-        if (length(trian) > 1) {
-          return(Reduce("+", trian))
-        } else {
-          return(Reduce("+", trian))
-        }
-      })
-    # ------------
-    # Center of Mass Calculation
-    vec_trian <- triangulos_obs
-    if(metd != 4) vec_trian <- lapply(1:length(unique(M)), function(i) c(triangulos_obs[[i]][1, 1], triangulos_obs[[i]][2, 1], triangulos_obs[[i]][1, 2]))
-    # --------------------------------------------------------
-    # Transforming Vector to Scalar
-    # ------------
-    R_M <- switch(metd,
-      # ------------
-      # Barycenter
-      # yager Distance
-      "1" = {
-        # ------------
-        Yagerdistance(vec_trian, M)
-        # ------------
-      },
-      "2" = {
-        # ------------
-        # Using distance Q
-        Qdistance(vec_trian, M)
-        # ------------
-      },
-      "3" = {
-        # ------------
-        # Thorani Distance
-        Thoranidistance(vec_trian, M)
-        # ------------
-      },
-      "4" = {
-        # ------------
-        # Alpha-Order for a class of fuzzy sets
-        AlphaOrderFuzzy(vec_trian, w, M)
-      },
-      "5" = {
-        # ------------
-        # A novel approach for arithmetic operations and ranking of generalized fuzzy numbers with application
-        GTFNdistance(vec_trian, M)
-      }
-    )
-    # --------------------------------------------------------
-    R_M_class <- R_M
-    # --------------------------------------------------------
-    return(R_M_class)
+  test_mat <- as.matrix(test[, 1:cols, drop = FALSE])
+  n_classes <- length(medias)
+  classes <- get_classes(M)
+
+  dens <- function(x, i, k, j) {
+    list(dnorm(x, mean = Parameters_media[[i]][[k]][j, 1], sd = sqrt(Parameters_varian[[i]][[k]][j, 1])),
+         dnorm(x, mean = Parameters_media[[i]][[k]][j, 2], sd = sqrt(Parameters_varian[[i]][[k]][j, 2])))
   }
-  # ------------
-  # -------------------------
-  parallel::stopCluster(core)
-  # ---------
-  if (type == "class") {
-    # -------------------------
-    R_M_obs <- matrix(R_M_obs,nrow = N_test)
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
-    # -------------------------
-  } else {
-    # -------------------------
-    Infpos <- which(R_M_obs==Inf)
-    R_M_obs[Infpos] <- .Machine$integer.max;
-    R_M_obs <- matrix(unlist(R_M_obs),ncol = length(unique(M)), nrow = N_test)
-    R_M_obs <- R_M_obs/rowSums(R_M_obs,na.rm = T)
-    # ----------
-    colnames(R_M_obs) <- unique(M)
-    return(R_M_obs)
-    # -------------------------
-  }
+  R_M_obs <- fuzzy_param_scores(test_mat, n_classes, cols, alpha, metd, w, dens)
+
+  scores_to_output(R_M_obs, classes, type)
 }

@@ -5,7 +5,7 @@
 #'
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
-#' @param cores  how many cores of the computer do you want to use to use for prediction (default = 2)
+#' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
 #' @return A vector of classifications
@@ -55,8 +55,9 @@ FuzzyBetaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) {
   M <- p_data$M
   intervalos <- p_data$intervalos
   #--------------------------------------------------------
+  col_max <- sapply(1:cols, function(j) max(dados[, j]))
   for(j in 1:cols){
-    dados[, j] <- dados[, j] / (max(dados[, j])+1e-2)
+    dados[, j] <- dados[, j] / (col_max[j] + 1e-2)
   }
   #--------------------------------------------------------
   # Estimating Beta Parameters
@@ -67,14 +68,12 @@ FuzzyBetaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) {
   Sturges <- Sturges(dados, M);
   Comprim_Intervalo <- Comprim_Intervalo(dados, M, Sturges);
   minimos <- minimos(dados, M, cols);
-  #Freq <- Freq(dados, M, Comprim_Intervalo, Sturges, minimos, cols);
-  #Pertinencia <- Pertinencia(Freq, dados, M);
   MinimosDataFrame <- minomosdt_function(minimos, M, Comprim_Intervalo, Sturges, cols)
   Frequencia <- Freq_esparsa(dados = dados,M = M, minomosdt = MinimosDataFrame, cols = cols)
   Pertinencia <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)
   #------
   # A priori probability of classes - considered equal
-  pk <- rep(1 / length(unique(M)), length(unique(M)))
+  pk <- rep(1 / length(get_classes(M)), length(get_classes(M)))
   #-------------------------------------------------------
 
 
@@ -90,6 +89,7 @@ FuzzyBetaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) {
     Pertinencia = Pertinencia,
     Sturges = Sturges,
     pk = pk,
+    col_max = col_max,
     fuzzy = fuzzy
   ),
   class = "FuzzyBetaNaiveBayes"
@@ -134,8 +134,13 @@ predict.FuzzyBetaNaiveBayes <- function(object,
   pk <- object$pk
   fuzzy <- object$fuzzy
   #--------------------------------------------------------
+  col_max <- object$col_max
+  if (is.null(col_max)) {
+    col_max <- sapply(1:cols, function(j) max(test[, j]))
+  }
   for(j in 1:cols){
-    test[, j] <- test[, j] / (max(test[, j])+1e-2)
+    denom <- col_max[j] + 1e-2
+    test[, j] <- pmin(pmax(test[, j] / denom, 1e-5), 1 - 1e-5)
   }
   #--------------------------------------------------------
   # Classification
@@ -145,27 +150,28 @@ predict.FuzzyBetaNaiveBayes <- function(object,
   N_test <- nrow(test)
   # --
   # --
-  if(fuzzy == T){
+  #---------
+  if(fuzzy == TRUE){
     Pertinencia_r <- function_new_membership_predict(test, M = M, MinimosDataFrame, Pertinencia, cols = cols)
     R_M_obs <- function_new_fuzzy_predict(retorno = Pertinencia_r, P, M)
   }else{
-    R_M_obs <- t(data.frame(matrix(unlist(P), nrow=length(P), byrow=TRUE)))
+    R_M_obs <- do.call(cbind, P)
   }
   #---------
   if (type == "class") {
     #-------------------------
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
+    pred_idx <- max.col(R_M_obs, ties.method = "first")
+    resultado <- levels(M)[pred_idx]
+    return(as.factor(resultado))
     #-------------------------
   } else {
     #-------------------------
     Infpos <- which(R_M_obs==Inf)
     R_M_obs[Infpos] <- .Machine$integer.max;
-    R_M_obs <- matrix(unlist(R_M_obs),ncol = length(unique(M)), nrow = N_test)
+    R_M_obs <- as.matrix(R_M_obs)
     R_M_obs <- R_M_obs/rowSums(R_M_obs,na.rm = T)
     #----------
-    colnames(R_M_obs) <- unique(M)
+    colnames(R_M_obs) <- levels(M)
     return(R_M_obs)
     #-------------------------
   }
@@ -173,29 +179,17 @@ predict.FuzzyBetaNaiveBayes <- function(object,
 
 # ----------------
 density_values_beta <- function(M, cols, test, parametersC, pk){
-  lapply(1:length(unique(M)), function(i) {
-    densidades <- sapply(1:cols, function(j) {
-      stats::dbeta(test[, j], shape1 = parametersC[[i]][[j]][1], shape2 = parametersC[[i]][[j]][2])
-    })
-    densidades <- apply(densidades, 1, prod)
-    # Calcula a P(w_i) * P(X_k | w_i)
-    p <- pk[[i]] * densidades
-    # ---
-    return(p)
+  classes <- levels(M)
+  lapply(seq_along(classes), function(i) {
+    dens_mat <- matrix(0, nrow = nrow(test), ncol = cols)
+    for (j in seq_len(cols)) {
+      dens_mat[, j] <- stats::dbeta(test[, j], shape1 = parametersC[[i]][[j]][1], shape2 = parametersC[[i]][[j]][2])
+    }
+    densidades <- dens_mat[, 1]
+    if (cols > 1) {
+      for (j in 2:cols) densidades <- densidades * dens_mat[, j]
+    }
+    pk[[i]] * densidades
   })
-
-}
-# ----------------
-
-# ----------------
-estimation_parameters_beta <- function(M, cols, dados){
-  lapply(1:length(unique(M)), function(i) {
-    lapply(1:cols, function(j) {
-      SubSet <- dados[M == unique(M)[i], j]
-      param <- MASS::fitdistr(SubSet, "beta", start = list(shape1 = 1, shape2 = 1), lower = c(0.001,0.001), upper = c(10,10))$estimate#max(SubSet) + 1e-2)$estimate
-      return(param)
-    })
-  })
-
 }
 # ----------------

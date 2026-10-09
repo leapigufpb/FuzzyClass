@@ -27,7 +27,7 @@ ExpNBFuzzyParam(
 
 \item{w}{When metd for 4, it is necessary to have w which are alpha-cut weights defined}
 
-\item{cores}{how many cores of the computer do you want to use (default = 2)}
+\item{cores}{kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)}
 }
 \value{
 A vector of classifications

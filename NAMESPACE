@@ -87,24 +87,23 @@ export(uniFS)
 importFrom(MASS,fitdistr)
 importFrom(Rdpack,reprompt)
 importFrom(caTools,sample.split)
-importFrom(foreach,'%dopar%')
-importFrom(rlang,.data)
-importFrom(stats,cov)
-importFrom(stats,dbeta)
-importFrom(stats,dbinom)
-importFrom(stats,dexp)
-importFrom(stats,dgamma)
-importFrom(stats,dhyper)
-importFrom(stats,dnorm)
-importFrom(stats,dpois)
-importFrom(stats,median.default)
-importFrom(stats,model.extract)
-importFrom(stats,na.pass)
-importFrom(stats,predict)
-importFrom(stats,qchisq)
-importFrom(stats,qnorm)
-importFrom(stats,rgamma)
-importFrom(stats,sd)
-importFrom(stats,terms)
-importFrom(stats,uniroot)
-importFrom(stats,var)
+importFrom(stats,
+  cov,
+  dbeta,
+  dbinom,
+  dexp,
+  dgamma,
+  dhyper,
+  dnorm,
+  dpois,
+  median.default,
+  model.extract,
+  na.pass,
+  predict,
+  qchisq,
+  qnorm,
+  rgamma,
+  sd,
+  terms,
+  var
+)

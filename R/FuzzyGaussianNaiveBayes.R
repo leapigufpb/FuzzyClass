@@ -5,7 +5,7 @@
 #'
 #' @param train matrix or data frame of training set cases.
 #' @param cl factor of true classifications of training set
-#' @param cores  how many cores of the computer do you want to use to use for prediction (default = 2)
+#' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
 #' @return A vector of classifications
@@ -36,7 +36,6 @@
 #' head(pred_GNB)
 #' head(Test[, 5])
 #' @importFrom stats cov dnorm qchisq qnorm
-#' @importFrom foreach '%dopar%'
 #' @importFrom Rdpack reprompt
 #'
 #' @export
@@ -60,7 +59,7 @@ FuzzyGaussianNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) 
   N <- nrow(dados) # Number of observations
   # -------------------------------
   # --------------------------------------------------------
-  names_class <- unique(M)
+  names_class <- get_classes(M)
   Sturges <- Sturges(dados, M);
   # --------------------------------------------------------
   Comprim_Intervalo <- Comprim_Intervalo(dados, M, Sturges);
@@ -72,15 +71,15 @@ FuzzyGaussianNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) 
   Pertinencias <- Pertinencia_esparsa(M = M, Frequencia, cols = cols)
   # --------------------------------------------------------
   # Finding Mu and Sigma for each class
-  medias <- lapply(1:length(unique(M)), function(i) colMeans(subset(dados, M == unique(M)[i])))
-  varian <- lapply(1:length(unique(M)), function(i) diag(diag(cov(subset(dados, M == unique(M)[i]))), (cols), (cols)))
+  medias <- lapply(1:length(get_classes(M)), function(i) colMeans(subset(dados, M == get_classes(M)[i])))
+  varian <- lapply(1:length(get_classes(M)), function(i) diag(diag(cov(subset(dados, M == get_classes(M)[i]))), (cols), (cols)))
   # --------------------------------------------------------
   # A priori probability of classes - considered equal
-  pk <- rep(1 / length(unique(M)), length(unique(M)))
+  pk <- rep(1 / length(get_classes(M)), length(get_classes(M)))
   # -----------------------
   logaritmo <- log(pk)
-  log_determinante <- lapply(1:length(unique(M)), function(i) 0.5 * log(det(varian[[i]])))
-  inversa_covar <- lapply(1:length(unique(M)), function(i) MASS::ginv(varian[[i]]))
+  log_determinante <- lapply(1:length(get_classes(M)), function(i) 0.5 * log(det(varian[[i]])))
+  inversa_covar <- lapply(1:length(get_classes(M)), function(i) MASS::ginv(varian[[i]]))
   # -----------------------
 
   # -------------------------------------------------------
@@ -111,11 +110,11 @@ FuzzyGaussianNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) 
 print.FuzzyGaussianNaiveBayes <- function(x, ...) {
   if (x$fuzzy == T) {
     # -----------------
-    cat("\nFuzzy Gaussian Naive Bayes Classifier for Discrete Predictors Zadeh-based\n\n")
+    cat("\nFuzzy Gaussian Naive Bayes Classifier for Continuous Predictors Zadeh-based\n\n")
     # -----------------
   } else {
     # -----------------
-    cat("\nGaussian Naive Bayes Classifier for Discrete Predictors\n\n")
+    cat("\nGaussian Naive Bayes Classifier for Continuous Predictors\n\n")
     # -----------------
   }
   cat("Variables:\n")
@@ -150,61 +149,43 @@ predict.FuzzyGaussianNaiveBayes <- function(object,
   # --------------------------------------------------------
 
   # --------------------------------------------------------
-  # Calculation of triangles for each test observation
+  # Calculation for each test observation
   # --------------
-  N_test <- nrow(test)
-  # --------------
-  # Defining how many CPU cores to use
-  core <- parallel::makePSOCKcluster(cores)
-  doParallel::registerDoParallel(core)
-  # --------------
-  # loop start
-  R_M_obs <- foreach::foreach(h = 1:N_test, .combine = rbind) %dopar% {
-    # ------------
-    x <- test[h, ]
-    # ------------
-    R_M <- lapply(1:length(unique(M)), function(i) {
+  test_mat <- as.matrix(test[, 1:cols, drop = FALSE])
+  N_test <- nrow(test_mat)
+  classes <- get_classes(M)
+  n_classes <- length(classes)
 
-      Pertinencia_r <- pertinencia_predict_esparsa(minomosdt = MinimosDataFrame, x, Pert_joda = Pertinencias, cols,i)
-      log_Pertinencia <- log(Pertinencia_r)
-
-      if (fuzzy == T) {
-        # --------------
-        f <- log_Pertinencia + logaritmo[i] - log_determinante[[i]] - 0.5 * as.numeric(x - medias[[i]]) %*% inversa_covar[[i]] %*% as.numeric(x - medias[[i]])
-        # --------------
-      } else {
-        # --------------
-        f <- logaritmo[i] - log_determinante[[i]] - 0.5 * as.numeric(x - medias[[i]]) %*% inversa_covar[[i]] %*% as.numeric(x - medias[[i]])
-        # --------------
-      }
-
-      return(f)
-    })
-    # --------------------------------------------------------
-    R_M_class <- R_M
-    # --------------------------------------------------------
-    return(R_M_class)
+  if (fuzzy == TRUE) {
+    Pert_list <- function_new_membership_predict(test_mat, M = M, MinimosDataFrame = MinimosDataFrame, Pertinencia = Pertinencias, cols = cols)
   }
-  # ------------
-  # -------------------------
-  parallel::stopCluster(core)
-  # ---------
+
+  R_M_obs <- matrix(0, nrow = N_test, ncol = n_classes)
+  for (i in 1:n_classes) {
+    D_i <- sweep(test_mat, 2, medias[[i]], "-")
+    quad <- rowSums((D_i %*% inversa_covar[[i]]) * D_i)
+    if (fuzzy == TRUE) {
+      log_Pert <- log(pmax(Pert_list[[i]], 1e-15))
+      R_M_obs[, i] <- log_Pert + logaritmo[i] - log_determinante[[i]] - 0.5 * quad
+    } else {
+      R_M_obs[, i] <- logaritmo[i] - log_determinante[[i]] - 0.5 * quad
+    }
+  }
+
   if (type == "class") {
     # -------------------------
-    R_M_obs <- matrix(R_M_obs,nrow = N_test)
-    R_M_obs <- sapply(1:nrow(R_M_obs), function(i) which.max(R_M_obs[i, ]))
-    resultado <- unique(M)[R_M_obs]
-    return(as.factor(c(resultado)))
+    res_idx <- max.col(R_M_obs, ties.method = "first")
+    resultado <- classes[res_idx]
+    return(as.factor(resultado))
     # -------------------------
   } else {
     # -------------------------
-    Infpos <- which(R_M_obs==Inf)
-    R_M_obs[Infpos] <- .Machine$integer.max;
-    R_M_obs <- matrix(unlist(R_M_obs),ncol = length(unique(M)), nrow = N_test)
-    R_M_obs <- R_M_obs/rowSums(R_M_obs,na.rm = T)
-    # ----------
-    colnames(R_M_obs) <- unique(M)
-    return(R_M_obs)
+    # Softmax conversion to probabilities
+    max_scores <- R_M_obs[cbind(seq_len(N_test), max.col(R_M_obs))]
+    exp_scores <- exp(R_M_obs - max_scores)
+    probs <- exp_scores / rowSums(exp_scores, na.rm = TRUE)
+    colnames(probs) <- classes
+    return(probs)
     # -------------------------
   }
 }
