@@ -9,3 +9,4 @@
 /.quarto/
 /doc/
 /Meta/
+*.tar.gz
