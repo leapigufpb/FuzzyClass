@@ -5,7 +5,14 @@
 ## Usage
 
 ``` r
-FuzzyNaiveBayes(train, cl, fuzzy = TRUE, m = NULL, Pi = NULL)
+FuzzyNaiveBayes(
+  train,
+  cl,
+  fuzzy = TRUE,
+  m = NULL,
+  Pi = NULL,
+  verbose = fuzzy_verbose()
+)
 ```
 
 ## Arguments
@@ -31,15 +38,34 @@ FuzzyNaiveBayes(train, cl, fuzzy = TRUE, m = NULL, Pi = NULL)
 
   is 1/M, where M is the number of classes
 
+- verbose:
+
+  logical; if `TRUE` (default, see
+  [`fuzzy_verbose()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_verbose.md))
+  a message reports the training progress.
+
 ## Value
 
-A vector of classifications
+A trained
+[FuzzyNaiveBayesModel](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyNaiveBayesModel.md)
+R6 object (which inherits from
+[FuzzyClassifier](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyClassifier.md)).
+Use `predict(object, newdata, type = "class")` or
+`object$predict(newdata)` to classify new observations; `type = "prob"`
+(or `"matrix"`) returns the matrix of class probabilities.
 
 ## References
 
 Moraes RM, Machado LS (2009). “Another approach for fuzzy naive bayes
 applied on online training assessment in virtual reality simulators.” In
 *Proceedings of Safety Health and Environmental World Congress*, 62–66.
+
+## See also
+
+[FuzzyNaiveBayesModel](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyNaiveBayesModel.md)
+for the R6 interface and
+[`fuzzy_naive_bayes()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_naive_bayes.md)
+(engine `"naive"`) for the tidymodels interface.
 
 ## Examples
 
@@ -60,6 +86,10 @@ fit_FNB <- FuzzyNaiveBayes(
   train = Train[, -1],
   cl = Train[, 1]
 )
+#> ℹ Fuzzy Naive Bayes: 305 observations, 16 predictors and 2 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [14ms]
+#> 
 
 pred_FNB <- predict(fit_FNB, test)
 

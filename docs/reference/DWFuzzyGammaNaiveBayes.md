@@ -5,7 +5,15 @@
 ## Usage
 
 ``` r
-DWFuzzyGammaNaiveBayes(train, cl, cores = 2, fuzzy = TRUE, wdelta, weta)
+DWFuzzyGammaNaiveBayes(
+  train,
+  cl,
+  cores = 2,
+  fuzzy = TRUE,
+  wdelta,
+  weta,
+  verbose = fuzzy_verbose()
+)
 ```
 
 ## Arguments
@@ -35,15 +43,34 @@ DWFuzzyGammaNaiveBayes(train, cl, cores = 2, fuzzy = TRUE, wdelta, weta)
 
   vector weight each feature
 
+- verbose:
+
+  logical; if `TRUE` (default, see
+  [`fuzzy_verbose()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_verbose.md))
+  a message reports the training progress.
+
 ## Value
 
-A vector of classifications
+A trained
+[DWFuzzyGammaNaiveBayesModel](https://leapigufpb.github.io/FuzzyClass/reference/DWFuzzyGammaNaiveBayesModel.md)
+R6 object (which inherits from
+[FuzzyClassifier](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyClassifier.md)).
+Use `predict(object, newdata, type = "class")` or
+`object$predict(newdata)` to classify new observations; `type = "prob"`
+(or `"matrix"`) returns the matrix of class probabilities.
 
 ## References
 
 Moraes RM, Soares EAMG, Machado LS (2020). “A double weighted fuzzy
 gamma naive bayes classifier.” *Journal of Intelligent & Fuzzy Systems*,
 **38**(1), 577–588.
+
+## See also
+
+[DWFuzzyGammaNaiveBayesModel](https://leapigufpb.github.io/FuzzyClass/reference/DWFuzzyGammaNaiveBayesModel.md)
+for the R6 interface and
+[`fuzzy_naive_bayes()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_naive_bayes.md)
+(engine `"dw_gamma"`) for the tidymodels interface.
 
 ## Examples
 
@@ -66,6 +93,10 @@ fit_NBT <- DWFuzzyGammaNaiveBayes(
   wdelta = c(2.002/6,1.998/6,2.000/6),
   weta = c(3/10,2/10, 5/10)
 )
+#> ℹ Double Weighted Fuzzy Gamma Naive Bayes: 420 observations, 3 predictors and 3 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [7ms]
+#> 
 
 pred_NBT <- predict(fit_NBT, test)
 

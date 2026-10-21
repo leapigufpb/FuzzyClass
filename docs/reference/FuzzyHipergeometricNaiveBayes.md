@@ -5,7 +5,13 @@
 ## Usage
 
 ``` r
-FuzzyHipergeometricNaiveBayes(train, cl, cores = 2, fuzzy = TRUE)
+FuzzyHipergeometricNaiveBayes(
+  train,
+  cl,
+  cores = 2,
+  fuzzy = TRUE,
+  verbose = fuzzy_verbose()
+)
 ```
 
 ## Arguments
@@ -27,9 +33,21 @@ FuzzyHipergeometricNaiveBayes(train, cl, cores = 2, fuzzy = TRUE)
 
   boolean variable to use the membership function
 
+- verbose:
+
+  logical; if `TRUE` (default, see
+  [`fuzzy_verbose()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_verbose.md))
+  a message reports the training progress.
+
 ## Value
 
-A vector of classifications
+A trained
+[FuzzyHipergeometricNaiveBayesModel](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyHipergeometricNaiveBayesModel.md)
+R6 object (which inherits from
+[FuzzyClassifier](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyClassifier.md)).
+Use `predict(object, newdata, type = "class")` or
+`object$predict(newdata)` to classify new observations; `type = "prob"`
+(or `"matrix"`) returns the matrix of class probabilities.
 
 ## References
 
@@ -37,6 +55,13 @@ Ferreira J, Machado LS, de Moraes RM (2025). “A New Double Weighted
 Fuzzy Hypergeometric Naive Bayes Network and its Application for User’s
 Assessment in Virtual Reality Simulators.” *International Journal of
 Computational Intelligence Systems*, **18**(1), 1–17.
+
+## See also
+
+[FuzzyHipergeometricNaiveBayesModel](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyHipergeometricNaiveBayesModel.md)
+for the R6 interface and
+[`fuzzy_naive_bayes()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_naive_bayes.md)
+(engine `"hypergeometric"`) for the tidymodels interface.
 
 ## Examples
 
@@ -87,6 +112,10 @@ fit_NHT <- FuzzyHipergeometricNaiveBayes(
  train = Train[, -3],
  cl = Train[, 3], cores = 2
 )
+#> ℹ Fuzzy Hypergeometric Naive Bayes: 151 observations, 2 predictors and 3 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [5ms]
+#> 
 
 pred_NHT <- predict(fit_NHT, test)
 

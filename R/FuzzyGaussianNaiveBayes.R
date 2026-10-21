@@ -8,7 +8,11 @@
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [FuzzyGaussianNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [FuzzyGaussianNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"gaussian"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{marcos2012online}{FuzzyClass}
@@ -39,12 +43,12 @@
 #' @importFrom Rdpack reprompt
 #'
 #' @export
-FuzzyGaussianNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
-  UseMethod("FuzzyGaussianNaiveBayes")
+FuzzyGaussianNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose()) {
+  FuzzyGaussianNaiveBayesModel$new(fuzzy = fuzzy)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-FuzzyGaussianNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) {
+#' @noRd
+fit_FuzzyGaussianNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -83,7 +87,7 @@ FuzzyGaussianNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) 
   # -----------------------
 
   # -------------------------------------------------------
-  structure(list(
+  list(
     minimo = minimos,
     MinimosDataFrame = MinimosDataFrame,
     maximo = maximos,
@@ -99,33 +103,13 @@ FuzzyGaussianNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) 
     cols = cols,
     M = M,
     cores = cores
-  ),
-  class = "FuzzyGaussianNaiveBayes"
   )
 }
 # -------------------------
 
 
-#' @export
-print.FuzzyGaussianNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    # -----------------
-    cat("\nFuzzy Gaussian Naive Bayes Classifier for Continuous Predictors Zadeh-based\n\n")
-    # -----------------
-  } else {
-    # -----------------
-    cat("\nGaussian Naive Bayes Classifier for Continuous Predictors\n\n")
-    # -----------------
-  }
-  cat("Variables:\n")
-  print(names(x$medias[[1]]))
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
-
-#' @export
-predict.FuzzyGaussianNaiveBayes <- function(object,
+#' @noRd
+predict_FuzzyGaussianNaiveBayes <- function(object,
                                             newdata,
                                             type = "class",
                                             ...) {
@@ -189,3 +173,41 @@ predict.FuzzyGaussianNaiveBayes <- function(object,
     # -------------------------
   }
 }
+
+#' Fuzzy Gaussian Naive Bayes (Zadeh-based) (R6 class)
+#'
+#' @description
+#' R6 implementation of the Fuzzy Gaussian Naive Bayes (Zadeh-based) classifier. Create the model with
+#' `FuzzyGaussianNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [FuzzyGaussianNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- FuzzyGaussianNaiveBayesModel$new()
+#' model$fit(train = iris[, -5], cl = iris$Species)
+#' head(model$predict(iris[, -5]))
+#' head(model$predict(iris[, -5], type = "prob"))
+#' model
+#' @export
+FuzzyGaussianNaiveBayesModel <- R6::R6Class(
+  classname = "FuzzyGaussianNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [FuzzyGaussianNaiveBayes()].
+    initialize = function(fuzzy = TRUE) {
+      super$initialize(fuzzy = fuzzy)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Fuzzy Gaussian Naive Bayes (Zadeh-based)",
+    label_crisp = "Gaussian Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_FuzzyGaussianNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_FuzzyGaussianNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
+

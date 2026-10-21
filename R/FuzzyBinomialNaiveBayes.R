@@ -8,7 +8,11 @@
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [FuzzyBinomialNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [FuzzyBinomialNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"binomial"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{moraes2016fuzzybinom}{FuzzyClass}
@@ -47,12 +51,12 @@
 #' @importFrom stats dbinom
 #'
 #' @export
-FuzzyBinomialNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
-  UseMethod("FuzzyBinomialNaiveBayes")
+FuzzyBinomialNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose()) {
+  FuzzyBinomialNaiveBayesModel$new(fuzzy = fuzzy)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-FuzzyBinomialNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
+#' @noRd
+fit_FuzzyBinomialNaiveBayes <- function(train, cl, cores = 2, fuzzy = T) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -87,7 +91,7 @@ FuzzyBinomialNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
 
 
   #-------------------------------------------------------
-  structure(list(
+  list(
     parametersC = parametersC,
     minimos = minimos,
     MinimosDataFrame = MinimosDataFrame,
@@ -99,31 +103,13 @@ FuzzyBinomialNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
     Sturges = Sturges,
     pk = pk,
     fuzzy = fuzzy
-  ),
-  class = "FuzzyBinomialNaiveBayes"
   )
 }
 #-------------------------
 
 
-#' @export
-print.FuzzyBinomialNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    #-----------------
-    cat("\nFuzzy Binomial Naive Bayes Classifier for Discrete Predictors\n\n")
-    #-----------------
-  } else {
-    #-----------------
-    cat("\nNaive Binomial  Bayes Classifier for Discrete Predictors\n\n")
-    #-----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  #-----------------
-}
-
-#' @export
-predict.FuzzyBinomialNaiveBayes <- function(object,
+#' @noRd
+predict_FuzzyBinomialNaiveBayes <- function(object,
                                          newdata,
                                          type = "class",
                                          ...) {
@@ -219,3 +205,42 @@ estimation_parameters_binomial <- function(M, cols, dados){
 
 }
 # ----------------
+
+#' Fuzzy Binomial Naive Bayes (R6 class)
+#'
+#' @description
+#' R6 implementation of the Fuzzy Binomial Naive Bayes classifier. Create the model with
+#' `FuzzyBinomialNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [FuzzyBinomialNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- FuzzyBinomialNaiveBayesModel$new()
+#' x <- round(iris[, -5])
+#' model$fit(train = x, cl = iris$Species)
+#' head(model$predict(x))
+#' head(model$predict(x, type = "prob"))
+#' model
+#' @export
+FuzzyBinomialNaiveBayesModel <- R6::R6Class(
+  classname = "FuzzyBinomialNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [FuzzyBinomialNaiveBayes()].
+    initialize = function(fuzzy = TRUE) {
+      super$initialize(fuzzy = fuzzy)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Fuzzy Binomial Naive Bayes",
+    label_crisp = "Binomial Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_FuzzyBinomialNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_FuzzyBinomialNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
+

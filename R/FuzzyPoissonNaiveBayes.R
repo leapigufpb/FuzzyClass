@@ -8,7 +8,11 @@
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [FuzzyPoissonNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [FuzzyPoissonNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"poisson"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{moraes2015fuzzy}{FuzzyClass}
@@ -47,12 +51,12 @@
 #' @importFrom stats dpois
 #'
 #' @export
-FuzzyPoissonNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
-  UseMethod("FuzzyPoissonNaiveBayes")
+FuzzyPoissonNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose()) {
+  FuzzyPoissonNaiveBayesModel$new(fuzzy = fuzzy)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-FuzzyPoissonNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
+#' @noRd
+fit_FuzzyPoissonNaiveBayes <- function(train, cl, cores = 2, fuzzy = T) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -86,7 +90,7 @@ FuzzyPoissonNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
 
 
   # -------------------------------------------------------
-  structure(list(
+  list(
     parametersC = parametersC,
     minimos = minimos,
     MinimosDataFrame = MinimosDataFrame,
@@ -98,31 +102,13 @@ FuzzyPoissonNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
     Sturges = Sturges,
     pk = pk,
     fuzzy = fuzzy
-  ),
-  class = "FuzzyPoissonNaiveBayes"
   )
 }
 # -------------------------
 
 
-#' @export
-print.FuzzyPoissonNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    # -----------------
-    cat("\nFuzzy Poisson Naive Bayes Classifier for Discrete Predictors\n\n")
-    # -----------------
-  } else {
-    # -----------------
-    cat("\nNaive Poisson  Bayes Classifier for Discrete Predictors\n\n")
-    # -----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
-
-#' @export
-predict.FuzzyPoissonNaiveBayes <- function(object,
+#' @noRd
+predict_FuzzyPoissonNaiveBayes <- function(object,
                                                newdata,
                                                type = "class",
                                                ...) {
@@ -192,3 +178,42 @@ density_values_poi <- function(M, cols, test, parametersC, pk) {
   })
 }
 # ----------------
+
+#' Fuzzy Poisson Naive Bayes (R6 class)
+#'
+#' @description
+#' R6 implementation of the Fuzzy Poisson Naive Bayes classifier. Create the model with
+#' `FuzzyPoissonNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [FuzzyPoissonNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- FuzzyPoissonNaiveBayesModel$new()
+#' x <- round(iris[, -5])
+#' model$fit(train = x, cl = iris$Species)
+#' head(model$predict(x))
+#' head(model$predict(x, type = "prob"))
+#' model
+#' @export
+FuzzyPoissonNaiveBayesModel <- R6::R6Class(
+  classname = "FuzzyPoissonNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [FuzzyPoissonNaiveBayes()].
+    initialize = function(fuzzy = TRUE) {
+      super$initialize(fuzzy = fuzzy)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Fuzzy Poisson Naive Bayes",
+    label_crisp = "Poisson Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_FuzzyPoissonNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_FuzzyPoissonNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
+

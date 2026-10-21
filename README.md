@@ -33,6 +33,21 @@ classification for complex and ambiguous data.
 
 ------------------------------------------------------------------------
 
+## What’s New in Version 0.3.0
+
+- 🧱 **R6 classes**: every classifier is now an
+  [R6](https://r6.r-lib.org) class (e.g. `FuzzyGaussianNaiveBayesModel`)
+  with `$new()`, `$fit()`, `$predict()` and `$set_params()`. The
+  functional interface (`FuzzyGaussianNaiveBayes(train, cl)` +
+  `predict()`) still works and gives the same predictions.
+- 💬 **Friendly training messages**: `$fit()` tells you which model is
+  being trained, on how much data, and how long it took. Silence it with
+  `verbose = FALSE` or `options(FuzzyClass.verbose = FALSE)`.
+- 🔗 **tidymodels support**: the new parsnip model `fuzzy_naive_bayes()`
+  exposes all classifiers as engines, ready for `workflows`, `recipes`,
+  `rsample`, `tune` and `yardstick`, including tuning of `fuzzy`,
+  `alpha_cut` and `ranking_method`.
+
 ## What’s New in Version 0.2.0
 
 - 🐞 **Correct class labelling**: parameters and predicted labels now
@@ -55,29 +70,31 @@ classification for complex and ambiguous data.
 
 ## Available Classifiers (Taxonomy)
 
-`FuzzyClass` provides **18 dedicated classifiers** categorized by
-feature type and modeling paradigm:
+`FuzzyClass` provides **17 classifiers** and a fuzzy rule-based system,
+categorized by feature type and modeling paradigm. Each classifier `X`
+has the functional interface `X(train, cl)`, the R6 class `XModel` and
+an engine of `fuzzy_naive_bayes()`:
 
-| Classifier | Paradigm | Description |
-|:---|:---|:---|
-| [`FuzzyGaussianNaiveBayes`](#continuous-classifiers) | Continuous | Gaussian Naive Bayes weighted by fuzzy membership degrees. |
-| [`GauNBFuzzyParam`](#continuous-classifiers) | Continuous | Gaussian Naive Bayes with fuzzy parameters ($\tilde{\mu}, \tilde{\sigma}^2$) across 5 estimation methods. |
-| [`FuzzyExponentialNaiveBayes`](#continuous-classifiers) | Continuous | Exponential Naive Bayes with fuzzy memberships for positive continuous features. |
-| [`ExpNBFuzzyParam`](#continuous-classifiers) | Continuous | Exponential Naive Bayes with fuzzy rate parameters. |
-| [`FuzzyGammaNaiveBayes`](#continuous-classifiers) | Continuous | Gamma Naive Bayes with fuzzy memberships for skewed continuous data. |
-| [`DWFuzzyGammaNaiveBayes`](#continuous-classifiers) | Continuous | Double-Weighted Fuzzy Gamma Naive Bayes. |
-| [`FuzzyBetaNaiveBayes`](#continuous-classifiers) | Continuous | Beta Naive Bayes for continuous features bounded in $(0, 1)$ (rates/proportions). |
-| [`FuzzyTriangNaiveBayes`](#continuous-classifiers) | Continuous | Naive Bayes with triangular membership functions. |
-| [`FuzzyTrapeNaiveBayes`](#continuous-classifiers) | Continuous | Naive Bayes with trapezoidal membership functions. |
-| [`FuzzyPoissonNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Poisson Naive Bayes with fuzzy memberships for integer count data. |
-| [`PoiNBFuzzyParam`](#discrete-count-classifiers) | Discrete / Count | Poisson Naive Bayes with fuzzy rate parameters $\tilde{\lambda}$. |
-| [`FuzzyBinomialNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Binomial Naive Bayes with fuzzy memberships for binary/trial counts. |
-| [`FuzzyHipergeometricNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Hypergeometric Naive Bayes for sampling without replacement from finite populations. |
-| [`DoubleWeightedFuzzyHipergeometricNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Double-Weighted Hypergeometric Naive Bayes. |
-| [`FuzzyGeoNaiveBayes`](#geometric-rule-based-systems) | Geometric | Naive Bayes with distance-based geometric fuzzy memberships. |
-| [`FuzzyNaiveBayes`](#geometric-rule-based-systems) | General | Generalized fuzzy Naive Bayes supporting continuous and categorical features. |
-| [`FuzzyBayesRule`](#geometric-rule-based-systems) | Decision Rule | Fuzzy Bayes decision rule classifier. |
-| [`FuzzyRuleBasedSystem`](#geometric-rule-based-systems) | Inference Rule | Fuzzy rule-based inference and classification system. |
+| Classifier | Paradigm | Description | tidymodels engine |
+|:---|:---|:---|:---|
+| [`FuzzyGaussianNaiveBayes`](#continuous-classifiers) | Continuous | Gaussian Naive Bayes weighted by fuzzy membership degrees. | `"gaussian"` |
+| [`GauNBFuzzyParam`](#continuous-classifiers) | Continuous | Gaussian Naive Bayes with fuzzy parameters ($\tilde{\mu}, \tilde{\sigma}^2$) across 5 estimation methods. | `"gaussian_fuzzy_param"` |
+| [`FuzzyExponentialNaiveBayes`](#continuous-classifiers) | Continuous | Exponential Naive Bayes with fuzzy memberships for positive continuous features. | `"exponential"` |
+| [`ExpNBFuzzyParam`](#continuous-classifiers) | Continuous | Exponential Naive Bayes with fuzzy rate parameters. | `"exponential_fuzzy_param"` |
+| [`FuzzyGammaNaiveBayes`](#continuous-classifiers) | Continuous | Gamma Naive Bayes with fuzzy memberships for skewed continuous data. | `"gamma"` |
+| [`DWFuzzyGammaNaiveBayes`](#continuous-classifiers) | Continuous | Double-Weighted Fuzzy Gamma Naive Bayes. | `"dw_gamma"` |
+| [`FuzzyBetaNaiveBayes`](#continuous-classifiers) | Continuous | Beta Naive Bayes for continuous features bounded in $(0, 1)$ (rates/proportions). | `"beta"` |
+| [`FuzzyTriangularNaiveBayes`](#continuous-classifiers) | Continuous | Naive Bayes with triangular membership functions. | `"triangular"` |
+| [`FuzzyTrapezoidalNaiveBayes`](#continuous-classifiers) | Continuous | Naive Bayes with trapezoidal membership functions. | `"trapezoidal"` |
+| [`FuzzyPoissonNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Poisson Naive Bayes with fuzzy memberships for integer count data. | `"poisson"` |
+| [`PoiNBFuzzyParam`](#discrete-count-classifiers) | Discrete / Count | Poisson Naive Bayes with fuzzy rate parameters $\tilde{\lambda}$. | `"poisson_fuzzy_param"` |
+| [`FuzzyBinomialNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Binomial Naive Bayes with fuzzy memberships for binary/trial counts. | `"binomial"` |
+| [`FuzzyHipergeometricNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Hypergeometric Naive Bayes for sampling without replacement from finite populations. | `"hypergeometric"` |
+| [`DWFuzzyHipergeometricNaiveBayes`](#discrete-count-classifiers) | Discrete / Count | Double-Weighted Hypergeometric Naive Bayes. | `"dw_hypergeometric"` |
+| [`FuzzyGeoNaiveBayes`](#geometric-rule-based-systems) | Geometric | Naive Bayes with distance-based geometric fuzzy memberships. | `"geometric"` |
+| [`FuzzyNaiveBayes`](#geometric-rule-based-systems) | General | Generalized fuzzy Naive Bayes supporting continuous and categorical features. | `"naive"` |
+| [`FuzzyBayesRule`](#geometric-rule-based-systems) | Decision Rule | Fuzzy Bayes decision rule classifier. | `"bayes_rule"` |
+| [`FuzzyRuleBasedSystem`](#geometric-rule-based-systems) | Inference Rule | Fuzzy rule-based inference and classification system. | — |
 
 ------------------------------------------------------------------------
 
@@ -108,13 +125,19 @@ devtools::install_github("leapigufpb/FuzzyClass")
 dependencies automatically installed by R:
 
 - [caTools](https://cran.r-project.org/package=caTools)
+- [cli](https://cran.r-project.org/package=cli)
 - [e1071](https://cran.r-project.org/package=e1071)
 - [EnvStats](https://cran.r-project.org/package=EnvStats)
 - [MASS](https://cran.r-project.org/package=MASS)
 - [maxLik](https://cran.r-project.org/package=maxLik)
 - [mvtnorm](https://cran.r-project.org/package=mvtnorm)
+- [R6](https://cran.r-project.org/package=R6)
 - [Rdpack](https://cran.r-project.org/package=Rdpack)
 - [rootSolve](https://cran.r-project.org/package=rootSolve)
+
+The [tidymodels](https://www.tidymodels.org) packages (`parsnip`,
+`dials`, `tune`, …) are optional: install them to use
+`fuzzy_naive_bayes()`.
 
 ------------------------------------------------------------------------
 
@@ -154,6 +177,10 @@ numbers:
 ``` r
 # Fit model using fuzzy estimation method 2
 fit_fgnb <- GauNBFuzzyParam(train = X_train, cl = y_train, metd = 2, cores = 1)
+#> ℹ Gaussian Naive Bayes with Fuzzy Parameters: 420 observations, 3 predictors and 3 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [31ms]
+#> 
 
 # Predict classes
 pred_classes <- predict(fit_fgnb, X_test)
@@ -198,6 +225,10 @@ membership degrees:
 ``` r
 # Fit standard fuzzy Gaussian Naive Bayes
 fit_gnb <- FuzzyGaussianNaiveBayes(train = X_train, cl = y_train)
+#> ℹ Fuzzy Gaussian Naive Bayes (Zadeh-based): 420 observations, 3 predictors and 3 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [16ms]
+#> 
 
 # Predict classes on test set
 pred_gnb <- predict(fit_gnb, X_test)
@@ -209,6 +240,95 @@ table(Actual = y_test, Predicted = pred_gnb)
 #>      1 58  2  0
 #>      2  7 50  3
 #>      3  0 10 50
+```
+
+------------------------------------------------------------------------
+
+### 4. The R6 Interface
+
+Every classifier is an R6 class. Create the model, train it (a message
+tells you what is happening) and predict:
+
+``` r
+model <- FuzzyGammaNaiveBayesModel$new(fuzzy = TRUE)
+model$fit(train = X_train, cl = y_train)
+#> ℹ Fuzzy Gamma Naive Bayes: 420 observations, 3 predictors and 3 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [6ms]
+#> 
+model
+#> <FuzzyGammaNaiveBayes> Fuzzy Gamma Naive Bayes
+#> ✔ Trained on 420 observations in 0.002s
+#>   Hyperparameters: fuzzy = TRUE
+#>   Predictors (3): V1, V2, V3
+#>   Classes (3): 1, 2, 3
+
+head(model$predict(X_test))
+#> [1] 1 1 1 1 1 1
+#> Levels: 1 2 3
+head(model$predict(X_test, type = "prob"))
+#>              1            2            3
+#> [1,] 0.9084371 9.153798e-02 2.487652e-05
+#> [2,] 0.9998998 1.002413e-04 6.140526e-11
+#> [3,] 0.9942020 5.797331e-03 7.118546e-07
+#> [4,] 0.9999186 8.141746e-05 4.390692e-11
+#> [5,] 0.8022878 1.976974e-01 1.476847e-05
+#> [6,] 0.9729373 2.706046e-02 2.218717e-06
+```
+
+Hyperparameters can be changed with `$set_params()`, and the calls can
+be chained:
+
+``` r
+model$set_params(fuzzy = FALSE)$fit(X_train, y_train, verbose = FALSE)
+mean(model$predict(X_test) == y_test)
+#> [1] 0.8777778
+```
+
+------------------------------------------------------------------------
+
+### 5. Using FuzzyClass with tidymodels
+
+`fuzzy_naive_bayes()` is a [parsnip](https://parsnip.tidymodels.org)
+model whose engines are the FuzzyClass classifiers, so it plugs into
+workflows, recipes, resampling and tuning:
+
+``` r
+library(tidymodels)
+
+vr <- VirtualRealityData |>
+  as.data.frame() |>
+  mutate(V4 = factor(V4))
+
+set.seed(123)
+vr_split <- initial_split(vr, prop = 0.7, strata = V4)
+
+spec <- fuzzy_naive_bayes(alpha_cut = tune(), ranking_method = tune()) |>
+  set_engine("gaussian_fuzzy_param")
+
+wf <- workflow() |>
+  add_formula(V4 ~ .) |>
+  add_model(spec)
+
+options(FuzzyClass.verbose = FALSE) # quiet while tuning
+tuned <- tune_grid(wf, resamples = vfold_cv(training(vr_split), v = 5, strata = V4), grid = 5)
+show_best(tuned, metric = "accuracy", n = 3)
+#> # A tibble: 3 × 8
+#>   alpha_cut ranking_method .metric  .estimator  mean     n std_err .config      
+#>       <dbl>          <int> <chr>    <chr>      <dbl> <int>   <dbl> <chr>        
+#> 1    0.0001              2 accuracy multiclass 0.788     5 0.0121  pre0_mod1_po…
+#> 2    0.0501              1 accuracy multiclass 0.786     5 0.00842 pre0_mod3_po…
+#> 3    0.0750              5 accuracy multiclass 0.786     5 0.00842 pre0_mod4_po…
+
+final <- finalize_workflow(wf, select_best(tuned, metric = "accuracy")) |>
+  last_fit(vr_split)
+collect_metrics(final)
+#> # A tibble: 3 × 4
+#>   .metric     .estimator .estimate .config        
+#>   <chr>       <chr>          <dbl> <chr>          
+#> 1 accuracy    multiclass     0.783 pre0_mod0_post0
+#> 2 roc_auc     hand_till      0.918 pre0_mod0_post0
+#> 3 brier_class multiclass     0.156 pre0_mod0_post0
 ```
 
 ------------------------------------------------------------------------

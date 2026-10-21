@@ -16,8 +16,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Fuzzy and Non-Fuzzy Classifiers">
-<meta name="description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;.">
-<meta property="og:description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;.">
+<meta name="description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;. The classifiers are implemented as R6 classes and are also available as parsnip models, so they can be used within the tidymodels framework.">
+<meta property="og:description" content="It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE) and Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG) at Federal University of Paraiba, Brazil. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by Moraes, Ferreira and Machado (2021) &lt;doi:10.1007/s40815-020-00936-4&gt;. The classifiers are implemented as R6 classes and are also available as parsnip models, so they can be used within the tidymodels framework.">
 <meta property="og:image" content="https://leapigufpb.github.io/FuzzyClass/logo.svg">
 </head>
 <body>
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">FuzzyClass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/index.html">Using FuzzyClass: Solving a Classification Problem</a></li>
+    <li><a class="dropdown-item" href="articles/r6-tidymodels.html">R6 Classes and tidymodels</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -74,6 +75,15 @@
 </blockquote>
 <hr>
 <div class="section level2">
+<h2 id="whats-new-in-version-030">What’s New in Version 0.3.0<a class="anchor" aria-label="anchor" href="#whats-new-in-version-030"></a>
+</h2>
+<ul>
+<li>🧱 <strong>R6 classes</strong>: every classifier is now an <a href="https://r6.r-lib.org" class="external-link">R6</a> class (e.g. <code>FuzzyGaussianNaiveBayesModel</code>) with <code>$new()</code>, <code>$fit()</code>, <code>$predict()</code> and <code>$set_params()</code>. The functional interface (<code>FuzzyGaussianNaiveBayes(train, cl)</code> + <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>) still works and gives the same predictions.</li>
+<li>💬 <strong>Friendly training messages</strong>: <code>$fit()</code> tells you which model is being trained, on how much data, and how long it took. Silence it with <code>verbose = FALSE</code> or <code>options(FuzzyClass.verbose = FALSE)</code>.</li>
+<li>🔗 <strong>tidymodels support</strong>: the new parsnip model <code><a href="reference/fuzzy_naive_bayes.html">fuzzy_naive_bayes()</a></code> exposes all classifiers as engines, ready for <code>workflows</code>, <code>recipes</code>, <code>rsample</code>, <code>tune</code> and <code>yardstick</code>, including tuning of <code>fuzzy</code>, <code>alpha_cut</code> and <code>ranking_method</code>.</li>
+</ul>
+</div>
+<div class="section level2">
 <h2 id="whats-new-in-version-020">What’s New in Version 0.2.0<a class="anchor" aria-label="anchor" href="#whats-new-in-version-020"></a>
 </h2>
 <ul>
@@ -87,108 +97,128 @@
 <div class="section level2">
 <h2 id="available-classifiers-taxonomy">Available Classifiers (Taxonomy)<a class="anchor" aria-label="anchor" href="#available-classifiers-taxonomy"></a>
 </h2>
-<p><code>FuzzyClass</code> provides <strong>18 dedicated classifiers</strong> categorized by feature type and modeling paradigm:</p>
+<p><code>FuzzyClass</code> provides <strong>17 classifiers</strong> and a fuzzy rule-based system, categorized by feature type and modeling paradigm. Each classifier <code>X</code> has the functional interface <code>X(train, cl)</code>, the R6 class <code>XModel</code> and an engine of <code><a href="reference/fuzzy_naive_bayes.html">fuzzy_naive_bayes()</a></code>:</p>
 <table class="table">
 <colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
 </colgroup>
 <thead><tr>
 <th align="left">Classifier</th>
 <th align="left">Paradigm</th>
 <th align="left">Description</th>
+<th align="left">tidymodels engine</th>
 </tr></thead>
 <tbody>
 <tr>
 <td align="left"><a href="#continuous-classifiers"><code>FuzzyGaussianNaiveBayes</code></a></td>
 <td align="left">Continuous</td>
 <td align="left">Gaussian Naive Bayes weighted by fuzzy membership degrees.</td>
+<td align="left"><code>"gaussian"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#continuous-classifiers"><code>GauNBFuzzyParam</code></a></td>
 <td align="left">Continuous</td>
 <td align="left">Gaussian Naive Bayes with fuzzy parameters (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>μ</mi><mo accent="true">̃</mo></mover><mo>,</mo><msup><mover><mi>σ</mi><mo accent="true">̃</mo></mover><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\tilde{\mu}, \tilde{\sigma}^2</annotation></semantics></math>) across 5 estimation methods.</td>
+<td align="left"><code>"gaussian_fuzzy_param"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#continuous-classifiers"><code>FuzzyExponentialNaiveBayes</code></a></td>
 <td align="left">Continuous</td>
 <td align="left">Exponential Naive Bayes with fuzzy memberships for positive continuous features.</td>
+<td align="left"><code>"exponential"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#continuous-classifiers"><code>ExpNBFuzzyParam</code></a></td>
 <td align="left">Continuous</td>
 <td align="left">Exponential Naive Bayes with fuzzy rate parameters.</td>
+<td align="left"><code>"exponential_fuzzy_param"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#continuous-classifiers"><code>FuzzyGammaNaiveBayes</code></a></td>
 <td align="left">Continuous</td>
 <td align="left">Gamma Naive Bayes with fuzzy memberships for skewed continuous data.</td>
+<td align="left"><code>"gamma"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#continuous-classifiers"><code>DWFuzzyGammaNaiveBayes</code></a></td>
 <td align="left">Continuous</td>
 <td align="left">Double-Weighted Fuzzy Gamma Naive Bayes.</td>
+<td align="left"><code>"dw_gamma"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#continuous-classifiers"><code>FuzzyBetaNaiveBayes</code></a></td>
 <td align="left">Continuous</td>
 <td align="left">Beta Naive Bayes for continuous features bounded in <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0, 1)</annotation></semantics></math> (rates/proportions).</td>
+<td align="left"><code>"beta"</code></td>
 </tr>
 <tr>
-<td align="left"><a href="#continuous-classifiers"><code>FuzzyTriangNaiveBayes</code></a></td>
+<td align="left"><a href="#continuous-classifiers"><code>FuzzyTriangularNaiveBayes</code></a></td>
 <td align="left">Continuous</td>
 <td align="left">Naive Bayes with triangular membership functions.</td>
+<td align="left"><code>"triangular"</code></td>
 </tr>
 <tr>
-<td align="left"><a href="#continuous-classifiers"><code>FuzzyTrapeNaiveBayes</code></a></td>
+<td align="left"><a href="#continuous-classifiers"><code>FuzzyTrapezoidalNaiveBayes</code></a></td>
 <td align="left">Continuous</td>
 <td align="left">Naive Bayes with trapezoidal membership functions.</td>
+<td align="left"><code>"trapezoidal"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#discrete-count-classifiers"><code>FuzzyPoissonNaiveBayes</code></a></td>
 <td align="left">Discrete / Count</td>
 <td align="left">Poisson Naive Bayes with fuzzy memberships for integer count data.</td>
+<td align="left"><code>"poisson"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#discrete-count-classifiers"><code>PoiNBFuzzyParam</code></a></td>
 <td align="left">Discrete / Count</td>
 <td align="left">Poisson Naive Bayes with fuzzy rate parameters <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>λ</mi><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{\lambda}</annotation></semantics></math>.</td>
+<td align="left"><code>"poisson_fuzzy_param"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#discrete-count-classifiers"><code>FuzzyBinomialNaiveBayes</code></a></td>
 <td align="left">Discrete / Count</td>
 <td align="left">Binomial Naive Bayes with fuzzy memberships for binary/trial counts.</td>
+<td align="left"><code>"binomial"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#discrete-count-classifiers"><code>FuzzyHipergeometricNaiveBayes</code></a></td>
 <td align="left">Discrete / Count</td>
 <td align="left">Hypergeometric Naive Bayes for sampling without replacement from finite populations.</td>
+<td align="left"><code>"hypergeometric"</code></td>
 </tr>
 <tr>
-<td align="left"><a href="#discrete-count-classifiers"><code>DoubleWeightedFuzzyHipergeometricNaiveBayes</code></a></td>
+<td align="left"><a href="#discrete-count-classifiers"><code>DWFuzzyHipergeometricNaiveBayes</code></a></td>
 <td align="left">Discrete / Count</td>
 <td align="left">Double-Weighted Hypergeometric Naive Bayes.</td>
+<td align="left"><code>"dw_hypergeometric"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#geometric-rule-based-systems"><code>FuzzyGeoNaiveBayes</code></a></td>
 <td align="left">Geometric</td>
 <td align="left">Naive Bayes with distance-based geometric fuzzy memberships.</td>
+<td align="left"><code>"geometric"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#geometric-rule-based-systems"><code>FuzzyNaiveBayes</code></a></td>
 <td align="left">General</td>
 <td align="left">Generalized fuzzy Naive Bayes supporting continuous and categorical features.</td>
+<td align="left"><code>"naive"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#geometric-rule-based-systems"><code>FuzzyBayesRule</code></a></td>
 <td align="left">Decision Rule</td>
 <td align="left">Fuzzy Bayes decision rule classifier.</td>
+<td align="left"><code>"bayes_rule"</code></td>
 </tr>
 <tr>
 <td align="left"><a href="#geometric-rule-based-systems"><code>FuzzyRuleBasedSystem</code></a></td>
 <td align="left">Inference Rule</td>
 <td align="left">Fuzzy rule-based inference and classification system.</td>
+<td align="left">—</td>
 </tr>
 </tbody>
 </table>
@@ -220,14 +250,17 @@
 <p><code>FuzzyClass</code> is designed with minimal, stable, and battle-tested dependencies automatically installed by R:</p>
 <ul>
 <li><a href="https://cran.r-project.org/package=caTools" class="external-link">caTools</a></li>
+<li><a href="https://cran.r-project.org/package=cli" class="external-link">cli</a></li>
 <li><a href="https://cran.r-project.org/package=e1071" class="external-link">e1071</a></li>
 <li><a href="https://cran.r-project.org/package=EnvStats" class="external-link">EnvStats</a></li>
 <li><a href="https://cran.r-project.org/package=MASS" class="external-link">MASS</a></li>
 <li><a href="https://cran.r-project.org/package=maxLik" class="external-link">maxLik</a></li>
 <li><a href="https://cran.r-project.org/package=mvtnorm" class="external-link">mvtnorm</a></li>
+<li><a href="https://cran.r-project.org/package=R6" class="external-link">R6</a></li>
 <li><a href="https://cran.r-project.org/package=Rdpack" class="external-link">Rdpack</a></li>
 <li><a href="https://cran.r-project.org/package=rootSolve" class="external-link">rootSolve</a></li>
 </ul>
+<p>The <a href="https://www.tidymodels.org" class="external-link">tidymodels</a> packages (<code>parsnip</code>, <code>dials</code>, <code>tune</code>, …) are optional: install them to use <code><a href="reference/fuzzy_naive_bayes.html">fuzzy_naive_bayes()</a></code>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -263,6 +296,10 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fit model using fuzzy estimation method 2</span></span>
 <span><span class="va">fit_fgnb</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/GauNBFuzzyParam.html">GauNBFuzzyParam</a></span><span class="op">(</span>train <span class="op">=</span> <span class="va">X_train</span>, cl <span class="op">=</span> <span class="va">y_train</span>, metd <span class="op">=</span> <span class="fl">2</span>, cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ℹ Gaussian Naive Bayes with Fuzzy Parameters: 420 observations, 3 predictors and 3 classes</span></span>
+<span><span class="co">#&gt; ℹ Training the model: estimating its parameters</span></span>
+<span><span class="co">#&gt; ✔ Model trained successfully [31ms]</span></span>
+<span><span class="co">#&gt; </span></span>
 <span></span>
 <span><span class="co"># Predict classes</span></span>
 <span><span class="va">pred_classes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_fgnb</span>, <span class="va">X_test</span><span class="op">)</span></span>
@@ -301,6 +338,10 @@
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fit standard fuzzy Gaussian Naive Bayes</span></span>
 <span><span class="va">fit_gnb</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/FuzzyGaussianNaiveBayes.html">FuzzyGaussianNaiveBayes</a></span><span class="op">(</span>train <span class="op">=</span> <span class="va">X_train</span>, cl <span class="op">=</span> <span class="va">y_train</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ℹ Fuzzy Gaussian Naive Bayes (Zadeh-based): 420 observations, 3 predictors and 3 classes</span></span>
+<span><span class="co">#&gt; ℹ Training the model: estimating its parameters</span></span>
+<span><span class="co">#&gt; ✔ Model trained successfully [16ms]</span></span>
+<span><span class="co">#&gt; </span></span>
 <span></span>
 <span><span class="co"># Predict classes on test set</span></span>
 <span><span class="va">pred_gnb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_gnb</span>, <span class="va">X_test</span><span class="op">)</span></span>
@@ -312,6 +353,84 @@
 <span><span class="co">#&gt;      1 58  2  0</span></span>
 <span><span class="co">#&gt;      2  7 50  3</span></span>
 <span><span class="co">#&gt;      3  0 10 50</span></span></code></pre></div>
+<hr>
+</div>
+<div class="section level3">
+<h3 id="id_4-the-r6-interface">4. The R6 Interface<a class="anchor" aria-label="anchor" href="#id_4-the-r6-interface"></a>
+</h3>
+<p>Every classifier is an R6 class. Create the model, train it (a message tells you what is happening) and predict:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/FuzzyGammaNaiveBayesModel.html">FuzzyGammaNaiveBayesModel</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>fuzzy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">model</span><span class="op">$</span><span class="fu">fit</span><span class="op">(</span>train <span class="op">=</span> <span class="va">X_train</span>, cl <span class="op">=</span> <span class="va">y_train</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ℹ Fuzzy Gamma Naive Bayes: 420 observations, 3 predictors and 3 classes</span></span>
+<span><span class="co">#&gt; ℹ Training the model: estimating its parameters</span></span>
+<span><span class="co">#&gt; ✔ Model trained successfully [6ms]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="va">model</span></span>
+<span><span class="co">#&gt; &lt;FuzzyGammaNaiveBayes&gt; Fuzzy Gamma Naive Bayes</span></span>
+<span><span class="co">#&gt; ✔ Trained on 420 observations in 0.002s</span></span>
+<span><span class="co">#&gt;   Hyperparameters: fuzzy = TRUE</span></span>
+<span><span class="co">#&gt;   Predictors (3): V1, V2, V3</span></span>
+<span><span class="co">#&gt;   Classes (3): 1, 2, 3</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">X_test</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1 1 1 1 1 1</span></span>
+<span><span class="co">#&gt; Levels: 1 2 3</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">X_test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;              1            2            3</span></span>
+<span><span class="co">#&gt; [1,] 0.9084371 9.153798e-02 2.487652e-05</span></span>
+<span><span class="co">#&gt; [2,] 0.9998998 1.002413e-04 6.140526e-11</span></span>
+<span><span class="co">#&gt; [3,] 0.9942020 5.797331e-03 7.118546e-07</span></span>
+<span><span class="co">#&gt; [4,] 0.9999186 8.141746e-05 4.390692e-11</span></span>
+<span><span class="co">#&gt; [5,] 0.8022878 1.976974e-01 1.476847e-05</span></span>
+<span><span class="co">#&gt; [6,] 0.9729373 2.706046e-02 2.218717e-06</span></span></code></pre></div>
+<p>Hyperparameters can be changed with <code>$set_params()</code>, and the calls can be chained:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">model</span><span class="op">$</span><span class="fu">set_params</span><span class="op">(</span>fuzzy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="fu">fit</span><span class="op">(</span><span class="va">X_train</span>, <span class="va">y_train</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">X_test</span><span class="op">)</span> <span class="op">==</span> <span class="va">y_test</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.8777778</span></span></code></pre></div>
+<hr>
+</div>
+<div class="section level3">
+<h3 id="id_5-using-fuzzyclass-with-tidymodels">5. Using FuzzyClass with tidymodels<a class="anchor" aria-label="anchor" href="#id_5-using-fuzzyclass-with-tidymodels"></a>
+</h3>
+<p><code><a href="reference/fuzzy_naive_bayes.html">fuzzy_naive_bayes()</a></code> is a <a href="https://parsnip.tidymodels.org" class="external-link">parsnip</a> model whose engines are the FuzzyClass classifiers, so it plugs into workflows, recipes, resampling and tuning:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">vr</span> <span class="op">&lt;-</span> <span class="va">VirtualRealityData</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>V4 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">V4</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">vr_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">vr</span>, prop <span class="op">=</span> <span class="fl">0.7</span>, strata <span class="op">=</span> <span class="va">V4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fuzzy_naive_bayes.html">fuzzy_naive_bayes</a></span><span class="op">(</span>alpha_cut <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, ranking_method <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"gaussian_fuzzy_param"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu">workflow</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_formula</span><span class="op">(</span><span class="va">V4</span> <span class="op">~</span> <span class="va">.</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_model</span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>FuzzyClass.verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co"># quiet while tuning</span></span>
+<span><span class="va">tuned</span> <span class="op">&lt;-</span> <span class="fu">tune_grid</span><span class="op">(</span><span class="va">wf</span>, resamples <span class="op">=</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="fu">training</span><span class="op">(</span><span class="va">vr_split</span><span class="op">)</span>, v <span class="op">=</span> <span class="fl">5</span>, strata <span class="op">=</span> <span class="va">V4</span><span class="op">)</span>, grid <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">tuned</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 8</span></span>
+<span><span class="co">#&gt;   alpha_cut ranking_method .metric  .estimator  mean     n std_err .config      </span></span>
+<span><span class="co">#&gt;       &lt;dbl&gt;          &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;        </span></span>
+<span><span class="co">#&gt; 1    0.0001              2 accuracy multiclass 0.788     5 0.0121  pre0_mod1_po…</span></span>
+<span><span class="co">#&gt; 2    0.0501              1 accuracy multiclass 0.786     5 0.00842 pre0_mod3_po…</span></span>
+<span><span class="co">#&gt; 3    0.0750              5 accuracy multiclass 0.786     5 0.00842 pre0_mod4_po…</span></span>
+<span></span>
+<span><span class="va">final</span> <span class="op">&lt;-</span> <span class="fu">finalize_workflow</span><span class="op">(</span><span class="va">wf</span>, <span class="fu">select_best</span><span class="op">(</span><span class="va">tuned</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">last_fit</span><span class="op">(</span><span class="va">vr_split</span><span class="op">)</span></span>
+<span><span class="fu">collect_metrics</span><span class="op">(</span><span class="va">final</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 4</span></span>
+<span><span class="co">#&gt;   .metric     .estimator .estimate .config        </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;          </span></span>
+<span><span class="co">#&gt; 1 accuracy    multiclass     0.783 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; 2 roc_auc     hand_till      0.918 pre0_mod0_post0</span></span>
+<span><span class="co">#&gt; 3 brier_class multiclass     0.156 pre0_mod0_post0</span></span></code></pre></div>
 <hr>
 </div>
 </div>

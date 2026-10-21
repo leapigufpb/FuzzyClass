@@ -1,6 +1,68 @@
 # Changelog
 
+## FuzzyClass 0.3.0
+
+### R6 classes
+
+- All classifiers are now implemented as [R6](https://r6.r-lib.org)
+  classes that inherit from the new base class `FuzzyClassifier`. Each
+  classifier has a generator named after its function with the suffix
+  `Model` (e.g. `FuzzyGaussianNaiveBayesModel`, `GauNBFuzzyParamModel`,
+  `DWFuzzyGammaNaiveBayesModel`) and the methods `$new()`,
+  `$fit(train, cl)`, `$predict(newdata, type)`, `$set_params(...)`,
+  `$is_fitted()` and `$print()`. Calls can be chained:
+  `FuzzyGammaNaiveBayesModel$new()$fit(x, y)$predict(x_new)`.
+- Training now reports its progress with an informative message
+  (classifier, number of observations, predictors and classes, and the
+  training time). It can be silenced with `verbose = FALSE` or globally
+  with `options(FuzzyClass.verbose = FALSE)` (see
+  [`fuzzy_verbose()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_verbose.md)).
+- The functional interface is unchanged:
+  `FuzzyGaussianNaiveBayes(train, cl)` and the other functions train and
+  return the R6 object, and `predict(fit, newdata)` /
+  `predict(fit, newdata, type = "matrix")` keep working. `type = "prob"`
+  is now accepted as a synonym of `"matrix"`. Predictions are identical
+  to version 0.2.0.
+- The estimated quantities are now stored in `fit$estimates` (they were
+  the elements of the S3 list returned in previous versions), together
+  with `fit$params`, `fit$predictors`, `fit$classes`, `fit$n_obs` and
+  `fit$fit_time`.
+- Informative error messages (powered by `cli`) for untrained models,
+  `train`/`cl` with different sizes and missing required arguments
+  (`wdelta`, `weta`).
+
+### tidymodels
+
+- New parsnip model
+  [`fuzzy_naive_bayes()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_naive_bayes.md),
+  so every classifier can be used with `parsnip`, `workflows`,
+  `recipes`, `rsample`, `tune` and `yardstick`. The classifier is chosen
+  by the engine (`"gaussian"`, `"gamma"`, `"beta"`, `"exponential"`,
+  `"binomial"`, `"poisson"`, `"geometric"`, `"trapezoidal"`,
+  `"triangular"`, `"hypergeometric"`, `"bayes_rule"`, `"naive"`,
+  `"dw_gamma"`, `"dw_hypergeometric"`, `"gaussian_fuzzy_param"`,
+  `"exponential_fuzzy_param"` and `"poisson_fuzzy_param"`).
+- The main arguments `fuzzy`, `alpha_cut` and `ranking_method` (`metd`)
+  can be tuned with
+  [`tune()`](https://hardhat.tidymodels.org/reference/tune.html); their
+  `dials` parameter objects are
+  [`fuzzy_membership()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_membership.md),
+  [`alpha_cut()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_membership.md)
+  and
+  [`ranking_method()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_membership.md).
+- `parsnip`, `dials` and the other tidymodels packages are only
+  suggested: the model is registered when `parsnip` is loaded.
+
+### Other changes
+
+- Requires R \>= 4.1.0. New imports: `R6` and `cli`.
+- The tests now use the standard `testthat` structure
+  (`tests/testthat/`), so they run with `R CMD check` and
+  [`devtools::test()`](https://devtools.r-lib.org/reference/test.html).
+
 ## FuzzyClass 0.2.0
+
+CRAN release: 2026-10-09
 
 - Added new method for fuzzy number ordering as `metd = 5` in functions
   `GauNBFuzzyParam`, `ExpNBFuzzyParam`, and `PoiNBFuzzyParam`.

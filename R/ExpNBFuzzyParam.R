@@ -11,7 +11,11 @@
 #' @param w When metd for 4, it is necessary to have w which are alpha-cut weights defined
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [ExpNBFuzzyParamModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [ExpNBFuzzyParamModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"exponential_fuzzy_param"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{rodrigues2016new}{FuzzyClass}
@@ -45,12 +49,12 @@
 #' @importFrom Rdpack reprompt
 #'
 #' @export
-ExpNBFuzzyParam <- function(train, cl,  alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
-  UseMethod("ExpNBFuzzyParam")
+ExpNBFuzzyParam <- function(train, cl,  alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2, verbose = fuzzy_verbose()) {
+  ExpNBFuzzyParamModel$new(alphacut = alphacut, metd = metd, alp = alp, w = w)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-ExpNBFuzzyParam.default <- function(train, cl,  alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
+#' @noRd
+fit_ExpNBFuzzyParam <- function(train, cl,  alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -93,7 +97,7 @@ ExpNBFuzzyParam.default <- function(train, cl,  alphacut = 0.0001, metd = 2, alp
     })
   })
   # -------------------------------------------------------
-  structure(list(
+  list(
     Parameters_lambda = Parameters_lambda,
     lambdas = lambdas,
     cols = cols,
@@ -102,27 +106,13 @@ ExpNBFuzzyParam.default <- function(train, cl,  alphacut = 0.0001, metd = 2, alp
     metd = metd,
     cores = cores,
     w = w
-  ),
-  class = "ExpNBFuzzyParam"
   )
 }
 # -------------------------
 
-#' @export
-print.ExpNBFuzzyParam <- function(x, ...) {
-  # -----------------
-  cat("\nFuzzy Exponential Naive Bayes Classifier for Discrete Predictors\n\n")
-  # -----------------
-  cat("Variables:\n")
-  print(names(x$lambdas[[1]]))
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
 
-
-#' @export
-predict.ExpNBFuzzyParam <- function(object,
+#' @noRd
+predict_ExpNBFuzzyParam <- function(object,
                                     newdata,
                                     type = "class",
                                     ...) {
@@ -158,3 +148,43 @@ predict.ExpNBFuzzyParam <- function(object,
 
   scores_to_output(R_M_obs, classes, type)
 }
+
+#' Exponential Naive Bayes with Fuzzy Parameters (R6 class)
+#'
+#' @description
+#' R6 implementation of the Exponential Naive Bayes with Fuzzy Parameters classifier. Create the model with
+#' `ExpNBFuzzyParamModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [ExpNBFuzzyParam()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- ExpNBFuzzyParamModel$new()
+#' model$fit(train = iris[, -5], cl = iris$Species)
+#' head(model$predict(iris[, -5]))
+#' head(model$predict(iris[, -5], type = "prob"))
+#' model
+#' @export
+ExpNBFuzzyParamModel <- R6::R6Class(
+  classname = "ExpNBFuzzyParam",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param alphacut See [ExpNBFuzzyParam()].
+    #' @param metd See [ExpNBFuzzyParam()].
+    #' @param alp See [ExpNBFuzzyParam()].
+    #' @param w See [ExpNBFuzzyParam()].
+    initialize = function(alphacut = 1e-04, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1, 0.3, 0.6)) {
+      super$initialize(alphacut = alphacut, metd = metd, alp = alp, w = w)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Exponential Naive Bayes with Fuzzy Parameters",
+    estimate = function(train, cl) {
+      do.call(fit_ExpNBFuzzyParam, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_ExpNBFuzzyParam(self$estimates, newdata, type = type)
+    }
+  )
+)
+

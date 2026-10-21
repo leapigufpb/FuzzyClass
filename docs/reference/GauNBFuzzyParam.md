@@ -13,7 +13,8 @@ GauNBFuzzyParam(
   metd = 2,
   alp = c(0.35, 0.7, 0.86),
   w = c(0.1, 0.3, 0.6),
-  cores = 2
+  cores = 2,
+  verbose = fuzzy_verbose()
 )
 ```
 
@@ -57,9 +58,21 @@ GauNBFuzzyParam(
   kept for backward compatibility; prediction is vectorized and does not
   start parallel workers (default = 2)
 
+- verbose:
+
+  logical; if `TRUE` (default, see
+  [`fuzzy_verbose()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_verbose.md))
+  a message reports the training progress.
+
 ## Value
 
-A vector of classifications
+A trained
+[GauNBFuzzyParamModel](https://leapigufpb.github.io/FuzzyClass/reference/GauNBFuzzyParamModel.md)
+R6 object (which inherits from
+[FuzzyClassifier](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyClassifier.md)).
+Use `predict(object, newdata, type = "class")` or
+`object$predict(newdata)` to classify new observations; `type = "prob"`
+(or `"matrix"`) returns the matrix of class probabilities.
 
 ## References
 
@@ -67,6 +80,13 @@ Moraes RM, Ferreira JA, Machado LS (2021). “A New Bayesian Network Based
 on Gaussian Naive Bayes with Fuzzy Parameters for Training Assessment in
 Virtual Simulators.” *International Journal of Fuzzy Systems*,
 **23**(3), 849–861.
+
+## See also
+
+[GauNBFuzzyParamModel](https://leapigufpb.github.io/FuzzyClass/reference/GauNBFuzzyParamModel.md)
+for the R6 interface and
+[`fuzzy_naive_bayes()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_naive_bayes.md)
+(engine `"gaussian_fuzzy_param"`) for the tidymodels interface.
 
 ## Examples
 
@@ -87,6 +107,10 @@ fit_FGNB <- GauNBFuzzyParam(
   train = Train[, -5],
   cl = Train[, 5], metd = 1, cores = 2
 )
+#> ℹ Gaussian Naive Bayes with Fuzzy Parameters: 105 observations, 4 predictors and 3 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [16ms]
+#> 
 
 pred_FGNB <- predict(fit_FGNB, test)
 

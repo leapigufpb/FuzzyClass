@@ -11,7 +11,8 @@ PoiNBFuzzyParam(
   metd = 2,
   alp = c(0.35, 0.7, 0.86),
   w = c(0.1, 0.3, 0.6),
-  cores = 2
+  cores = 2,
+  verbose = fuzzy_verbose()
 )
 }
 \arguments{
@@ -28,9 +29,11 @@ PoiNBFuzzyParam(
 \item{w}{When metd for 4, it is necessary to have w which are alpha-cut weights defined}
 
 \item{cores}{kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)}
+
+\item{verbose}{logical; if \code{TRUE} (default, see \code{\link[=fuzzy_verbose]{fuzzy_verbose()}}) a message reports the training progress.}
 }
 \value{
-A vector of classifications
+A trained \link{PoiNBFuzzyParamModel} R6 object (which inherits from \link{FuzzyClassifier}). Use \code{predict(object, newdata, type = "class")} or \code{object$predict(newdata)} to classify new observations; \code{type = "prob"} (or \code{"matrix"}) returns the matrix of class probabilities.
 }
 \description{
 \code{PoiNBFuzzyParam} Fuzzy Poisson Naive Bayes Classifier with Fuzzy parameters
@@ -69,4 +72,7 @@ head(Test[, 4])
 }
 \references{
 \insertRef{soares2016assessment}{FuzzyClass}
+}
+\seealso{
+\link{PoiNBFuzzyParamModel} for the R6 interface and \code{\link[=fuzzy_naive_bayes]{fuzzy_naive_bayes()}} (engine \code{"poisson_fuzzy_param"}) for the tidymodels interface.
 }

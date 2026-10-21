@@ -8,7 +8,11 @@
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [FuzzyHipergeometricNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [FuzzyHipergeometricNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"hypergeometric"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{ferreira2025new}{FuzzyClass}
@@ -68,14 +72,14 @@
 #'
 #'
 #' @export
-FuzzyHipergeometricNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
-  UseMethod("FuzzyHipergeometricNaiveBayes")
+FuzzyHipergeometricNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose()) {
+  FuzzyHipergeometricNaiveBayesModel$new(fuzzy = fuzzy)$fit(train, cl, verbose = verbose)
 }
 
 #------------------------------
 
-#' @export
-FuzzyHipergeometricNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
+#' @noRd
+fit_FuzzyHipergeometricNaiveBayes <- function(train, cl, cores = 2, fuzzy = T) {
   
   #--------------------------------------------------------
   # Estimating class parameters
@@ -119,7 +123,7 @@ FuzzyHipergeometricNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = 
 
   #-------------------------------------------------------
   
-  structure(list(
+  list(
     parametersC = parametersC,
     minimos = minimos,
     MinimosDataFrame = MinimosDataFrame,
@@ -131,32 +135,14 @@ FuzzyHipergeometricNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = 
     Sturges = Sturges,
     pk = pk,
     fuzzy = fuzzy
-  ),
-  class = "FuzzyHipergeometricNaiveBayes"
   )
 }
 
 #-------------------------
 
 
-#' @export
-print.FuzzyHipergeometricNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    #-----------------
-    cat("\nFuzzy Hipergeometric Naive Bayes Classifier for Discrete Predictors\n\n")
-    #-----------------
-  } else {
-    #-----------------
-    cat("\nNaive Hipergeometric  Bayes Classifier for Discrete Predictors\n\n")
-    #-----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  #-----------------
-}
-
-#' @export
-predict.FuzzyHipergeometricNaiveBayes <- function(object,
+#' @noRd
+predict_FuzzyHipergeometricNaiveBayes <- function(object,
                                                   newdata,
                                                   type = "class",
                                                   ...) {
@@ -258,3 +244,42 @@ fuzzy_density_values_hipergeometric <- function(M, cols, test, parametersC, pk, 
   return(as.data.frame(saida))
 }
 # ----------------
+
+#' Fuzzy Hypergeometric Naive Bayes (R6 class)
+#'
+#' @description
+#' R6 implementation of the Fuzzy Hypergeometric Naive Bayes classifier. Create the model with
+#' `FuzzyHipergeometricNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [FuzzyHipergeometricNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- FuzzyHipergeometricNaiveBayesModel$new()
+#' x <- data.frame(s1 = c(1, 2, 1, 2), n1 = c(5, 5, 6, 6))
+#' y <- factor(c("A", "A", "B", "B"))
+#' model$fit(train = x, cl = y)
+#' model$predict(x)
+#' model
+#' @export
+FuzzyHipergeometricNaiveBayesModel <- R6::R6Class(
+  classname = "FuzzyHipergeometricNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [FuzzyHipergeometricNaiveBayes()].
+    initialize = function(fuzzy = TRUE) {
+      super$initialize(fuzzy = fuzzy)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Fuzzy Hypergeometric Naive Bayes",
+    label_crisp = "Hypergeometric Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_FuzzyHipergeometricNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_FuzzyHipergeometricNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
+

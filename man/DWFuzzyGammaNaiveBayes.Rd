@@ -4,7 +4,15 @@
 \alias{DWFuzzyGammaNaiveBayes}
 \title{Double Weighted Fuzzy Gamma Naive Bayes}
 \usage{
-DWFuzzyGammaNaiveBayes(train, cl, cores = 2, fuzzy = TRUE, wdelta, weta)
+DWFuzzyGammaNaiveBayes(
+  train,
+  cl,
+  cores = 2,
+  fuzzy = TRUE,
+  wdelta,
+  weta,
+  verbose = fuzzy_verbose()
+)
 }
 \arguments{
 \item{train}{matrix or data frame of training set cases.}
@@ -18,9 +26,11 @@ DWFuzzyGammaNaiveBayes(train, cl, cores = 2, fuzzy = TRUE, wdelta, weta)
 \item{wdelta}{vector weight each class}
 
 \item{weta}{vector  weight each feature}
+
+\item{verbose}{logical; if \code{TRUE} (default, see \code{\link[=fuzzy_verbose]{fuzzy_verbose()}}) a message reports the training progress.}
 }
 \value{
-A vector of classifications
+A trained \link{DWFuzzyGammaNaiveBayesModel} R6 object (which inherits from \link{FuzzyClassifier}). Use \code{predict(object, newdata, type = "class")} or \code{object$predict(newdata)} to classify new observations; \code{type = "prob"} (or \code{"matrix"}) returns the matrix of class probabilities.
 }
 \description{
 \code{DWFuzzyGammaNaiveBayes} Double Weighted Fuzzy Gamma Naive Bayes
@@ -52,4 +62,7 @@ head(Test[, 4])
 }
 \references{
 \insertRef{marcos2020double}{FuzzyClass}
+}
+\seealso{
+\link{DWFuzzyGammaNaiveBayesModel} for the R6 interface and \code{\link[=fuzzy_naive_bayes]{fuzzy_naive_bayes()}} (engine \code{"dw_gamma"}) for the tidymodels interface.
 }

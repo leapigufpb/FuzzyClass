@@ -5,7 +5,13 @@
 ## Usage
 
 ``` r
-FuzzyBinomialNaiveBayes(train, cl, cores = 2, fuzzy = TRUE)
+FuzzyBinomialNaiveBayes(
+  train,
+  cl,
+  cores = 2,
+  fuzzy = TRUE,
+  verbose = fuzzy_verbose()
+)
 ```
 
 ## Arguments
@@ -27,15 +33,34 @@ FuzzyBinomialNaiveBayes(train, cl, cores = 2, fuzzy = TRUE)
 
   boolean variable to use the membership function
 
+- verbose:
+
+  logical; if `TRUE` (default, see
+  [`fuzzy_verbose()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_verbose.md))
+  a message reports the training progress.
+
 ## Value
 
-A vector of classifications
+A trained
+[FuzzyBinomialNaiveBayesModel](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyBinomialNaiveBayesModel.md)
+R6 object (which inherits from
+[FuzzyClassifier](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyClassifier.md)).
+Use `predict(object, newdata, type = "class")` or
+`object$predict(newdata)` to classify new observations; `type = "prob"`
+(or `"matrix"`) returns the matrix of class probabilities.
 
 ## References
 
 Moraes RM, Machado LS (2016). “A Fuzzy Binomial Naive Bayes classifier
 for epidemiological data.” In *2016 IEEE International Conference on
 Fuzzy Systems (FUZZ-IEEE)*, 745–750. IEEE.
+
+## See also
+
+[FuzzyBinomialNaiveBayesModel](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyBinomialNaiveBayesModel.md)
+for the R6 interface and
+[`fuzzy_naive_bayes()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_naive_bayes.md)
+(engine `"binomial"`) for the tidymodels interface.
 
 ## Examples
 
@@ -65,6 +90,10 @@ fit_NBT <- FuzzyBinomialNaiveBayes(
   train = Train[, -4],
   cl = Train[, 4], cores = 2
 )
+#> ℹ Fuzzy Binomial Naive Bayes: 210 observations, 3 predictors and 3 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [5ms]
+#> 
 
 pred_NBT <- predict(fit_NBT, test)
 

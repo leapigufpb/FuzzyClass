@@ -8,7 +8,11 @@
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [FuzzyExponentialNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [FuzzyExponentialNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"exponential"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{moraes2016fuzzy}{FuzzyClass}
@@ -38,12 +42,12 @@
 #' @importFrom stats dexp
 #'
 #' @export
-FuzzyExponentialNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
-  UseMethod("FuzzyExponentialNaiveBayes")
+FuzzyExponentialNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose()) {
+  FuzzyExponentialNaiveBayesModel$new(fuzzy = fuzzy)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-FuzzyExponentialNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
+#' @noRd
+fit_FuzzyExponentialNaiveBayes <- function(train, cl, cores = 2, fuzzy = T) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -75,7 +79,7 @@ FuzzyExponentialNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) 
 
 
   # -------------------------------------------------------
-  structure(list(
+  list(
     parametersC = parametersC,
     minimos = minimos,
     MinimosDataFrame = MinimosDataFrame,
@@ -87,31 +91,13 @@ FuzzyExponentialNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) 
     Sturges = Sturges,
     pk = pk,
     fuzzy = fuzzy
-  ),
-  class = "FuzzyExponentialNaiveBayes"
   )
 }
 # -------------------------
 
 
-#' @export
-print.FuzzyExponentialNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    # -----------------
-    cat("\nFuzzy Exponential Naive Bayes Classifier for Discrete Predictors\n\n")
-    # -----------------
-  } else {
-    # -----------------
-    cat("\nNaive Exponential  Bayes Classifier for Discrete Predictors\n\n")
-    # -----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
-
-#' @export
-predict.FuzzyExponentialNaiveBayes <- function(object,
+#' @noRd
+predict_FuzzyExponentialNaiveBayes <- function(object,
                                                newdata,
                                                type = "class",
                                                ...) {
@@ -180,3 +166,41 @@ density_values_exp <- function(M, cols, test, parametersC, pk) {
   })
 }
 # ----------------
+
+#' Fuzzy Exponential Naive Bayes (R6 class)
+#'
+#' @description
+#' R6 implementation of the Fuzzy Exponential Naive Bayes classifier. Create the model with
+#' `FuzzyExponentialNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [FuzzyExponentialNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- FuzzyExponentialNaiveBayesModel$new()
+#' model$fit(train = iris[, -5], cl = iris$Species)
+#' head(model$predict(iris[, -5]))
+#' head(model$predict(iris[, -5], type = "prob"))
+#' model
+#' @export
+FuzzyExponentialNaiveBayesModel <- R6::R6Class(
+  classname = "FuzzyExponentialNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [FuzzyExponentialNaiveBayes()].
+    initialize = function(fuzzy = TRUE) {
+      super$initialize(fuzzy = fuzzy)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Fuzzy Exponential Naive Bayes",
+    label_crisp = "Exponential Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_FuzzyExponentialNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_FuzzyExponentialNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
+

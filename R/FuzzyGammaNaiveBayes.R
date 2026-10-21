@@ -8,7 +8,11 @@
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [FuzzyGammaNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [FuzzyGammaNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"gamma"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{de2018fuzzy}{FuzzyClass}
@@ -38,12 +42,12 @@
 #' @importFrom stats dgamma
 #'
 #' @export
-FuzzyGammaNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
-  UseMethod("FuzzyGammaNaiveBayes")
+FuzzyGammaNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose()) {
+  FuzzyGammaNaiveBayesModel$new(fuzzy = fuzzy)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-FuzzyGammaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
+#' @noRd
+fit_FuzzyGammaNaiveBayes <- function(train, cl, cores = 2, fuzzy = T) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -76,7 +80,7 @@ FuzzyGammaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
 
 
   # -------------------------------------------------------
-  structure(list(
+  list(
     parametersC = parametersC,
     minimos = minimos,
     MinimosDataFrame = MinimosDataFrame,
@@ -88,31 +92,13 @@ FuzzyGammaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
     Sturges = Sturges,
     pk = pk,
     fuzzy = fuzzy
-  ),
-  class = "FuzzyGammaNaiveBayes"
   )
 }
 # -------------------------
 
 
-#' @export
-print.FuzzyGammaNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    # -----------------
-    cat("\nFuzzy Gamma Naive Bayes Classifier for Discrete Predictors\n\n")
-    # -----------------
-  } else {
-    # -----------------
-    cat("\nNaive Gamma  Bayes Classifier for Discrete Predictors\n\n")
-    # -----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
-
-#' @export
-predict.FuzzyGammaNaiveBayes <- function(object,
+#' @noRd
+predict_FuzzyGammaNaiveBayes <- function(object,
                                          newdata,
                                          type = "class",
                                          ...) {
@@ -183,3 +169,41 @@ density_values_gamma <- function(M, cols, test, parametersC, pk) {
   })
 }
 # ----------------
+
+#' Fuzzy Gamma Naive Bayes (R6 class)
+#'
+#' @description
+#' R6 implementation of the Fuzzy Gamma Naive Bayes classifier. Create the model with
+#' `FuzzyGammaNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [FuzzyGammaNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- FuzzyGammaNaiveBayesModel$new()
+#' model$fit(train = iris[, -5], cl = iris$Species)
+#' head(model$predict(iris[, -5]))
+#' head(model$predict(iris[, -5], type = "prob"))
+#' model
+#' @export
+FuzzyGammaNaiveBayesModel <- R6::R6Class(
+  classname = "FuzzyGammaNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [FuzzyGammaNaiveBayes()].
+    initialize = function(fuzzy = TRUE) {
+      super$initialize(fuzzy = fuzzy)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Fuzzy Gamma Naive Bayes",
+    label_crisp = "Gamma Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_FuzzyGammaNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_FuzzyGammaNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
+

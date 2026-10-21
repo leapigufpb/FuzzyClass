@@ -9,7 +9,11 @@
 #' @param m is M/N, where M is the number of classes and N is the number of train lines
 #' @param Pi is 1/M, where M is the number of classes
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [FuzzyNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [FuzzyNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"naive"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{moraes2009another}{FuzzyClass}
@@ -40,12 +44,12 @@
 #' @importFrom stats model.extract na.pass sd terms predict
 #'
 #' @export
-FuzzyNaiveBayes <- function(train, cl, fuzzy = TRUE, m = NULL, Pi = NULL) {
-  UseMethod("FuzzyNaiveBayes")
+FuzzyNaiveBayes <- function(train, cl, fuzzy = TRUE, m = NULL, Pi = NULL, verbose = fuzzy_verbose()) {
+  FuzzyNaiveBayesModel$new(fuzzy = fuzzy, m = m, Pi = Pi)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-FuzzyNaiveBayes.default <- function(train, cl, fuzzy = TRUE, m = NULL, Pi = NULL) {
+#' @noRd
+fit_FuzzyNaiveBayes <- function(train, cl, fuzzy = TRUE, m = NULL, Pi = NULL) {
 
   if(fuzzy==F){
     modelo <- e1071::naiveBayes(as.data.frame(train), factor(cl))
@@ -84,16 +88,19 @@ FuzzyNaiveBayes.default <- function(train, cl, fuzzy = TRUE, m = NULL, Pi = NULL
   # --
   res <- sapply(1:cols, function(i) {is.factor(train[,i])})
   if(sum(res) == cols){
-    resul <- FuzzyNaiveBayes.categorical(train, cl, fuzzy = T, m = m, Pi = Pi)
+    resul <- fit_FuzzyNaiveBayes_categorical(train, cl, fuzzy = T, m = m, Pi = Pi)
   }
   # --
   res <- sapply(1:cols, function(i) {is.numeric(train[,i])})
   if(sum(res) == cols){
-    resul <- FuzzyNaiveBayes.continuo(train, cl, fuzzy = T, m = m, Pi = Pi)
+    resul <- fit_FuzzyNaiveBayes_continuous(train, cl, fuzzy = T, m = m, Pi = Pi)
+  }
+  if (!exists("resul", inherits = FALSE)) {
+    cli::cli_abort("All predictors must be either categorical (factor/character) or numeric.")
   }
 
   # -------------------------------------------------------
-  structure(list(
+  list(
     parametersC = resul$parametersC,
     cols = resul$cols,
     M = resul$M,
@@ -102,8 +109,6 @@ FuzzyNaiveBayes.default <- function(train, cl, fuzzy = TRUE, m = NULL, Pi = NULL
     fuzzy = resul$fuzzy,
     Intervalos_Valores = resul$Intervalos_Valores,
     model = resul$model
-  ),
-  class = "FuzzyNaiveBayes"
   )
 
   }
@@ -112,29 +117,18 @@ FuzzyNaiveBayes.default <- function(train, cl, fuzzy = TRUE, m = NULL, Pi = NULL
 # -------------------------
 
 
-#' @export
-print.FuzzyNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    # -----------------
-    cat("\nFuzzy Naive Bayes Classifier for Discrete Predictors\n\n")
-    # -----------------
-  } else {
-    # -----------------
-    cat("\nNaive Bayes Classifier for Discrete Predictors\n\n")
-    # -----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
-
-#' @export
-predict.FuzzyNaiveBayes <- function(object,
+#' @noRd
+predict_FuzzyNaiveBayes <- function(object,
                                    newdata,
                                    type = "class",
                                    ...) {
   # --------------------------------------------------------
   test <- as.data.frame(newdata)
+  # --------------------------------------------------------
+  # fuzzy = FALSE: classic naive Bayes estimated by e1071
+  if (inherits(object, "naiveBayes")) {
+    return(predict(object, test, type = if (type == "class") "class" else "raw"))
+  }
   # --------------------------------------------------------
   parametersC <- object$parametersC
   cols <- object$cols
@@ -177,8 +171,8 @@ predict.FuzzyNaiveBayes <- function(object,
 }
 
 
-#' @export
-FuzzyNaiveBayes.categorical <- function(train, cl, fuzzy = T, m = NULL, Pi = NULL) {
+#' @noRd
+fit_FuzzyNaiveBayes_categorical <- function(train, cl, fuzzy = T, m = NULL, Pi = NULL) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -245,8 +239,8 @@ FuzzyNaiveBayes.categorical <- function(train, cl, fuzzy = T, m = NULL, Pi = NUL
 # -------------------------
 
 # -------------------------
-#' @export
-FuzzyNaiveBayes.continuo <- function(train, cl, fuzzy = T, m = NULL, Pi = NULL) {
+#' @noRd
+fit_FuzzyNaiveBayes_continuous <- function(train, cl, fuzzy = T, m = NULL, Pi = NULL) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -486,4 +480,43 @@ predict_continuo_nonfuzzy <- function(test, M, cols, parametersC, pk, Pertinenci
 }
 # -------------------------
 # -------------------------
+
+#' Fuzzy Naive Bayes (R6 class)
+#'
+#' @description
+#' R6 implementation of the Fuzzy Naive Bayes classifier. Create the model with
+#' `FuzzyNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [FuzzyNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- FuzzyNaiveBayesModel$new()
+#' model$fit(train = iris[, -5], cl = iris$Species)
+#' head(model$predict(iris[, -5]))
+#' head(model$predict(iris[, -5], type = "prob"))
+#' model
+#' @export
+FuzzyNaiveBayesModel <- R6::R6Class(
+  classname = "FuzzyNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [FuzzyNaiveBayes()].
+    #' @param m See [FuzzyNaiveBayes()].
+    #' @param Pi See [FuzzyNaiveBayes()].
+    initialize = function(fuzzy = TRUE, m = NULL, Pi = NULL) {
+      super$initialize(fuzzy = fuzzy, m = m, Pi = Pi)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Fuzzy Naive Bayes",
+    label_crisp = "Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_FuzzyNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_FuzzyNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
 

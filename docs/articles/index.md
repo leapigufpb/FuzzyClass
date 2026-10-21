@@ -167,6 +167,10 @@ classifier:
 # Build the Fuzzy Gaussian Naive Bayes classifier
 fit_FGNB <- GauNBFuzzyParam(train = train_data[, -5],
                             cl = train_data[, 5], metd = 2, cores = 1)
+#> ℹ Gaussian Naive Bayes with Fuzzy Parameters: 105 observations, 4 predictors and 3 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [23ms]
+#> 
 ```
 
 Now that the classifier is trained, we can evaluate its performance on

@@ -10,7 +10,11 @@
 #' @param wdelta vector weight each class
 #' @param weta vector  weight each feature
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [DWFuzzyGammaNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [DWFuzzyGammaNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"dw_gamma"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{marcos2020double}{FuzzyClass}
@@ -42,12 +46,12 @@
 #' @importFrom stats dgamma
 #'
 #' @export
-DWFuzzyGammaNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, wdelta, weta) {
-  UseMethod("DWFuzzyGammaNaiveBayes")
+DWFuzzyGammaNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, wdelta, weta, verbose = fuzzy_verbose()) {
+  DWFuzzyGammaNaiveBayesModel$new(fuzzy = fuzzy, wdelta = wdelta, weta = weta)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-DWFuzzyGammaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T, wdelta, weta) {
+#' @noRd
+fit_DWFuzzyGammaNaiveBayes <- function(train, cl, cores = 2, fuzzy = T, wdelta, weta) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -80,7 +84,7 @@ DWFuzzyGammaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T, wdel
 
 
   # -------------------------------------------------------
-  structure(list(
+  list(
     parametersC = parametersC,
     minimos = minimos,
     MinimosDataFrame = MinimosDataFrame,
@@ -94,31 +98,13 @@ DWFuzzyGammaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T, wdel
     fuzzy = fuzzy,
     wdelta = wdelta,
     weta = weta
-  ),
-  class = "DWFuzzyGammaNaiveBayes"
   )
 }
 # -------------------------
 
 
-#' @export
-print.DWFuzzyGammaNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    # -----------------
-    cat("\nDouble Weighted Fuzzy Gamma Naive Bayes Classifier for Discrete Predictors\n\n")
-    # -----------------
-  } else {
-    # -----------------
-    cat("\nDouble Weighted Naive Gamma  Bayes Classifier for Discrete Predictors\n\n")
-    # -----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
-
-#' @export
-predict.DWFuzzyGammaNaiveBayes <- function(object,
+#' @noRd
+predict_DWFuzzyGammaNaiveBayes <- function(object,
                                          newdata,
                                          type = "class",
                                          ...) {
@@ -191,3 +177,44 @@ density_values_gamma_dw <- function(M, cols, test, parametersC, pk, wdelta, weta
   })
 }
 # ----------------
+
+#' Double Weighted Fuzzy Gamma Naive Bayes (R6 class)
+#'
+#' @description
+#' R6 implementation of the Double Weighted Fuzzy Gamma Naive Bayes classifier. Create the model with
+#' `DWFuzzyGammaNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [DWFuzzyGammaNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- DWFuzzyGammaNaiveBayesModel$new(wdelta = rep(1/3, 3), weta = c(0.3, 0.2, 0.5))
+#' data(GamWeightData)
+#' model$fit(train = GamWeightData[, -4], cl = GamWeightData[, 4])
+#' head(model$predict(GamWeightData[, -4]))
+#' model
+#' @export
+DWFuzzyGammaNaiveBayesModel <- R6::R6Class(
+  classname = "DWFuzzyGammaNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [DWFuzzyGammaNaiveBayes()].
+    #' @param wdelta See [DWFuzzyGammaNaiveBayes()].
+    #' @param weta See [DWFuzzyGammaNaiveBayes()].
+    initialize = function(fuzzy = TRUE, wdelta, weta) {
+      check_required_params(missing(wdelta), missing(weta), names = c("wdelta", "weta"))
+      super$initialize(fuzzy = fuzzy, wdelta = wdelta, weta = weta)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Double Weighted Fuzzy Gamma Naive Bayes",
+    label_crisp = "Double Weighted Gamma Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_DWFuzzyGammaNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_DWFuzzyGammaNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
+

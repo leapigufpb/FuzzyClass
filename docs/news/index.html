@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FuzzyClass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/index.html">Using FuzzyClass: Solving a Classification Problem</a></li>
+    <li><a class="dropdown-item" href="../articles/r6-tidymodels.html">R6 Classes and tidymodels</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -37,7 +38,30 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.0" id="fuzzyclass-020">FuzzyClass 0.2.0<a class="anchor" aria-label="anchor" href="#fuzzyclass-020"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.3.0" id="fuzzyclass-030">FuzzyClass 0.3.0<a class="anchor" aria-label="anchor" href="#fuzzyclass-030"></a></h2>
+<div class="section level3">
+<h3 id="r6-classes-0-3-0">R6 classes<a class="anchor" aria-label="anchor" href="#r6-classes-0-3-0"></a></h3>
+<ul><li>All classifiers are now implemented as <a href="https://r6.r-lib.org" class="external-link">R6</a> classes that inherit from the new base class <code>FuzzyClassifier</code>. Each classifier has a generator named after its function with the suffix <code>Model</code> (e.g. <code>FuzzyGaussianNaiveBayesModel</code>, <code>GauNBFuzzyParamModel</code>, <code>DWFuzzyGammaNaiveBayesModel</code>) and the methods <code>$new()</code>, <code>$fit(train, cl)</code>, <code>$predict(newdata, type)</code>, <code>$set_params(...)</code>, <code>$is_fitted()</code> and <code>$print()</code>. Calls can be chained: <code>FuzzyGammaNaiveBayesModel$new()$fit(x, y)$predict(x_new)</code>.</li>
+<li>Training now reports its progress with an informative message (classifier, number of observations, predictors and classes, and the training time). It can be silenced with <code>verbose = FALSE</code> or globally with <code>options(FuzzyClass.verbose = FALSE)</code> (see <code><a href="../reference/fuzzy_verbose.html">fuzzy_verbose()</a></code>).</li>
+<li>The functional interface is unchanged: <code>FuzzyGaussianNaiveBayes(train, cl)</code> and the other functions train and return the R6 object, and <code>predict(fit, newdata)</code> / <code>predict(fit, newdata, type = "matrix")</code> keep working. <code>type = "prob"</code> is now accepted as a synonym of <code>"matrix"</code>. Predictions are identical to version 0.2.0.</li>
+<li>The estimated quantities are now stored in <code>fit$estimates</code> (they were the elements of the S3 list returned in previous versions), together with <code>fit$params</code>, <code>fit$predictors</code>, <code>fit$classes</code>, <code>fit$n_obs</code> and <code>fit$fit_time</code>.</li>
+<li>Informative error messages (powered by <code>cli</code>) for untrained models, <code>train</code>/<code>cl</code> with different sizes and missing required arguments (<code>wdelta</code>, <code>weta</code>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="tidymodels-0-3-0">tidymodels<a class="anchor" aria-label="anchor" href="#tidymodels-0-3-0"></a></h3>
+<ul><li>New parsnip model <code><a href="../reference/fuzzy_naive_bayes.html">fuzzy_naive_bayes()</a></code>, so every classifier can be used with <code>parsnip</code>, <code>workflows</code>, <code>recipes</code>, <code>rsample</code>, <code>tune</code> and <code>yardstick</code>. The classifier is chosen by the engine (<code>"gaussian"</code>, <code>"gamma"</code>, <code>"beta"</code>, <code>"exponential"</code>, <code>"binomial"</code>, <code>"poisson"</code>, <code>"geometric"</code>, <code>"trapezoidal"</code>, <code>"triangular"</code>, <code>"hypergeometric"</code>, <code>"bayes_rule"</code>, <code>"naive"</code>, <code>"dw_gamma"</code>, <code>"dw_hypergeometric"</code>, <code>"gaussian_fuzzy_param"</code>, <code>"exponential_fuzzy_param"</code> and <code>"poisson_fuzzy_param"</code>).</li>
+<li>The main arguments <code>fuzzy</code>, <code>alpha_cut</code> and <code>ranking_method</code> (<code>metd</code>) can be tuned with <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune()</a></code>; their <code>dials</code> parameter objects are <code><a href="../reference/fuzzy_membership.html">fuzzy_membership()</a></code>, <code><a href="../reference/fuzzy_membership.html">alpha_cut()</a></code> and <code><a href="../reference/fuzzy_membership.html">ranking_method()</a></code>.</li>
+<li>
+<code>parsnip</code>, <code>dials</code> and the other tidymodels packages are only suggested: the model is registered when <code>parsnip</code> is loaded.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="other-changes-0-3-0">Other changes<a class="anchor" aria-label="anchor" href="#other-changes-0-3-0"></a></h3>
+<ul><li>Requires R &gt;= 4.1.0. New imports: <code>R6</code> and <code>cli</code>.</li>
+<li>The tests now use the standard <code>testthat</code> structure (<code>tests/testthat/</code>), so they run with <code>R CMD check</code> and <code><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">devtools::test()</a></code>.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="fuzzyclass-020">FuzzyClass 0.2.0<a class="anchor" aria-label="anchor" href="#fuzzyclass-020"></a></h2><p class="text-muted">CRAN release: 2026-10-09</p>
 <ul><li>Added new method for fuzzy number ordering as <code>metd = 5</code> in functions <code>GauNBFuzzyParam</code>, <code>ExpNBFuzzyParam</code>, and <code>PoiNBFuzzyParam</code>.</li>
 <li>Significant performance optimization across all classifiers: vectorized predictions using native matrix operations and <code>max.col</code> for substantial speedups.</li>
 <li>Fixed discrete variables validation (<code>verifyNumbersFunction</code>) ensuring compatibility with R 4.2+ and resolving missing argument errors in <code>DWFuzzyHipergeometricNaiveBayes</code>, <code>FuzzyBinomialNaiveBayes</code>, <code>FuzzyHipergeometricNaiveBayes</code>, and <code>FuzzyPoissonNaiveBayes</code>.</li>

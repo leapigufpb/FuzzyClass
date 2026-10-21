@@ -1,23 +1,25 @@
 Package: FuzzyClass
 Title: Fuzzy and Non-Fuzzy Classifiers
-Version: 0.2.0
+Version: 0.3.0
 Authors@R:
     c(person("Jodavid", "Ferreira", email = "jodavid@protonmail.com",role = c("aut","cre"), comment = c(ORCID = "0000-0002-2131-6464")),
       person("Ronei", "Moraes", email = "ronei@de.ufpb.br",role = c("ctb"), comment = c(ORCID = "0000-0001-8436-8950")),
       person("Liliane", "Machado", email = "liliane@di.ufpb.br",role = c("ctb"), comment = c(ORCID = "0000-0002-1182-2929")),
       person("Arthur", "Ricardo", email = "arthur.ricardo17@gmail.com",role = c("ctb")),
       person("Isaac", "Araújo", email = "isaac.sebastian@academico.ufpb.br",role = c("ctb")))
-Description: It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the 'Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE)' and 'Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG)' at 'Federal University of Paraiba, Brazil'. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by 'Moraes, Ferreira and Machado' (2021) <doi:10.1007/s40815-020-00936-4>.
+Description: It provides classifiers which can be used for discrete variables and for continuous variables based on the Naive Bayes and Fuzzy Naive Bayes hypothesis. Those methods were developed by researchers belong to the 'Laboratory of Technologies for Virtual Teaching and Statistics (LabTEVE)' and 'Laboratory of Applied Statistics to Image Processing and Geoprocessing (LEAPIG)' at 'Federal University of Paraiba, Brazil'. They considered some statistical distributions and their papers were published in the scientific literature, as for instance, the Gaussian classifier using fuzzy parameters, proposed by 'Moraes, Ferreira and Machado' (2021) <doi:10.1007/s40815-020-00936-4>. The classifiers are implemented as 'R6' classes and are also available as 'parsnip' models, so they can be used within the 'tidymodels' framework.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 Imports: 
     caTools,
+    cli (>= 3.4.0),
     e1071,
     EnvStats,
     MASS,
     mvtnorm,
+    R6 (>= 2.5.0),
     Rdpack,
     rootSolve,
     stats,
@@ -25,12 +27,21 @@ Imports:
 RdMacros:
     Rdpack
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)
 Suggests: 
-    testthat (>= 3.0.0),
+    dials (>= 1.2.0),
+    hardhat,
     knitr,
+    maxLik,
+    parsnip (>= 1.2.0),
+    recipes,
+    rlang (>= 1.1.0),
     rmarkdown,
-    maxLik
+    rsample,
+    testthat (>= 3.0.0),
+    tune (>= 1.2.0),
+    workflows,
+    yardstick
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://leapigufpb.github.io/FuzzyClass/, https://github.com/leapigufpb/FuzzyClass

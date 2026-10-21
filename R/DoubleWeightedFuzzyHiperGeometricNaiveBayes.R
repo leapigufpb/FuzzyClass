@@ -10,7 +10,11 @@
 #' @param wdelta vector weight each class
 #' @param weta vector  weight each feature
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [DWFuzzyHipergeometricNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [DWFuzzyHipergeometricNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"dw_hypergeometric"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{ferreira2025new}{FuzzyClass}
@@ -77,14 +81,14 @@
 #'
 #'
 #' @export
-DWFuzzyHipergeometricNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, wdelta, weta) {
-  UseMethod("DWFuzzyHipergeometricNaiveBayes")
+DWFuzzyHipergeometricNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, wdelta, weta, verbose = fuzzy_verbose()) {
+  DWFuzzyHipergeometricNaiveBayesModel$new(fuzzy = fuzzy, wdelta = wdelta, weta = weta)$fit(train, cl, verbose = verbose)
 }
 
 #------------------------------
 
-#' @export
-DWFuzzyHipergeometricNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T, wdelta, weta) {
+#' @noRd
+fit_DWFuzzyHipergeometricNaiveBayes <- function(train, cl, cores = 2, fuzzy = T, wdelta, weta) {
   
   #--------------------------------------------------------
   # Estimating class parameters
@@ -126,7 +130,7 @@ DWFuzzyHipergeometricNaiveBayes.default <- function(train, cl, cores = 2, fuzzy 
   pk <- rep(1 / length(get_classes(M)), length(get_classes(M)))
   # -------------------------------------------------------
   
-  structure(list(
+  list(
     parametersC = parametersC,
     minimos = minimos,
     MinimosDataFrame = MinimosDataFrame,
@@ -140,31 +144,13 @@ DWFuzzyHipergeometricNaiveBayes.default <- function(train, cl, cores = 2, fuzzy 
     fuzzy = fuzzy,
     wdelta = wdelta,
     weta = weta
-  ),
-  class = "DWFuzzyHipergeometricNaiveBayes"
   )
 }
 #-------------------------
 
 
-#' @export
-print.DWFuzzyHipergeometricNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    #-----------------
-    cat("\nDouble Weighted Fuzzy Hipergeometric Naive Bayes Classifier for Discrete Predictors\n\n")
-    #-----------------
-  } else {
-    #-----------------
-    cat("\nDouble Weighted Hipergeometric Naive Bayes Classifier for Discrete Predictors\n\n")
-    #-----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  #-----------------
-}
-
-#' @export
-predict.DWFuzzyHipergeometricNaiveBayes <- function(object,
+#' @noRd
+predict_DWFuzzyHipergeometricNaiveBayes <- function(object,
                                                   newdata,
                                                   type = "class",
                                                   ...) {
@@ -280,3 +266,45 @@ fuzzy_density_values_hipergeometric_dw <- function(M, cols, test, parametersC, p
   return(as.data.frame(saida))
 }
 # ----------------
+
+#' Double Weighted Fuzzy Hypergeometric Naive Bayes (R6 class)
+#'
+#' @description
+#' R6 implementation of the Double Weighted Fuzzy Hypergeometric Naive Bayes classifier. Create the model with
+#' `DWFuzzyHipergeometricNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [DWFuzzyHipergeometricNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- DWFuzzyHipergeometricNaiveBayesModel$new(wdelta = c(0.5, 0.5), weta = 1)
+#' x <- data.frame(s1 = c(1, 2, 1, 2), n1 = c(5, 5, 6, 6))
+#' y <- factor(c("A", "A", "B", "B"))
+#' model$fit(train = x, cl = y)
+#' model$predict(x)
+#' model
+#' @export
+DWFuzzyHipergeometricNaiveBayesModel <- R6::R6Class(
+  classname = "DWFuzzyHipergeometricNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [DWFuzzyHipergeometricNaiveBayes()].
+    #' @param wdelta See [DWFuzzyHipergeometricNaiveBayes()].
+    #' @param weta See [DWFuzzyHipergeometricNaiveBayes()].
+    initialize = function(fuzzy = TRUE, wdelta, weta) {
+      check_required_params(missing(wdelta), missing(weta), names = c("wdelta", "weta"))
+      super$initialize(fuzzy = fuzzy, wdelta = wdelta, weta = weta)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Double Weighted Fuzzy Hypergeometric Naive Bayes",
+    label_crisp = "Double Weighted Hypergeometric Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_DWFuzzyHipergeometricNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_DWFuzzyHipergeometricNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
+

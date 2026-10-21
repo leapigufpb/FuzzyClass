@@ -11,7 +11,11 @@
 #' @param w When metd for 4, it is necessary to have w which are alpha-cut weights defined
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [GauNBFuzzyParamModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [GauNBFuzzyParamModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"gaussian_fuzzy_param"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{moraes2021new}{FuzzyClass}
@@ -42,12 +46,12 @@
 #' @importFrom Rdpack reprompt
 #'
 #' @export
-GauNBFuzzyParam <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
-  UseMethod("GauNBFuzzyParam")
+GauNBFuzzyParam <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2, verbose = fuzzy_verbose()) {
+  GauNBFuzzyParamModel$new(alphacut = alphacut, metd = metd, alp = alp, w = w)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-GauNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
+#' @noRd
+fit_GauNBFuzzyParam <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -118,7 +122,7 @@ GauNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp 
   })
 
   # -------------------------------------------------------
-  structure(list(
+  list(
     Parameters_varian = Parameters_varian,
     Parameters_media = Parameters_media,
     medias = medias,
@@ -129,27 +133,13 @@ GauNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp 
     metd = metd,
     cores = cores,
     w = w
-  ),
-  class = "GauNBFuzzyParam"
   )
 }
 # -------------------------
 
 
-#' @export
-print.GauNBFuzzyParam <- function(x, ...) {
-  # -----------------
-  cat("\nFuzzy Gaussian Naive Bayes Classifier for Discrete Predictors\n\n")
-  # -----------------
-  cat("Variables:\n")
-  print(names(x$medias[[1]]))
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
-
-#' @export
-predict.GauNBFuzzyParam <- function(object,
+#' @noRd
+predict_GauNBFuzzyParam <- function(object,
                                     newdata,
                                     type = "class",
                                     ...) {
@@ -185,3 +175,43 @@ predict.GauNBFuzzyParam <- function(object,
 
   scores_to_output(R_M_obs, classes, type)
 }
+
+#' Gaussian Naive Bayes with Fuzzy Parameters (R6 class)
+#'
+#' @description
+#' R6 implementation of the Gaussian Naive Bayes with Fuzzy Parameters classifier. Create the model with
+#' `GauNBFuzzyParamModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [GauNBFuzzyParam()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- GauNBFuzzyParamModel$new()
+#' model$fit(train = iris[, -5], cl = iris$Species)
+#' head(model$predict(iris[, -5]))
+#' head(model$predict(iris[, -5], type = "prob"))
+#' model
+#' @export
+GauNBFuzzyParamModel <- R6::R6Class(
+  classname = "GauNBFuzzyParam",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param alphacut See [GauNBFuzzyParam()].
+    #' @param metd See [GauNBFuzzyParam()].
+    #' @param alp See [GauNBFuzzyParam()].
+    #' @param w See [GauNBFuzzyParam()].
+    initialize = function(alphacut = 1e-04, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1, 0.3, 0.6)) {
+      super$initialize(alphacut = alphacut, metd = metd, alp = alp, w = w)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Gaussian Naive Bayes with Fuzzy Parameters",
+    estimate = function(train, cl) {
+      do.call(fit_GauNBFuzzyParam, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_GauNBFuzzyParam(self$estimates, newdata, type = type)
+    }
+  )
+)
+

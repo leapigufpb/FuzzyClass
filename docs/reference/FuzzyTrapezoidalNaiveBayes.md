@@ -5,7 +5,13 @@
 ## Usage
 
 ``` r
-FuzzyTrapezoidalNaiveBayes(train, cl, cores = 2, fuzzy = T)
+FuzzyTrapezoidalNaiveBayes(
+  train,
+  cl,
+  cores = 2,
+  fuzzy = T,
+  verbose = fuzzy_verbose()
+)
 ```
 
 ## Arguments
@@ -27,9 +33,21 @@ FuzzyTrapezoidalNaiveBayes(train, cl, cores = 2, fuzzy = T)
 
   boolean variable to use the membership function
 
+- verbose:
+
+  logical; if `TRUE` (default, see
+  [`fuzzy_verbose()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_verbose.md))
+  a message reports the training progress.
+
 ## Value
 
-A vector of classifications
+A trained
+[FuzzyTrapezoidalNaiveBayesModel](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyTrapezoidalNaiveBayesModel.md)
+R6 object (which inherits from
+[FuzzyClassifier](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyClassifier.md)).
+Use `predict(object, newdata, type = "class")` or
+`object$predict(newdata)` to classify new observations; `type = "prob"`
+(or `"matrix"`) returns the matrix of class probabilities.
 
 ## References
 
@@ -38,6 +56,13 @@ Trapezoidal Naive Bayes Network as basis for Assessment in Training
 based on Virtual Reality.” In *The 15th International FLINS Conference
 on Machine learning, Multi agent and Cyber physical systems (FLINS
 2022)*. Nankai University.
+
+## See also
+
+[FuzzyTrapezoidalNaiveBayesModel](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyTrapezoidalNaiveBayesModel.md)
+for the R6 interface and
+[`fuzzy_naive_bayes()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_naive_bayes.md)
+(engine `"trapezoidal"`) for the tidymodels interface.
 
 ## Examples
 
@@ -58,6 +83,10 @@ fit_NBT <- FuzzyTrapezoidalNaiveBayes(
   train = Train[, -5],
   cl = Train[, 5], cores = 2
 )
+#> ℹ Fuzzy Trapezoidal Naive Bayes: 105 observations, 4 predictors and 3 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [11ms]
+#> 
 
 pred_NBT <- predict(fit_NBT, test)
 

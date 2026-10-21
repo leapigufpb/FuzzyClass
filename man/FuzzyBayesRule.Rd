@@ -4,7 +4,7 @@
 \alias{FuzzyBayesRule}
 \title{Fuzzy Bayes Rule}
 \usage{
-FuzzyBayesRule(train, cl, cores = 2, fuzzy = TRUE)
+FuzzyBayesRule(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose())
 }
 \arguments{
 \item{train}{matrix or data frame of training set cases.}
@@ -14,9 +14,11 @@ FuzzyBayesRule(train, cl, cores = 2, fuzzy = TRUE)
 \item{cores}{kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)}
 
 \item{fuzzy}{boolean variable to use the membership function}
+
+\item{verbose}{logical; if \code{TRUE} (default, see \code{\link[=fuzzy_verbose]{fuzzy_verbose()}}) a message reports the training progress.}
 }
 \value{
-A vector of classifications
+A trained \link{FuzzyBayesRuleModel} R6 object (which inherits from \link{FuzzyClassifier}). Use \code{predict(object, newdata, type = "class")} or \code{object$predict(newdata)} to classify new observations; \code{type = "prob"} (or \code{"matrix"}) returns the matrix of class probabilities.
 }
 \description{
 \code{FuzzyBayesRule} Fuzzy Bayes Rule
@@ -46,4 +48,7 @@ head(Test[, 5])
 }
 \references{
 \insertRef{de2006fuzzy}{FuzzyClass}
+}
+\seealso{
+\link{FuzzyBayesRuleModel} for the R6 interface and \code{\link[=fuzzy_naive_bayes]{fuzzy_naive_bayes()}} (engine \code{"bayes_rule"}) for the tidymodels interface.
 }

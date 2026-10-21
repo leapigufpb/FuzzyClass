@@ -1,5 +1,3 @@
-library(testthat)
-library(FuzzyClass)
 
 data <- iris
 

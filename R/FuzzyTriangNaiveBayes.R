@@ -8,7 +8,11 @@
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [FuzzyTriangularNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [FuzzyTriangularNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"triangular"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{de2020online}{FuzzyClass}
@@ -40,12 +44,12 @@
 #'
 #'
 #' @export
-FuzzyTriangularNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
-  UseMethod("FuzzyTriangularNaiveBayes")
+FuzzyTriangularNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose()) {
+  FuzzyTriangularNaiveBayesModel$new(fuzzy = fuzzy)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-FuzzyTriangularNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
+#' @noRd
+fit_FuzzyTriangularNaiveBayes <- function(train, cl, cores = 2, fuzzy = T) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -77,7 +81,7 @@ FuzzyTriangularNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
 
 
   # -------------------------------------------------------
-  structure(list(
+  list(
     parametersC = parametersC,
     minimos = minimos,
     MinimosDataFrame = MinimosDataFrame,
@@ -89,31 +93,13 @@ FuzzyTriangularNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = T) {
     Sturges = Sturges,
     pk = pk,
     fuzzy = fuzzy
-  ),
-  class = "FuzzyTriangularNaiveBayes"
   )
 }
 # -------------------------
 
 
-#' @export
-print.FuzzyTriangularNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    # -----------------
-    cat("\nFuzzy Naive Bayes Triangular Classifier for Discrete Predictors\n\n")
-    # -----------------
-  } else {
-    # -----------------
-    cat("\nNaive Bayes Triangular Classifier for Discrete Predictors\n\n")
-    # -----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
-
-#' @export
-predict.FuzzyTriangularNaiveBayes <- function(object,
+#' @noRd
+predict_FuzzyTriangularNaiveBayes <- function(object,
                                               newdata,
                                               type = "class",
                                               ...) {
@@ -184,3 +170,41 @@ density_values_triang <- function(M, cols, test, parametersC, pk) {
   })
 }
 # ----------------
+
+#' Fuzzy Triangular Naive Bayes (R6 class)
+#'
+#' @description
+#' R6 implementation of the Fuzzy Triangular Naive Bayes classifier. Create the model with
+#' `FuzzyTriangularNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [FuzzyTriangularNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- FuzzyTriangularNaiveBayesModel$new()
+#' model$fit(train = iris[, -5], cl = iris$Species)
+#' head(model$predict(iris[, -5]))
+#' head(model$predict(iris[, -5], type = "prob"))
+#' model
+#' @export
+FuzzyTriangularNaiveBayesModel <- R6::R6Class(
+  classname = "FuzzyTriangularNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [FuzzyTriangularNaiveBayes()].
+    initialize = function(fuzzy = TRUE) {
+      super$initialize(fuzzy = fuzzy)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Fuzzy Triangular Naive Bayes",
+    label_crisp = "Triangular Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_FuzzyTriangularNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_FuzzyTriangularNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
+

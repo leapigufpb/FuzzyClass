@@ -8,6 +8,22 @@ navbar:
     right: [search, github]
 
 reference:
+  - title: "R6 Interface"
+    desc: >
+      All classifiers are R6 classes that inherit from `FuzzyClassifier`:
+      create them with `$new()`, train with `$fit()` and classify with `$predict()`.
+    contents:
+      - FuzzyClassifier
+      - ends_with("Model")
+      - predict.FuzzyClassifier
+      - fuzzy_verbose
+
+  - title: "tidymodels Interface"
+    desc: "Use any classifier with parsnip, workflows, recipes and tune."
+    contents:
+      - fuzzy_naive_bayes
+      - fuzzy_membership
+
   - title: "Continuous Classifiers"
     desc: "Probabilistic classifiers for continuous features using fuzzy sets and fuzzy parameters."
     contents:

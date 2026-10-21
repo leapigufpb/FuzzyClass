@@ -8,7 +8,11 @@
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [FuzzyBetaNaiveBayesModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [FuzzyBetaNaiveBayesModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"beta"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{de2020new}{FuzzyClass}
@@ -38,12 +42,12 @@
 #' @importFrom stats dbeta
 #'
 #' @export
-FuzzyBetaNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
-  UseMethod("FuzzyBetaNaiveBayes")
+FuzzyBetaNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose()) {
+  FuzzyBetaNaiveBayesModel$new(fuzzy = fuzzy)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-FuzzyBetaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) {
+#' @noRd
+fit_FuzzyBetaNaiveBayes <- function(train, cl, cores = 2, fuzzy = TRUE) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -78,7 +82,7 @@ FuzzyBetaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) {
 
 
   #-------------------------------------------------------
-  structure(list(
+  list(
     parametersC = parametersC,
     minimos = minimos,
     MinimosDataFrame = MinimosDataFrame,
@@ -91,31 +95,13 @@ FuzzyBetaNaiveBayes.default <- function(train, cl, cores = 2, fuzzy = TRUE) {
     pk = pk,
     col_max = col_max,
     fuzzy = fuzzy
-  ),
-  class = "FuzzyBetaNaiveBayes"
   )
 }
 #-------------------------
 
 
-#' @export
-print.FuzzyBetaNaiveBayes <- function(x, ...) {
-  if (x$fuzzy == T) {
-    #-----------------
-    cat("\nFuzzy Beta Naive Bayes Classifier for Discrete Predictors\n\n")
-    #-----------------
-  } else {
-    #-----------------
-    cat("\nNaive Beta  Bayes Classifier for Discrete Predictors\n\n")
-    #-----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  #-----------------
-}
-
-#' @export
-predict.FuzzyBetaNaiveBayes <- function(object,
+#' @noRd
+predict_FuzzyBetaNaiveBayes <- function(object,
                                          newdata,
                                          type = "class",
                                          ...) {
@@ -193,3 +179,41 @@ density_values_beta <- function(M, cols, test, parametersC, pk){
   })
 }
 # ----------------
+
+#' Fuzzy Beta Naive Bayes (R6 class)
+#'
+#' @description
+#' R6 implementation of the Fuzzy Beta Naive Bayes classifier. Create the model with
+#' `FuzzyBetaNaiveBayesModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [FuzzyBetaNaiveBayes()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- FuzzyBetaNaiveBayesModel$new()
+#' model$fit(train = iris[, -5] / 10, cl = iris$Species)
+#' head(model$predict(iris[, -5] / 10))
+#' head(model$predict(iris[, -5] / 10, type = "prob"))
+#' model
+#' @export
+FuzzyBetaNaiveBayesModel <- R6::R6Class(
+  classname = "FuzzyBetaNaiveBayes",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [FuzzyBetaNaiveBayes()].
+    initialize = function(fuzzy = TRUE) {
+      super$initialize(fuzzy = fuzzy)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Fuzzy Beta Naive Bayes",
+    label_crisp = "Beta Naive Bayes",
+    estimate = function(train, cl) {
+      do.call(fit_FuzzyBetaNaiveBayes, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_FuzzyBetaNaiveBayes(self$estimates, newdata, type = type)
+    }
+  )
+)
+

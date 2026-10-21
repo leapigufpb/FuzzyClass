@@ -1,0 +1,1 @@
+options(FuzzyClass.verbose = FALSE)

@@ -11,7 +11,11 @@
 #' @param w When metd for 4, it is necessary to have w which are alpha-cut weights defined
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [PoiNBFuzzyParamModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [PoiNBFuzzyParamModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"poisson_fuzzy_param"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{soares2016assessment}{FuzzyClass}
@@ -52,12 +56,12 @@
 #' @importFrom MASS fitdistr
 #'
 #' @export
-PoiNBFuzzyParam <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
-  UseMethod("PoiNBFuzzyParam")
+PoiNBFuzzyParam <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2, verbose = fuzzy_verbose()) {
+  PoiNBFuzzyParamModel$new(alphacut = alphacut, metd = metd, alp = alp, w = w)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-PoiNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
+#' @noRd
+fit_PoiNBFuzzyParam <- function(train, cl, alphacut = 0.0001, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1,0.3,0.6), cores = 2) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -112,7 +116,7 @@ PoiNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp 
     })
   })
   # -------------------------------------------------------
-  structure(list(
+  list(
     Parameters_lambdas = Parameters_lambdas,
     lambda_estimated = lambda_estimated,
     cols = cols,
@@ -121,25 +125,13 @@ PoiNBFuzzyParam.default <- function(train, cl, alphacut = 0.0001, metd = 2, alp 
     metd = metd,
     cores = cores,
     w = w
-  ),
-  class = "PoiNBFuzzyParam"
   )
 }
 # -------------------------
 
 
-#' @export
-print.PoiNBFuzzyParam <- function(x, ...) {
-  # -----------------
-  cat("\nFuzzy Poisson Naive Bayes Classifier for Discrete Predictors\n\n")
-  # -----------------
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
-
-#' @export
-predict.PoiNBFuzzyParam <- function(object,
+#' @noRd
+predict_PoiNBFuzzyParam <- function(object,
                                     newdata,
                                     type = "class",
                                     ...) {
@@ -174,3 +166,44 @@ predict.PoiNBFuzzyParam <- function(object,
 
   scores_to_output(R_M_obs, classes, type)
 }
+
+#' Poisson Naive Bayes with Fuzzy Parameters (R6 class)
+#'
+#' @description
+#' R6 implementation of the Poisson Naive Bayes with Fuzzy Parameters classifier. Create the model with
+#' `PoiNBFuzzyParamModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [PoiNBFuzzyParam()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- PoiNBFuzzyParamModel$new()
+#' x <- round(iris[, -5])
+#' model$fit(train = x, cl = iris$Species)
+#' head(model$predict(x))
+#' head(model$predict(x, type = "prob"))
+#' model
+#' @export
+PoiNBFuzzyParamModel <- R6::R6Class(
+  classname = "PoiNBFuzzyParam",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param alphacut See [PoiNBFuzzyParam()].
+    #' @param metd See [PoiNBFuzzyParam()].
+    #' @param alp See [PoiNBFuzzyParam()].
+    #' @param w See [PoiNBFuzzyParam()].
+    initialize = function(alphacut = 1e-04, metd = 2, alp = c(0.35, 0.7, 0.86), w = c(0.1, 0.3, 0.6)) {
+      super$initialize(alphacut = alphacut, metd = metd, alp = alp, w = w)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Poisson Naive Bayes with Fuzzy Parameters",
+    estimate = function(train, cl) {
+      do.call(fit_PoiNBFuzzyParam, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_PoiNBFuzzyParam(self$estimates, newdata, type = type)
+    }
+  )
+)
+

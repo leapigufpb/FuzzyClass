@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FuzzyClass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/index.html">Using FuzzyClass: Solving a Classification Problem</a></li>
+    <li><a class="dropdown-item" href="../articles/r6-tidymodels.html">R6 Classes and tidymodels</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -36,6 +37,178 @@
     </div>
 
     <div class="section level2">
+      <h2 id="r-interface">R6 Interface<a class="anchor" aria-label="anchor" href="#r-interface"></a></h2>
+
+      <div class="section-desc"><p>All classifiers are R6 classes that inherit from <code>FuzzyClassifier</code>: create them with <code>$new()</code>, train with <code>$fit()</code> and classify with <code>$predict()</code>.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="FuzzyClassifier.html">FuzzyClassifier</a></code>
+
+        </dt>
+        <dd>Base R6 class of the FuzzyClass classifiers</dd>
+
+        <dt>
+
+          <code><a href="DWFuzzyGammaNaiveBayesModel.html">DWFuzzyGammaNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Double Weighted Fuzzy Gamma Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="DWFuzzyHipergeometricNaiveBayesModel.html">DWFuzzyHipergeometricNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Double Weighted Fuzzy Hypergeometric Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="ExpNBFuzzyParamModel.html">ExpNBFuzzyParamModel</a></code>
+
+        </dt>
+        <dd>Exponential Naive Bayes with Fuzzy Parameters (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyBayesRuleModel.html">FuzzyBayesRuleModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Bayes Rule (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyBetaNaiveBayesModel.html">FuzzyBetaNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Beta Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyBinomialNaiveBayesModel.html">FuzzyBinomialNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Binomial Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyExponentialNaiveBayesModel.html">FuzzyExponentialNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Exponential Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyGammaNaiveBayesModel.html">FuzzyGammaNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Gamma Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyGaussianNaiveBayesModel.html">FuzzyGaussianNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Gaussian Naive Bayes (Zadeh-based) (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyGeoNaiveBayesModel.html">FuzzyGeoNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Geometric Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyHipergeometricNaiveBayesModel.html">FuzzyHipergeometricNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Hypergeometric Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyNaiveBayesModel.html">FuzzyNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyPoissonNaiveBayesModel.html">FuzzyPoissonNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Poisson Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyTrapezoidalNaiveBayesModel.html">FuzzyTrapezoidalNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Trapezoidal Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="FuzzyTriangularNaiveBayesModel.html">FuzzyTriangularNaiveBayesModel</a></code>
+
+        </dt>
+        <dd>Fuzzy Triangular Naive Bayes (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="GauNBFuzzyParamModel.html">GauNBFuzzyParamModel</a></code>
+
+        </dt>
+        <dd>Gaussian Naive Bayes with Fuzzy Parameters (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="PoiNBFuzzyParamModel.html">PoiNBFuzzyParamModel</a></code>
+
+        </dt>
+        <dd>Poisson Naive Bayes with Fuzzy Parameters (R6 class)</dd>
+
+        <dt>
+
+          <code><a href="predict.FuzzyClassifier.html">predict(<i>&lt;FuzzyClassifier&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Predict method for FuzzyClass classifiers</dd>
+
+        <dt>
+
+          <code><a href="fuzzy_verbose.html">fuzzy_verbose()</a></code>
+
+        </dt>
+        <dd>Verbosity of the FuzzyClass classifiers</dd>
+      </dl></div><div class="section level2">
+      <h2 id="tidymodels-interface">tidymodels Interface<a class="anchor" aria-label="anchor" href="#tidymodels-interface"></a></h2>
+
+      <div class="section-desc"><p>Use any classifier with parsnip, workflows, recipes and tune.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="fuzzy_naive_bayes.html">fuzzy_naive_bayes()</a></code> <code><a href="fuzzy_naive_bayes.html">update(<i>&lt;fuzzy_naive_bayes&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Fuzzy naive Bayes models for tidymodels</dd>
+
+        <dt>
+
+          <code><a href="fuzzy_membership.html">fuzzy_membership()</a></code> <code><a href="fuzzy_membership.html">alpha_cut()</a></code> <code><a href="fuzzy_membership.html">ranking_method()</a></code>
+
+        </dt>
+        <dd>Tuning parameters of the fuzzy naive Bayes models</dd>
+      </dl></div><div class="section level2">
       <h2 id="continuous-classifiers">Continuous Classifiers<a class="anchor" aria-label="anchor" href="#continuous-classifiers"></a></h2>
 
       <div class="section-desc"><p>Probabilistic classifiers for continuous features using fuzzy sets and fuzzy parameters.</p></div>

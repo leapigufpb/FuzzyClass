@@ -8,7 +8,11 @@
 #' @param cores kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)
 #' @param fuzzy boolean variable to use the membership function
 #'
-#' @return A vector of classifications
+#' @param verbose logical; if `TRUE` (default, see [fuzzy_verbose()]) a message reports the training progress.
+#'
+#' @return A trained [FuzzyBayesRuleModel] R6 object (which inherits from [FuzzyClassifier]). Use `predict(object, newdata, type = "class")` or `object$predict(newdata)` to classify new observations; `type = "prob"` (or `"matrix"`) returns the matrix of class probabilities.
+#'
+#' @seealso [FuzzyBayesRuleModel] for the R6 interface and [fuzzy_naive_bayes()] (engine `"bayes_rule"`) for the tidymodels interface.
 #'
 #' @references
 #' \insertRef{de2006fuzzy}{FuzzyClass}
@@ -38,12 +42,12 @@
 #' @importFrom stats dgamma
 #'
 #' @export
-FuzzyBayesRule <- function(train, cl, cores = 2, fuzzy = TRUE) {
-  UseMethod("FuzzyBayesRule")
+FuzzyBayesRule <- function(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose()) {
+  FuzzyBayesRuleModel$new(fuzzy = fuzzy)$fit(train, cl, verbose = verbose)
 }
 
-#' @export
-FuzzyBayesRule.default <- function(train, cl, cores = 2, fuzzy = T) {
+#' @noRd
+fit_FuzzyBayesRule <- function(train, cl, cores = 2, fuzzy = T) {
 
   # --------------------------------------------------------
   # Estimating class parameters
@@ -75,7 +79,7 @@ FuzzyBayesRule.default <- function(train, cl, cores = 2, fuzzy = T) {
 
 
   # -------------------------------------------------------
-  structure(list(
+  list(
     parametersC = parametersC,
     minimos = minimos,
     MinimosDataFrame = MinimosDataFrame,
@@ -87,31 +91,13 @@ FuzzyBayesRule.default <- function(train, cl, cores = 2, fuzzy = T) {
     Sturges = Sturges,
     pk = pk,
     fuzzy = fuzzy
-  ),
-  class = "FuzzyBayesRule"
   )
 }
 # -------------------------
 
 
-#' @export
-print.FuzzyBayesRule <- function(x, ...) {
-  if (x$fuzzy == T) {
-    # -----------------
-    cat("\nFuzzy Bayes Rule Classifier for Discrete Predictors\n\n")
-    # -----------------
-  } else {
-    # -----------------
-    cat("\nNaive Bayes Rule Classifier for Discrete Predictors\n\n")
-    # -----------------
-  }
-  cat("Class:\n")
-  print(levels(x$M))
-  # -----------------
-}
-
-#' @export
-predict.FuzzyBayesRule <- function(object,
+#' @noRd
+predict_FuzzyBayesRule <- function(object,
                                    newdata,
                                    type = "class",
                                    ...) {
@@ -164,3 +150,41 @@ density_values_multivariate_normal <- function(M, cols, test, parametersC, pk){
   })
 }
 # ----------------
+
+#' Fuzzy Bayes Rule (R6 class)
+#'
+#' @description
+#' R6 implementation of the Fuzzy Bayes Rule classifier. Create the model with
+#' `FuzzyBayesRuleModel$new()`, train it with `$fit(train, cl)` and classify new
+#' observations with `$predict(newdata)`. The functional interface
+#' [FuzzyBayesRule()] trains and returns an object of this class.
+#'
+#' @examples
+#' model <- FuzzyBayesRuleModel$new()
+#' model$fit(train = iris[, -5], cl = iris$Species)
+#' head(model$predict(iris[, -5]))
+#' head(model$predict(iris[, -5], type = "prob"))
+#' model
+#' @export
+FuzzyBayesRuleModel <- R6::R6Class(
+  classname = "FuzzyBayesRule",
+  inherit = FuzzyClassifier,
+  public = list(
+    #' @description Create a new (untrained) classifier.
+    #' @param fuzzy See [FuzzyBayesRule()].
+    initialize = function(fuzzy = TRUE) {
+      super$initialize(fuzzy = fuzzy)
+    }
+  ),
+  private = list(
+    label_fuzzy = "Fuzzy Bayes Rule",
+    label_crisp = "Bayes Rule",
+    estimate = function(train, cl) {
+      do.call(fit_FuzzyBayesRule, c(list(train = train, cl = cl), self$params))
+    },
+    classify = function(newdata, type) {
+      predict_FuzzyBayesRule(self$estimates, newdata, type = type)
+    }
+  )
+)
+

@@ -5,7 +5,7 @@
 ## Usage
 
 ``` r
-FuzzyBayesRule(train, cl, cores = 2, fuzzy = TRUE)
+FuzzyBayesRule(train, cl, cores = 2, fuzzy = TRUE, verbose = fuzzy_verbose())
 ```
 
 ## Arguments
@@ -27,15 +27,34 @@ FuzzyBayesRule(train, cl, cores = 2, fuzzy = TRUE)
 
   boolean variable to use the membership function
 
+- verbose:
+
+  logical; if `TRUE` (default, see
+  [`fuzzy_verbose()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_verbose.md))
+  a message reports the training progress.
+
 ## Value
 
-A vector of classifications
+A trained
+[FuzzyBayesRuleModel](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyBayesRuleModel.md)
+R6 object (which inherits from
+[FuzzyClassifier](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyClassifier.md)).
+Use `predict(object, newdata, type = "class")` or
+`object$predict(newdata)` to classify new observations; `type = "prob"`
+(or `"matrix"`) returns the matrix of class probabilities.
 
 ## References
 
 Moraes R, Machado L (2008). “Fuzzy Bayes Rule for On-Line Training
 Assessment in Virtual Reality Simulators.” *Multiple-Valued Logic and
 Soft Computing*, **14**, 325-338.
+
+## See also
+
+[FuzzyBayesRuleModel](https://leapigufpb.github.io/FuzzyClass/reference/FuzzyBayesRuleModel.md)
+for the R6 interface and
+[`fuzzy_naive_bayes()`](https://leapigufpb.github.io/FuzzyClass/reference/fuzzy_naive_bayes.md)
+(engine `"bayes_rule"`) for the tidymodels interface.
 
 ## Examples
 
@@ -56,6 +75,10 @@ fit_NBT <- FuzzyBayesRule(
   train = Train[, -5],
   cl = Train[, 5], cores = 2
 )
+#> ℹ Fuzzy Bayes Rule: 105 observations, 4 predictors and 3 classes
+#> ℹ Training the model: estimating its parameters
+#> ✔ Model trained successfully [5ms]
+#> 
 
 pred_NBT <- predict(fit_NBT, test)
 

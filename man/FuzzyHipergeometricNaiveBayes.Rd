@@ -4,7 +4,13 @@
 \alias{FuzzyHipergeometricNaiveBayes}
 \title{Fuzzy Hipergeometric Naive Bayes}
 \usage{
-FuzzyHipergeometricNaiveBayes(train, cl, cores = 2, fuzzy = TRUE)
+FuzzyHipergeometricNaiveBayes(
+  train,
+  cl,
+  cores = 2,
+  fuzzy = TRUE,
+  verbose = fuzzy_verbose()
+)
 }
 \arguments{
 \item{train}{matrix or data frame of training set cases.}
@@ -14,9 +20,11 @@ FuzzyHipergeometricNaiveBayes(train, cl, cores = 2, fuzzy = TRUE)
 \item{cores}{kept for backward compatibility; prediction is vectorized and does not start parallel workers (default = 2)}
 
 \item{fuzzy}{boolean variable to use the membership function}
+
+\item{verbose}{logical; if \code{TRUE} (default, see \code{\link[=fuzzy_verbose]{fuzzy_verbose()}}) a message reports the training progress.}
 }
 \value{
-A vector of classifications
+A trained \link{FuzzyHipergeometricNaiveBayesModel} R6 object (which inherits from \link{FuzzyClassifier}). Use \code{predict(object, newdata, type = "class")} or \code{object$predict(newdata)} to classify new observations; \code{type = "prob"} (or \code{"matrix"}) returns the matrix of class probabilities.
 }
 \description{
 \code{FuzzyHipergeometricNaiveBayes} Fuzzy Hipergeometric Naive Bayes
@@ -76,4 +84,7 @@ pred_NHT <- predict(fit_NHT, test)
 }
 \references{
 \insertRef{ferreira2025new}{FuzzyClass}
+}
+\seealso{
+\link{FuzzyHipergeometricNaiveBayesModel} for the R6 interface and \code{\link[=fuzzy_naive_bayes]{fuzzy_naive_bayes()}} (engine \code{"hypergeometric"}) for the tidymodels interface.
 }

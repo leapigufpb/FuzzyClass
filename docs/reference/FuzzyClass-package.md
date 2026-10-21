@@ -11,7 +11,9 @@ published in the scientific literature, as for instance, the Gaussian
 classifier using fuzzy parameters, proposed by 'Moraes, Ferreira and
 Machado' (2021)
 [doi:10.1007/s40815-020-00936-4](https://doi.org/10.1007/s40815-020-00936-4)
-.
+. The classifiers are implemented as 'R6' classes and are also available
+as 'parsnip' models, so they can be used within the 'tidymodels'
+framework.
 
 ## See also
 

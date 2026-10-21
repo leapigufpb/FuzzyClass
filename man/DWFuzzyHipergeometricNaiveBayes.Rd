@@ -10,7 +10,8 @@ DWFuzzyHipergeometricNaiveBayes(
   cores = 2,
   fuzzy = TRUE,
   wdelta,
-  weta
+  weta,
+  verbose = fuzzy_verbose()
 )
 }
 \arguments{
@@ -25,9 +26,11 @@ DWFuzzyHipergeometricNaiveBayes(
 \item{wdelta}{vector weight each class}
 
 \item{weta}{vector  weight each feature}
+
+\item{verbose}{logical; if \code{TRUE} (default, see \code{\link[=fuzzy_verbose]{fuzzy_verbose()}}) a message reports the training progress.}
 }
 \value{
-A vector of classifications
+A trained \link{DWFuzzyHipergeometricNaiveBayesModel} R6 object (which inherits from \link{FuzzyClassifier}). Use \code{predict(object, newdata, type = "class")} or \code{object$predict(newdata)} to classify new observations; \code{type = "prob"} (or \code{"matrix"}) returns the matrix of class probabilities.
 }
 \description{
 \code{DWFuzzyHipergeometricNaiveBayes} Double Weighted Fuzzy Hipergeometric Naive Bayes
@@ -94,4 +97,7 @@ pred_NHT <- predict(fit_NHT, test)
 }
 \references{
 \insertRef{ferreira2025new}{FuzzyClass}
+}
+\seealso{
+\link{DWFuzzyHipergeometricNaiveBayesModel} for the R6 interface and \code{\link[=fuzzy_naive_bayes]{fuzzy_naive_bayes()}} (engine \code{"dw_hypergeometric"}) for the tidymodels interface.
 }
